@@ -1,26 +1,33 @@
 import React, { Component } from 'react';
-import config from '../globalConfiguration.json';
+// import config from '../globalConfiguration.json';
 import {Input} from 'semantic-ui-react';
+import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+// import { electronEnhancer } from 'redux-electron-store';
+import { saveConfiguration } from '../actions/index';
 
 
-
-export default class Configuration extends Component {
+class Configuration extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tokenExpiresIn : config.authorization_service.token_expires_in,
-            crdUrl:config.crd.crd_url,
-            coverageDecisionPath:config.crd.coverage_decision_path,
-            coverageRequirementPath:config.crd.coverage_requirement_path,
-            payerFhirUrl:config.payer.fhir_url,
-            providerFhirUrl:config.provider.fhir_url,
-            clientSecret:config.provider.client_secret,
-            clientId:config.provider.client_id,
-            authTokenUrl:config.authorization_service.auth_token_url,
-            tokenVerificationUurl:config.authorization_service.token_verification_url,
-            tokenType:config.authorization_service.token_type,
+            config:{
+                tokenExpiresIn : props.config.authorization_service.token_expires_in,
+                crdUrl: props.config.crd.crd_url,
+                coverageDecisionPath: props.config.crd.coverage_decision_path,
+                coverageRequirementPath: props.config.crd.coverage_requirement_path,
+                payerFhirUrl: props.onfig.payer.fhir_url,
+                providerFhirUrl: props.config.provider.fhir_url,
+                clientSecret: props.config.provider.client_secret,
+                clientId: props.config.provider.client_id,
+                authTokenUrl: props.config.authorization_service.auth_token_url,
+                tokenVerificationUurl: props.config.authorization_service.token_verification_url,
+                tokenType: props.config.authorization_service.token_type,
+            },
+            resetFlag:false
+            
         }
-        console.log(config.user_profiles[0].username);
         this.onChangeTokenExpiry = this.onChangeTokenExpiry.bind(this);
         this.onChangeCrdUrl = this.onChangeCrdUrl.bind(this);
         this.onChangeCoverageDecisionPath = this.onChangeCoverageDecisionPath.bind(this);
@@ -35,41 +42,71 @@ export default class Configuration extends Component {
         this.onSaveConfiguration=this.onSaveConfiguration.bind(this);
 
     }
+
     onChangeTokenExpiry(event){
-        this.setState({tokenExpiresIn:event.target.value})
+        let config = this.state.config;
+        config.tokenExpiresIn=event.target.value
+        this.setState({config})
     }
     onChangeCrdUrl(event){
-        this.setState({crdUrl:event.target.value})
+        let config = this.state.config;
+        config.crdUrl=event.target.value
+        // this.setState({crdUrl:event.target.value})
+        this.setState({config})
     }
     onChangeCoverageDecisionPath(event){
-        this.setState({coverageDecisionPath:event.target.value})
+        let config = this.state.config;
+        config.coverageDecisionPath = event.target.value
+        // this.setState({coverageDecisionPath:event.target.value})
+        this.setState({config})
     }
     onChangeCoverageRequirementPath(event){
-        this.setState({coverageRequirementPath:event.target.value})
+        let config = this.state.config;
+        config.coverageRequirementPath= event.target.value
+        // this.setState({coverageRequirementPath:event.target.value})
+        this.setState({config})
     }
     onChangePayerFhirUrl(event){
-        this.setState({payerFhirUrl:event.target.value})
+        let config = this.state.config;
+        config.payerFhirUrl = event.target.value
+        // this.setState({payerFhirUrl:event.target.value})
+        this.setState({config})
     }
     onChangeProviderFhirUrl(event){
-        this.setState({providerFhirUrl:event.target.value})
+        let config = this.state.config;
+        config.providerFhirUrl = event.target.value
+        // this.setState({providerFhirUrl:event.target.value})
+        this.setState({config})
     }
     onChangeClientId(event){
-        this.setState({clientId:event.target.value})
+        config.clientId = event.target.value
+        // this.setState({clientId:event.target.value})
+        this.setState({config})
+
     }
     onChangeClientSecret(event){
-        this.setState({clientSecret:event.target.value})
+        config.clientSecret = event.target.value
+        // this.setState({clientSecret:event.target.value})
+        this.setState({config})
     }
     onChangeAuthTokenUrl(event){
-        this.setState({authTokenUrl:event.target.value})
+        config.authTokenUrl = event.target.value
+        // this.setState({authTokenUrl:event.target.value})
+        this.setState({config})
     }
     onChangeTokenVerificationUrl(event){
-        this.setState({tokenVerificationUurl:event.target.value})
+        config.tokenVerificationUurl = event.target.value
+        // this.setState({tokenVerificationUurl:event.target.value})
+        this.setState({config})
     }
     onChangeTokenType(event){
-        this.setState({tokenType:event.target.value})
+        config.tokenType = event.target.value
+        this.setState({config})
     }
     onSaveConfiguration(){
         console.log('saved')
+        this.props.saveConfiguration(this.state.config);
+
     }
     renderConfiguration() {
         return (
@@ -108,14 +145,14 @@ export default class Configuration extends Component {
                     })} */}
                     <div className='header'>CRD</div>
                     <div className='header-child'>CRD URL</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="crd_url" onChange={this.onChangeCrdUrl} value={this.state.crdUrl}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="crd_url" onChange={this.onChangeCrdUrl} value={this.state.config.crdUrl}></Input></div>
                     <div className='header-child'>Coverage Decision Path</div>
-                    <div className="dropdown"> <Input className='ui fluid input' type="text" name="coverage_decision_path" fluid onChange={this.onChangeCoverageDecisionPath} value={this.state.coverageDecisionPath}></Input></div>
+                    <div className="dropdown"> <Input className='ui fluid input' type="text" name="coverage_decision_path" fluid onChange={this.onChangeCoverageDecisionPath} value={this.state.config.coverageDecisionPath}></Input></div>
                     <div className='header-child'>Coverage Requirement Path</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" name="coverage_requirement_path" fluid onChange={this.onChangeCoverageRequirementPath} value={this.state.coverageRequirementPath}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" name="coverage_requirement_path" fluid onChange={this.onChangeCoverageRequirementPath} value={this.state.config.coverageRequirementPath}></Input></div>
 
                     <div className='header'>Payer FHIR URL</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="payer_fhir_url" onChange={this.onChangePayerFhirUrl} value={this.state.payerFhirUrl}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="payer_fhir_url" onChange={this.onChangePayerFhirUrl} value={this.state.config.payerFhirUrl}></Input></div>
                     
                     {/* <div className='header'>CDS Service</div>
                     <div className="leftStateInput"><div className='header-child'>VSAC Username</div>
@@ -124,22 +161,22 @@ export default class Configuration extends Component {
                     <div className="dropdown"><Input className='ui  input' type="text" name="vsac_password"  value={config.cds_service.vsac_password}></Input></div></div> */}
                     <div className='header'>Authorization Service</div>
                     <div className='header-child'>Authorization Token URL</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="auth_token_url" onChange={this.onChangeAuthTokenUrl} value={this.state.authTokenUrl}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="auth_token_url" onChange={this.onChangeAuthTokenUrl} value={this.state.config.authTokenUrl}></Input></div>
                     <div className='header-child'>Token Verification URL</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" name="token_verification_url" fluid onChange={this.onChangeTokenVerificationUrl} value={this.state.tokenVerificationUurl}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" name="token_verification_url" fluid onChange={this.onChangeTokenVerificationUrl} value={this.state.config.tokenVerificationUurl}></Input></div>
                     <div className="leftStateInput"><div className='header-child'>Token Type</div>
-                    <div className="dropdown"><Input className='ui  input' type="text" name="token_type" onChange={this.onChangeTokenType}  value={this.state.tokenType}></Input></div></div>
+                    <div className="dropdown"><Input className='ui  input' type="text" name="token_type" onChange={this.onChangeTokenType}  value={this.state.config.tokenType}></Input></div></div>
                     <div className="rightStateInput"><div className='header-child'>Token Expires In</div>
-                    <div className="dropdown"><Input className='ui  input' type="text" name="token_expires_in" onChange={this.onChangeTokenExpiry} value={this.state.tokenExpiresIn}></Input></div></div>
+                    <div className="dropdown"><Input className='ui  input' type="text" name="token_expires_in" onChange={this.onChangeTokenExpiry} value={this.state.config.tokenExpiresIn}></Input></div></div>
                 </div>
                 <div className="right-form">
                 <div className='header'>Provider</div>
                     <div className='header-child'>Provider FHIR URL</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="provider_fhir_url" onChange={this.onChangeProviderFhirUrl} value={this.state.providerFhirUrl}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" fluid name="provider_fhir_url" onChange={this.onChangeProviderFhirUrl} value={this.state.config.providerFhirUrl}></Input></div>
                     <div className='header-child'>Client Secret</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" name="provider_client_secret" onChange={this.onChangeClientSecret} fluid value={this.state.clientSecret}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" name="provider_client_secret" onChange={this.onChangeClientSecret} fluid value={this.state.config.clientSecret}></Input></div>
                     <div className='header-child'>Client ID</div>
-                    <div className="dropdown"><Input className='ui fluid input' type="text" name="provider_client_id" fluid onChange={this.onChangeClientId} value={this.state.clientId}></Input></div>
+                    <div className="dropdown"><Input className='ui fluid input' type="text" name="provider_client_id" fluid onChange={this.onChangeClientId} value={this.state.config.clientId}></Input></div>
                     <button className="submit-btn btn btn-class button-ready" onClick={this.onSaveConfiguration}>Save</button>   
                 </div>
             </div>
@@ -148,6 +185,7 @@ export default class Configuration extends Component {
         )
 
     }
+    
     render() {
         return (
           <div className="attributes mdl-grid">
@@ -156,3 +194,18 @@ export default class Configuration extends Component {
       }
 
 }
+function mapStateToProps(state) {
+    console.log(state)
+    return {
+      config:state.config,
+    };
+  };
+  
+  function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        saveConfiguration
+    }, dispatch);
+  };
+  
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Configuration));
+// export default Configuration;
