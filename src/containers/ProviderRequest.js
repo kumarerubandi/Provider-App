@@ -452,7 +452,8 @@ class ProviderRequest extends Component {
                 {sessionStorage.getItem('name')}<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
               </button>
               <div className="menu-content">
-                <button className="menubtn" onClick={this.onClickLogout}>Logout</button>
+                <button className="logout-btn" onClick={this.onClickLogout}>
+                <i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-sign-out" aria-hidden="true"></i>Logout</button>
               </div>
             </div>
             <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
@@ -637,12 +638,12 @@ class ProviderRequest extends Component {
                               </div>
                               <div style={{ paddingLeft: "25px" }} >
                                 {
-                                  this.state.requirementSteps[i].step_no == 2 &&
+                                  this.state.requirementSteps[i].step_no === 2 &&
                                   <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}  >Successfully fetched 4 FHIR resources.</span>
 
                                 }
                                 {
-                                  this.state.requirementSteps[i].step_no == 3 &&
+                                  this.state.requirementSteps[i].step_no === 3 &&
                                   <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}>Successfully executed <a target="_blank" href={this.state.requirementSteps[i].step_link}>{this.state.requirementSteps[i].cql_name}</a> on CDS.</span>
 
                                 }
@@ -653,7 +654,7 @@ class ProviderRequest extends Component {
                             <div style={{ color: "brown" }} id="fse" className="visible">
                               <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "}</span>
                               {
-                                (this.state.requirementSteps[i].hideLoader == false || this.state.requirementSteps[i].hideLoader == undefined) &&
+                                (this.state.requirementSteps[i].hideLoader === false || this.state.requirementSteps[i].hideLoader === undefined) &&
                                 <div style={{ float: "right" }} >
                                   <Loader
                                     style={{ float: "right" }}
@@ -677,14 +678,14 @@ class ProviderRequest extends Component {
                   })}
                 </ol>
                 <div style={{ paddingLeft: "6%", }}>
-                  {this.state.stepsErrorString != undefined &&
+                  {this.state.stepsErrorString !== undefined &&
                     <span style={{ color: "red", marginBottom: "20px" }}>{this.state.stepsErrorString}</span>
                   }
                 </div>
               </div>
             }
 
-            {(this.state.loading == false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
+            {(this.state.loading === false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
               <div className="right-form">
                 <DisplayBox
                   response={this.state.response} req_type="coverage_requirement" userId={this.state.practitionerId} patientId={this.state.patientId} hook={this.state.hook} />
@@ -698,7 +699,7 @@ class ProviderRequest extends Component {
 
                 </div>
                 } */}
-            {this.state.loading == false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
+            {this.state.loading === false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
               <div className="right-form">
                 <DisplayBox
                   response={this.state.response} req_type="coverage_determination" userId={this.state.practitionerId} patientId={this.state.patient} hook={this.state.hook} />

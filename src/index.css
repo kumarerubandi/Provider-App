@@ -23,6 +23,17 @@ body {
   padding-top: 10px;
   margin-left: 25px;
 }
+.default-btn{
+  background: #C5C5C5;
+  color: rgb(255, 255, 255);
+    -webkit-font-feature-settings: "pcap", "c2pc";
+    font-feature-settings: "pcap", "c2pc";
+    font-variant-caps: all-petite-caps;
+    font-weight: bold;
+    font-size: 18px;
+    width: 100%;
+    margin-top: 20px;
+}
 
 .FormInputs{
   padding-top: 10px;
@@ -481,6 +492,14 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 }
 .logout{
   float:right;
+}
+.logout-btn{
+  background: #3FB1CF;
+  width: 100%;
+  padding: 15px;
+  margin-top: 13px;
+  border: none;
+  border-radius: 3px;
 }
 .pa_loading_text{
   color: #000000;

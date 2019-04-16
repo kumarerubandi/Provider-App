@@ -1,8 +1,8 @@
 import {combineReducers} from 'redux';
-import Configuration from './redux_configuration';
+import {Config} from './reducer_config';
 
 const allReducers = combineReducers({
-    config:Configuration
+    config:Config,
 });
 
 export default allReducers;
