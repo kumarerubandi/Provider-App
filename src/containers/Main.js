@@ -1026,17 +1026,7 @@ export default class Review extends Component {
                                                         })}
                                                     </div>
                                                 }
-                                                <div>
-                                                    <div className="header">
-                                                        Procedure Codes*
-                                            </div>
-                                                    <div className="docs">
-                                                        <DropdownProcedure
-                                                            elementName="procedure_code"
-                                                            updateCB={this.updateStateElement}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                
                                                 <div className="header">
                                                     Additional Notes
                                         </div>

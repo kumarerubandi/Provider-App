@@ -3,6 +3,7 @@ import DropdownCDSHook from '../components/DropdownCDSHook';
 import DropdownFrequency from '../components/DropdownFrequency';
 import DropdownTreating from '../components/DropdownTreating';
 import DropdownPayer from '../components/DropdownPayer';
+import DropdownServiceCode from '../components/DropdownServiceCode';
 import { Input } from 'semantic-ui-react';
 import { DateInput } from 'semantic-ui-calendar-react';
 import { withRouter } from 'react-router-dom';
@@ -73,6 +74,7 @@ class ProviderRequest extends Component {
       frequency: null,
       loadCards: false,
       showMenu: false,
+      service_code:"",
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -506,6 +508,11 @@ class ProviderRequest extends Component {
                   <div className='errorMsg dropdown'>{config.errorMsg}</div>
                 }
               </div>
+
+              <DropdownServiceCode elementName="service_code"  updateCB={this.updateStateElement}
+                      />
+
+
               {this.state.auth_active !== 'active' &&
                 <div>
                   <div>
@@ -779,6 +786,7 @@ class ProviderRequest extends Component {
       fhirServer: this.state.fhirUrl,
       hook: this.state.hook,
       payerName: this.state.payer,
+      service_code:this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
         "token_type": config.authorization_service.token_type, // json
