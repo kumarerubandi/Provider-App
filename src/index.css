@@ -10,6 +10,7 @@ body {
   float: left;
   padding: 15px 0px;
 	padding-left: 20px;
+  margin-bottom: 100px;
 }
 .btn:focus,.btn:active {
   outline: none !important;
@@ -275,7 +276,7 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 }
 
 .blackBorder{
-  border-color:black !important;
+  border-color: inherit;
 }
 
 .ui.selection.active.dropdown{

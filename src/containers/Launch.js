@@ -47,7 +47,7 @@ export default class Review extends Component {
           // api_server_uri: "http://3.92.187.150:8280/fhir/baseDstu3/"
       });
       
-      var settings = this.getSettings();
+      settings = this.getSettings();
       this.clearAuthToken();
       console.log(settings.api_server_uri)
       const fhirClient = new Client({ baseUrl: settings.api_server_uri });

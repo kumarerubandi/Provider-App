@@ -2,7 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import { createToken } from '../components/Authentication';
 import config from '../globalConfiguration.json';
-import { Input, Form } from 'semantic-ui-react';
+import { Input } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
 

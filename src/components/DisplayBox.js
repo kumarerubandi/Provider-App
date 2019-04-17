@@ -5,11 +5,11 @@ import Button from 'terra-button';
 import TerraCard from 'terra-card';
 import Text from 'terra-text';
 //import cx from 'classnames';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import axios from 'axios';
 
 
-const propTypes = {
+// const propTypes = {
     /**
      * A boolean to determine if the context of this component is under the Demo Card feature of the Sandbox, or in the actual
      * hook views that render cards themselves. This flag is necessary to make links and suggestions unactionable in the Card Demo view.
@@ -18,7 +18,7 @@ const propTypes = {
     /**
      * The FHIR access token retrieved from the authorization server. Used to retrieve a launch context for a SMART app
      */
-    fhirAccessToken: PropTypes.object,
+    // fhirAccessToken: PropTypes.object,
     /**
      * Function callback to take a specific suggestion from a card
      */
@@ -30,12 +30,12 @@ const propTypes = {
     /**
      * The FHIR server URL in context
      */
-    fhirServerUrl: PropTypes.string,
+    // fhirServerUrl: PropTypes.string,
     /**
      * JSON response from a CDS service containing potential cards to display
      */
     //cardResponses: PropTypes.object,
-  };
+  // };
 
 export default class DisplayBox extends Component{
     constructor(props){
