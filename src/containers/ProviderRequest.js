@@ -34,7 +34,7 @@ class ProviderRequest extends Component {
     super(props);
     this.state = {
       patient: null,
-      fhirUrl: (sessionStorage.getItem('username') === 'john') ? 'http://3.92.187.150:8280/fhir/baseDstu3/' : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
+      fhirUrl: (sessionStorage.getItem('username') === 'john') ? config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
       scope: '',
       payer: '',
@@ -387,7 +387,10 @@ class ProviderRequest extends Component {
       "Content-Type": "application/json",
       "authorization": token,
     });
-    let json_request = await this.getJson(token);
+    let json_request = await this.getJson();
+    let accessToken = this.state.accessToken;
+    accessToken = token;
+    this.setState({accessToken});
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
       url = config.crd.crd_url + '' + config.crd.coverage_requirement_path;
@@ -695,7 +698,12 @@ class ProviderRequest extends Component {
             {(this.state.loading === false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
               <div className="right-form">
                 <DisplayBox
-                  response={this.state.response} req_type="coverage_requirement" userId={this.state.practitionerId} patientId={this.state.patientId} hook={this.state.hook} />
+                  response={this.state.response} 
+                  req_type="coverage_requirement" 
+                  userId={this.state.practitionerId} 
+                  fhirAccessToken={this.state.accessToken}
+                  fhirServerUrl={config.provider.fhir_url}
+                  patientId={this.state.patientId} hook={this.state.hook} />
 
               </div>
             }
@@ -709,7 +717,11 @@ class ProviderRequest extends Component {
             {this.state.loading === false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
               <div className="right-form">
                 <DisplayBox
-                  response={this.state.response} req_type="coverage_determination" userId={this.state.practitionerId} patientId={this.state.patient} hook={this.state.hook} />
+                  response={this.state.response} req_type="coverage_determination" 
+                  userId={this.state.practitionerId} patientId={this.state.patient} 
+                  hook={this.state.hook} 
+                  fhirAccessToken={this.state.accessToken}
+                  fhirServerUrl={config.provider.fhir_url}/>
               </div>
             }
           </div>
@@ -717,7 +729,7 @@ class ProviderRequest extends Component {
       </React.Fragment>);
   };
 
-  async getJson(auth_token) {
+  async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
     let coverage = {

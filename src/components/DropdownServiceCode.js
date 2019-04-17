@@ -68,8 +68,8 @@ export default class DropdownServiceCode extends Component {
               placeholder='Service type category'
               search
               selection
+              fluid
               onChange={this.handleCategoryChange}
-              style={{"width" : "530px"}}
             />
           </div>
         </div>
@@ -84,8 +84,8 @@ export default class DropdownServiceCode extends Component {
               placeholder='Service type code'
               search
               selection
+              fluid
               onChange={this.handleChange}
-              style={{"width" : "530px"}}
             />
           </div>
         </div>

@@ -5,11 +5,11 @@ import Button from 'terra-button';
 import TerraCard from 'terra-card';
 import Text from 'terra-text';
 //import cx from 'classnames';
-//import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 
-//const propTypes = {
+const propTypes = {
     /**
      * A boolean to determine if the context of this component is under the Demo Card feature of the Sandbox, or in the actual
      * hook views that render cards themselves. This flag is necessary to make links and suggestions unactionable in the Card Demo view.
@@ -18,7 +18,7 @@ import axios from 'axios';
     /**
      * The FHIR access token retrieved from the authorization server. Used to retrieve a launch context for a SMART app
      */
-    //fhirAccessToken: PropTypes.object,
+    fhirAccessToken: PropTypes.object,
     /**
      * Function callback to take a specific suggestion from a card
      */
@@ -30,12 +30,12 @@ import axios from 'axios';
     /**
      * The FHIR server URL in context
      */
-    //fhirServerUrl: PropTypes.string,
+    fhirServerUrl: PropTypes.string,
     /**
      * JSON response from a CDS service containing potential cards to display
      */
     //cardResponses: PropTypes.object,
-  //};
+  };
 
 export default class DisplayBox extends Component{
     constructor(props){
@@ -172,6 +172,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       };
 
       if (link.appContext) {
+        console.log("Inside app context if")
         launchParameters.appContext = link.appContext;
       }
 
@@ -185,6 +186,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           parameters: launchParameters,
         },
       }).then((result) => {
+        console.log("fhir result",result.data.launch_id);
         if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launch_id')) {
           if (link.url.indexOf('?') < 0) {
             link.url += '?';
