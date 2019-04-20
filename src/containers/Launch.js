@@ -2,9 +2,13 @@ import React, {Component} from 'react';
 import queryString from 'query-string';
 import simpleOauthModule from 'simple-oauth2';
 import Client from 'fhir-kit-client';
-import config from '../globalConfiguration.json';
+// import config from '../globalConfiguration.json';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
-export default class Review extends Component {
+
+
+class Review extends Component {
   constructor(props){
     super(props);
     this.state = {
@@ -51,7 +55,7 @@ export default class Review extends Component {
       this.clearAuthToken();
       console.log(settings.api_server_uri)
       const fhirClient = new Client({ baseUrl: settings.api_server_uri });
-      if (config.provider.authorized_fhir === true){
+      if (this.props.config.provider.authorized_fhir === true){
          var { authorizeUrl, tokenUrl } = await fhirClient.smartAuthMetadata();
       
          if(settings.api_server_uri.search('3.92.187.150') > 0){
@@ -91,7 +95,7 @@ export default class Review extends Component {
          console.log(authorizationUri,'authorize')
          window.location = authorizationUri;
 	}
-        if (!config.provider.authorized_fhir){
+        if (!this.props.config.provider.authorized_fhir){
         	window.location = `${window.location.protocol}//${window.location.host}/index`;
       	}
   }
@@ -103,3 +107,12 @@ export default class Review extends Component {
       </div>)
   }
 }
+function mapStateToProps(state) {
+  console.log(state);
+  return {
+      config: state.config,
+  };
+};
+export default withRouter(connect(mapStateToProps)(Review));
+
+

@@ -1,9 +1,10 @@
 import React from 'react';
 import $ from 'jquery';
 import { createToken } from '../components/Authentication';
-import config from '../globalConfiguration.json';
+// import config from '../globalConfiguration.json';
 import { Input } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Loader from 'react-loader-spinner';
 
 class LoginPage extends React.Component {
@@ -56,10 +57,11 @@ class LoginPage extends React.Component {
     if (tokenResponse !== null && tokenResponse !== undefined) {
       sessionStorage.setItem('username', this.state.name);
       sessionStorage.setItem('password', this.state.password);
-      for (var key in config.user_profiles) {
-        if (this.state.name === config.user_profiles[key].username) {
-          sessionStorage.setItem('npi', config.user_profiles[key].npi);
-          sessionStorage.setItem('name', config.user_profiles[key].name);
+      console.log(this.props.config.user_profiles,'user profiles')
+      for (var key in this.props.config.user_profiles) {
+        if (this.state.name === this.props.config.user_profiles[key].username) {
+          sessionStorage.setItem('npi', this.props.config.user_profiles[key].npi);
+          sessionStorage.setItem('name', this.props.config.user_profiles[key].name);
         }
       }
       sessionStorage.setItem('isLoggedIn', true);
@@ -137,4 +139,11 @@ class LoginPage extends React.Component {
   }
 }
 
-export default withRouter(LoginPage);
+function mapStateToProps(state) {
+  console.log(state);
+  return {
+      config: state.config,
+  };
+};
+export default withRouter(connect(mapStateToProps)(LoginPage));
+

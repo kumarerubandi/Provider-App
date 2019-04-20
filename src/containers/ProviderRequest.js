@@ -18,9 +18,11 @@ import 'font-awesome/css/font-awesome.min.css';
 import '../index.css';
 import '../components/consoleBox.css';
 import Loader from 'react-loader-spinner';
-import config from '../globalConfiguration.json';
+// import config from '../globalConfiguration.json';
 import { KEYUTIL } from 'jsrsasign';
 import { createToken } from '../components/Authentication';
+import { connect } from 'react-redux';
+
 
 const types = {
   error: "errorClass",
@@ -34,7 +36,7 @@ class ProviderRequest extends Component {
     super(props);
     this.state = {
       patient: null,
-      fhirUrl: (sessionStorage.getItem('username') === 'john') ? config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
+      fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
       scope: '',
       payer: '',
@@ -183,7 +185,7 @@ class ProviderRequest extends Component {
 
   async readFHIR(resourceType, resourceId) {
     const fhirClient = new Client({ baseUrl: this.state.fhirUrl });
-    if (config.provider.authorized_fhir) {
+    if (this.props.config.provider.authorized_fhir) {
       fhirClient.bearerToken = this.state.accessToken;
     }
     let readResponse = await fhirClient.read({ resourceType: resourceType, id: resourceId });
@@ -234,7 +236,7 @@ class ProviderRequest extends Component {
 
   async getResourceData(token, prefectInput) {
     console.log("Prefetch input--", JSON.stringify(prefectInput));
-    const url = config.crd.crd_url + "prefetch";
+    const url = this.props.config.crd.crd_url + "prefetch";
     await fetch(url, {
       method: "POST",
       headers: {
@@ -393,10 +395,10 @@ class ProviderRequest extends Component {
     this.setState({accessToken});
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
-      url = config.crd.crd_url + '' + config.crd.coverage_requirement_path;
+      url = this.props.config.crd.crd_url + '' + this.props.config.crd.coverage_requirement_path;
     }
     if (this.state.hook === 'patient-view') {
-      url = config.crd.crd_url + '' + config.crd.patient_view_path;
+      url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
     console.log("Fetching response from " + url + ",types.info")
     try {
@@ -508,7 +510,7 @@ class ProviderRequest extends Component {
                   <Input className='ui fluid   input' type="text" name="patient" fluid value={this.state.patientId} onChange={this.onPatientChange}></Input>
                 </div>
                 {this.state.validatePatient === true &&
-                  <div className='errorMsg dropdown'>{config.errorMsg}</div>
+                  <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                 }
               </div>
 
@@ -529,7 +531,7 @@ class ProviderRequest extends Component {
                       />
                     </div>
                     {this.state.validateIcdCode === true &&
-                      <div className='errorMsg dropdown'>{config.errorMsg}</div>
+                      <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                     }
                   </div>
                   <div>
@@ -702,7 +704,7 @@ class ProviderRequest extends Component {
                   req_type="coverage_requirement" 
                   userId={this.state.practitionerId} 
                   fhirAccessToken={this.state.accessToken}
-                  fhirServerUrl={config.provider.fhir_url}
+                  fhirServerUrl={this.props.config.provider.fhir_url}
                   patientId={this.state.patientId} hook={this.state.hook} />
 
               </div>
@@ -721,7 +723,7 @@ class ProviderRequest extends Component {
                   userId={this.state.practitionerId} patientId={this.state.patient} 
                   hook={this.state.hook} 
                   fhirAccessToken={this.state.accessToken}
-                  fhirServerUrl={config.provider.fhir_url}/>
+                  fhirServerUrl={this.props.config.provider.fhir_url}/>
               </div>
             }
           </div>
@@ -801,10 +803,10 @@ class ProviderRequest extends Component {
       service_code:this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
-        "token_type": config.authorization_service.token_type, // json
-        "expires_in": config.authorization_service.expires_in, // json
-        "scope": config.authorization_service.scope,
-        "subject": config.authorization_service.subject,
+        "token_type": this.props.config.authorization_service.token_type, // json
+        "expires_in": this.props.config.authorization_service.expires_in, // json
+        "scope": this.props.config.authorization_service.scope,
+        "subject": this.props.config.authorization_service.subject,
       },
       userId: this.state.practitionerId,
       patientId: patientId,
@@ -847,4 +849,13 @@ class ProviderRequest extends Component {
   }
 }
 
-export default withRouter(ProviderRequest);
+
+function mapStateToProps(state) {
+  console.log(state);
+  return {
+      config: state.config,
+  };
+};
+export default withRouter(connect(mapStateToProps)(ProviderRequest));
+
+

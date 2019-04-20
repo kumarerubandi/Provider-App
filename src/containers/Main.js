@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import { withRouter } from 'react-router-dom';
 import simpleOauthModule from 'simple-oauth2';
 import Client from 'fhir-kit-client';
-import config from '../globalConfiguration.json';
+// import config from '../globalConfiguration.json';
 import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
@@ -13,10 +13,12 @@ import ReactJson from 'react-json-view';
 import { Input } from 'semantic-ui-react';
 import DropdownProcedure from '../components/DropdownProcedure';
 import ReadMoreAndLess from 'react-read-more-less';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 
 var pascalcaseKeys = require('pascalcase-keys');
 
-export default class Review extends Component {
+class Review extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -47,7 +49,7 @@ export default class Review extends Component {
             pa_submit: false,
             fhir_errors: 0,
             documents: 0,
-            requirements: config.requirements,
+            requirements: this.props.config.requirements,
             res_json: [],
             x12_response: "",
             organizationJson:{},
@@ -133,7 +135,7 @@ export default class Review extends Component {
     }
 
     async convertJsonToX12Request(claim_json) {
-        var tempURL = config.xmlx12_url + "xmlx12";
+        var tempURL = this.props.config.xmlx12_url + "xmlx12";
         console.log("x12 URL", tempURL);
         let req = await fetch(tempURL, {
             method: 'POST',
@@ -230,6 +232,13 @@ export default class Review extends Component {
             procedure: procedure_details,
             diagnosis: condition_details,
             use: { code: 'claim' },
+            priority: {
+                coding: [
+                  {
+                    code: "normal"
+                  }
+                ]
+              },
             type: {
                 coding: [
                     {
@@ -296,7 +305,7 @@ export default class Review extends Component {
         console.log(x12_data)
         this.setState({ 'x12_response': x12_data['x12_response'] });
         try {
-            const fhirClient = new Client({ baseUrl: config.payer.fhir_url });
+            const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
             const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
             console.log('The token is : ', token);
             fhirClient.bearerToken = token;
@@ -656,7 +665,8 @@ export default class Review extends Component {
         try {
             console.log(settings.api_server_uri, 'server uri')
             const fhirClient = new Client({ baseUrl: settings.api_server_uri });
-            if (config.provider.authorized_fhir) {
+            console.log(this.props.config.provider,'please tell me it works')
+            if (this.props.config.provider.authorized_fhir) {
                 var { authorizeUrl, tokenUrl } = await fhirClient.smartAuthMetadata();
                 if (settings.api_server_uri.search('3.92.187.150') > 0) {
                     authorizeUrl = { protocol: "https://", host: "3.92.187.150:8443/", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/auth" }
@@ -688,7 +698,7 @@ export default class Review extends Component {
                 fhirClient.bearerToken = token.access_token;
             }
             this.setState({ fhirClient: fhirClient });
-            const url = config.crd.crd_url + "smart_app";
+            const url = this.props.config.crd.crd_url + "smart_app";
             console.log("fetching data from " + url)
             var self = this;
             var patientId = '';
@@ -774,7 +784,7 @@ export default class Review extends Component {
         withRouter(({ history }) => (history.push('/')))
     }
     async getClaimResponse(claim_id) {
-        const fhirClient = new Client({ baseUrl: config.payer.fhir_url });
+        const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         fhirClient.bearerToken = token;
         this.searchFHIR(fhirClient, 'ClaimResponse', 'request=' + claim_id, 'payer')
@@ -1119,4 +1129,13 @@ export default class Review extends Component {
             </div>)
     }
 }
+function mapStateToProps(state) {
+    console.log(state);
+    return {
+        config: state.config,
+    };
+};
+export default withRouter(connect(mapStateToProps)(Review));
+
+
 
