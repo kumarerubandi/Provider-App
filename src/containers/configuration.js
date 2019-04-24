@@ -5,8 +5,11 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { saveConfiguration } from '../actions/index';
+import 'react-notifications/lib/notifications.css';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
-
+// const NotificationContainer = window.ReactNotifications.NotificationContainer;
+// const NotificationManager = window.ReactNotifications.NotificationManager;
 class Configuration extends Component {
     constructor(props) {
         super(props);
@@ -97,7 +100,7 @@ class Configuration extends Component {
     }
     onChangeProviderFhirUrl(event) {
         let config = this.state.config;
-        config.providerFhirUrl = event.target.value
+        config.provider.fhir_url = event.target.value
         this.setState({ config })
     }
     onChangeClientId(event) {
@@ -129,6 +132,7 @@ class Configuration extends Component {
     onSaveConfiguration() {
         let config = this.state.config;
         this.props.saveConfiguration(config);
+        NotificationManager.success('Your changes have been updated successfully', 'Success');
     }
     restToDefaults() {
         this.props.saveConfiguration(config_default);
@@ -275,6 +279,7 @@ class Configuration extends Component {
                                 onClick={this.restToDefaults}>Reset to defaults</button>
                         </div>
                     </div>
+                    <NotificationContainer/>
                 </div>
             </React.Fragment>
         )

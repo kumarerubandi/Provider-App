@@ -33,6 +33,8 @@ export default class DropdownServiceCode extends Component {
             console.log(key,jsonData[value][key])
               codesList.push({'key':key,'value':key,'text':key+" - "+jsonData[value][key]})
           }
+          this.props.updateCB("category_name", value)
+
           // this.code_options = codesList
           this.setState({ category: value ,code_options:codesList})
   

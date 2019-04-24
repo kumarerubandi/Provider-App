@@ -40,6 +40,11 @@
         "CN":   "Mammogram, Low Risk Patient",
         "DM":   "Durable Medical Equipment"
     },
+    "Durable Medical Equipment":{
+        "11":   "Used Durable Medical Equipment",
+        "12":   "Durable Medical Equipment Purchase",
+        "18":   "Durable Medical Equipment Rental"
+    },
     "Emergency Medical Services":{
         "56":   "Medically Related Transportation",
         "57":   "Air Transportation",
@@ -150,10 +155,7 @@
     },
     "Other":{
         "10":   "Blood Charges",
-        "11":   "Used Durable Medical Equipment",
-        "12":   "Durable Medical Equipment Purchase",
         "17":   "Pre-Admission Testing",
-        "18":   "Durable Medical Equipment Rental",
         "22":   "Social Work",
         "30":   "Health Benefit Plan Coverage",
         "32":   "Plan Waiting Period",

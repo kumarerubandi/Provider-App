@@ -77,6 +77,7 @@ class ProviderRequest extends Component {
       loadCards: false,
       showMenu: false,
       service_code:"",
+      category_name:"",
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -128,6 +129,7 @@ class ProviderRequest extends Component {
   }
 
   updateStateElement = (elementName, text) => {
+    console.log(elementName,'elenAME')
     if (elementName === "hook") {
       this.setState({ validateIcdCode: false })
       for (const key in orderReview) {
@@ -518,8 +520,9 @@ class ProviderRequest extends Component {
                       />
 
 
-              {this.state.auth_active !== 'active' &&
+              {this.state.auth_active !== 'active'&& 
                 <div>
+                  {this.state.category_name!=='Durable Medical Equipment' &&
                   <div>
                     <div className="header">
                       ICD 10 / HCPCS Codes*
@@ -534,6 +537,7 @@ class ProviderRequest extends Component {
                       <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                     }
                   </div>
+                  }
                   <div>
                     <div className="header">
                       NPI
