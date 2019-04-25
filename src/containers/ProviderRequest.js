@@ -522,7 +522,7 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active'&& 
                 <div>
-                  {this.state.category_name!=='Durable Medical Equipment' &&
+                  {this.state.category_name==='Durable Medical Equipment' &&
                   <div>
                     <div className="header">
                       ICD 10 / HCPCS Codes*

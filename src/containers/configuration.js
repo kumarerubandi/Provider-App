@@ -137,6 +137,8 @@ class Configuration extends Component {
     restToDefaults() {
         this.props.saveConfiguration(config_default);
         window.location.reload();
+        NotificationManager.success('Your changes have been updated successfully', 'Reset Successfull');
+
     }
     goHome() {
         window.location = `${window.location.protocol}//${window.location.host}/provider_request`;
