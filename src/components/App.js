@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {Switch} from 'react-router';
 import {BrowserRouter, Redirect, Route} from 'react-router-dom';
 //import PrivateRoute from './privateRoute';
-//import RequestBuilder from '../containers/RequestBuilder';
+import X12Converter from '../containers/x12converter';
 import CoverageDetermination from '../containers/CoverageDetermination';
 //import PriorAuthorization from '../containers/PriorAuthorization';
 import ProviderRequest from '../containers/ProviderRequest';
@@ -23,7 +23,7 @@ export default class App extends Component {
                 <Switch>
                     <Route exact path="/" component={() => { return <Redirect to="/login" />}} />
                     <Route path={"/login"} component={LoginPage} />                    
-                    {/* <Route path={"/cr"} component={RequestBuilder} /> */}
+                    <Route path={"/x12converter"} component={X12Converter} />
                     <Route path={"/cd"} component={CoverageDetermination} />
                     {/* <Route path={"/prior_auth"} component={PriorAuthorization} /> */}
                     <Route path={"/provider_request"} component={ProviderRequest} />                    

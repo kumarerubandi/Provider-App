@@ -1,0 +1,726 @@
+{
+   "resourceType":"Claim",
+   "id":"25156",
+   "meta":{
+      "versionId":"1",
+      "lastUpdated":"2019-03-01T09:26:29.392+00:00"
+   },
+   "contained":[
+      {
+         "resourceType":"Patient",
+         "id":"1",
+         "meta":{
+            "versionId":"2",
+            "lastUpdated":"2019-01-10T06:06:03.772+00:00"
+         },
+         "identifier":[
+            {
+               "use":"usual",
+               "type":{
+                  "coding":[
+                     {
+                        "system":"http://hl7.org/fhir/v2/0263",
+                        "code":"MR"
+                     }
+                  ]
+               },
+               "value":"patient-2"
+            }
+         ],
+         "active":true,
+         "name":[
+            {
+               "use":"official",
+               "family":"Alba",
+               "given":[
+                  "Alana",
+                  "Lana"
+               ]
+            }
+         ],
+         "telecom":[
+            {
+               "use":"work"
+            },
+            {
+               "system":"phone",
+               "value":"(05) 5381 8157",
+               "use":"work",
+               "rank":2
+            }
+         ],
+         "gender":"female",
+         "birthDate":"1978-04-10",
+         "_birthDate":{
+            "extension":[
+               {
+                  "url":"http://hl7.org/fhir/StructureDefinition/patient-birth",
+                  "valueDateTime":"1985-04-10T03:15:25-06:00"
+               }
+            ]
+         },
+         "deceasedBoolean":true,
+         "address":[
+            {
+               "use":"work",
+               "type":"both",
+               "text":"656 Church Lane,Belfast, 1985",
+               "line":[
+                  "656 Church Lane"
+               ],
+               "city":"Belfast",
+               "postalCode":"1985",
+               "period":{
+                  "start":"1985-04-10"
+               }
+            }
+         ],
+         "contact":[
+            {
+               "relationship":[
+                  {
+                     "coding":[
+                        {
+                           "system":"http://hl7.org/fhir/v2/0263",
+                           "code":"S"
+                        }
+                     ]
+                  }
+               ]
+            }
+         ],
+         "managingOrganization":{
+            "reference":"Organization/10"
+         }
+      },
+      {
+         "resourceType":"Practitioner",
+         "id":"4969",
+         "meta":{
+            "versionId":"3",
+            "lastUpdated":"2019-01-18T10:13:40.721+00:00"
+         },
+         "identifier":[
+            {"type" : { "coding":{"system":{"code":{"value":"PRN" }}}},
+               "system":"urn:oid:2.16.840.1.113883.4.6",
+               "value":"1932102951"
+            }
+         ],
+         "name":[
+            {
+               "family":"Doe",
+               "given":[
+                  "John"
+               ]
+            }
+         ],
+         "address":[
+            {
+               "line":[
+                  "Public Health Clinic",
+                  "10666 Healthcare Dr."
+               ],
+               "city":"Sacramento",
+               "state":"California",
+               "postalCode":"970995",
+               "country":"USA"
+            }
+         ]
+      },
+      {
+         "resourceType":"Practitioner",
+         "id":"4955",
+         "meta":{
+            "versionId":"3",
+            "lastUpdated":"2019-01-18T10:13:40.721+00:00"
+         },
+         "identifier":[
+            {"type" : { "coding":{"system":{"code":{"value":"PRN" }}}},
+               "system":"urn:oid:2.16.840.1.113883.4.6",
+               "value":"1932102951"
+            }
+         ],
+         "name":[
+            {
+               "family":"Khan",
+               "given":[
+                  "Samir"
+               ]
+            }
+         ],
+         "address":[
+            {
+               "line":[
+                  "Family Health Clinic",
+                  "1004 Healthcare Dr."
+               ],
+               "city":"Portland",
+               "state":"OR",
+               "postalCode":"97005",
+               "country":"USA"
+            }
+         ],
+        "telecom" : [
+            {
+               "system":"phone",
+               "value":"(05) 5381 8146",
+               "use":"work",
+               "rank":2
+            },
+            {
+               "system":"phone",
+               "value":"(05) 5381 8157",
+               "use":"work",
+               "rank":2
+            }
+         ]
+      },
+
+      {
+        "resourceType" : "Location",
+         "id":"321",
+        "identifier" : [
+        {
+           "type" : { "coding":{"system":{"code":{"value":"PRN" }}}},
+           "value" : "56789"
+         },
+         {
+           "type" : { "coding":{"system":{"code":{"value":"TAX" }}}},
+           "value" : "63729"
+         }
+         ],
+        "name" : "Family Health Clinic",
+        "telecom" : [
+            {
+               "system":"phone",
+               "value":"(05) 5381 8146",
+               "use":"work",
+               "rank":2
+            },
+            {
+               "system":"phone",
+               "value":"(05) 5381 8157",
+               "use":"work",
+               "rank":2
+            }
+         ],
+        "address" :
+            [{
+               "line":[
+                  "Family Health Clinic",
+                  "1004 Healthcare Dr."
+               ],
+               "city":"Portland",
+               "state":"OR",
+               "postalCode":"97005",
+               "country":"USA"
+            }]
+      },
+     {
+        "resourceType" : "Organization",
+         "id":"567",
+        "identifier" : [
+         {
+           "type" : { "coding":{"system":{"code":{"value":"TAX" }}}},
+           "value" : "63729"
+         }
+         ],
+        "name" : "Family Health Organization",
+        "telecom" : [
+            {
+               "system":"phone",
+               "value":"(05) 5381 8146",
+               "use":"work",
+               "rank":2
+            },
+            {
+               "system":"phone",
+               "value":"(05) 5381 8157",
+               "use":"work",
+               "rank":2
+            }
+         ],
+        "address" :[
+            {
+               "line":[
+                  "Family Health Org",
+                  "1004 Healthcare Dr."
+               ],
+               "city":"Portland",
+               "state":"OR",
+               "postalCode":"97005",
+               "country":"USA"
+            }]
+      },
+      {
+         "resourceType" : "Location",
+          "id":"322",
+         "identifier" : [
+          {
+            "type" : { "coding":{"system":{"code":{"value":"TAX" }}}},
+            "value" : "63725"
+          }
+    ],
+         "name" : "Stanford Health Clinic",
+         "telecom" : [
+             {
+                "system":"phone",
+                "value":"(05) 5381 8146",
+                "use":"work",
+                "rank":2
+             },
+             {
+                "system":"phone",
+                "value":"(05) 5381 8157",
+                "use":"work",
+                "rank":2
+             }
+          ],
+         "address" :
+             [{
+                "line":[
+                   "Stanford Health Clinic",
+                   "1004 Healthcare Dr."
+                ],
+                "city":"Portland",
+                "state":"OR",
+                "postalCode":"97005",
+                "country":"USA"
+             }]
+       },
+       {
+         "resourceType": "RelatedPerson",
+         "id": "f001",
+         "identifier": [
+           {
+             "use": "official",
+             "type": {
+               "text": "BSN"
+             },
+             "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+             "value": "444222222"
+           }
+         ],
+         "patient": {
+           "reference": "Patient/2"
+         },
+         "relationship": [
+           {
+             "coding": [
+               {
+                 "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                 "code": "SIGOTHR"
+               }
+             ]
+           }
+         ],
+         "name": [
+           {
+             "use": "usual",
+             "family": "Abels",
+             "given": [
+               "Sarah"
+             ]
+           }
+         ],
+         "telecom": [
+           {
+             "system": "phone",
+             "value": "0690383372",
+             "use": "mobile"
+           },
+           {
+             "system": "email",
+             "value": "s.abels@kpn.nl",
+             "use": "home"
+           }
+         ],
+         "gender": "female",
+         "birthDate":"1996-03-21",
+         "address": [
+            {
+              "use": "home",
+              "city":"Belfast",
+              "postalCode":"97005",
+              "state":"OR",
+              "line": [
+                "2222 Home Street"
+              ]
+            }
+          ]
+       },
+     {
+      "resourceType" : "Condition",
+      "id":"1777",
+      "onsetDateTime" : "12012017"
+     }
+   ],
+   "status":"draft",
+   "type":{
+      "coding":[
+         {
+            "system":"http://terminology.hl7.org/CodeSystem/claim-type",
+            "code":"institutional"
+         }
+      ]
+   },
+   "patient":{
+      "reference":"#1"
+   },
+   "provider":{
+      "reference":"#4969"
+   },
+   "diagnosis":[
+      {
+         "id":"5016",
+         "sequence":1,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"E10.622",
+                  "display":"Type 1 diabetes mellitus with other skin ulcer"
+               }
+            ],
+            "text":"Type 1 diabetes mellitus with other skin ulcer"
+         },
+        "diagnosisReference":
+            {
+          "reference":"#1777"
+       }
+      },
+      {
+         "id":"5013",
+         "sequence":2,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"T66.XXXA",
+                  "display":"Radiation sickness, unspecified, initial encounter"
+               }
+            ],
+            "text":"Radiation sickness, unspecified, initial encounter"
+         }
+      },
+      {
+         "id":"5014",
+         "sequence":3,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"A42.9",
+                  "display":"Actinomycosis, unspecified"
+               }
+            ],
+            "text":"Actinomycosis, unspecified"
+         }
+      },
+      {
+         "id":"5015",
+         "sequence":4,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"A42.9",
+                  "display":"Actinomycosis, unspecified"
+               }
+            ],
+            "text":"Actinomycosis, unspecified"
+         }
+      },
+      {
+         "id":"5019",
+         "sequence":5,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"T70.3XXA",
+                  "display":"Caisson disease [decompression sickness], initial encounter"
+               }
+            ],
+            "text":"Caisson disease [decompression sickness], initial encounter"
+         }
+      },
+      {
+         "id":"5012",
+         "sequence":6,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"M86.9",
+                  "display":"Osteomyelitis, unspecified"
+               }
+            ],
+            "text":"Osteomyelitis, unspecified"
+         }
+      },
+      {
+         "id":"5017",
+         "sequence":7,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"E11.622",
+                  "display":"Type 2 diabetes mellitus with other skin ulcer"
+               }
+            ],
+            "text":"Type 2 diabetes mellitus with other skin ulcer"
+         }
+      },
+      {
+         "id":"5018",
+         "sequence":8,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"S78.112A",
+                  "display":"Complete traumatic amputation at level between left hip and knee, initial encounter"
+               }
+            ],
+            "text":"Complete traumatic amputation at level between left hip and knee, initial encounter"
+         }
+      },
+      {
+         "id":"5020",
+         "sequence":9,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"T80.0XXA",
+                  "display":"Air embolism following infusion, transfusion and therapeutic injection, initial encounter"
+               }
+            ],
+            "text":"Air embolism following infusion, transfusion and therapeutic injection, initial encounter"
+         }
+      },
+      {
+         "id":"5012",
+         "sequence":10,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"M86.9",
+                  "display":"Osteomyelitis, unspecified"
+               }
+            ],
+            "text":"Osteomyelitis, unspecified"
+         }
+      },
+      {
+         "id":"5017",
+         "sequence":11,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"E11.622",
+                  "display":"Type 2 diabetes mellitus with other skin ulcer"
+               }
+            ],
+            "text":"Type 2 diabetes mellitus with other skin ulcer"
+         }
+      },
+      {
+         "id":"5013",
+         "sequence":12,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"T66.XXXA",
+                  "display":"Radiation sickness, unspecified, initial encounter"
+               }
+            ],
+            "text":"Radiation sickness, unspecified, initial encounter"
+         }
+      },
+      {
+         "id":"5016",
+         "sequence":13,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"E10.622",
+                  "display":"Type 1 diabetes mellitus with other skin ulcer"
+               }
+            ],
+            "text":"Type 1 diabetes mellitus with other skin ulcer"
+         }
+      },
+      {
+         "id":"5014",
+         "sequence":14,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"A42.9",
+                  "display":"Actinomycosis, unspecified"
+               }
+            ],
+            "text":"Actinomycosis, unspecified"
+         }
+      },
+      {
+         "id":"5015",
+         "sequence":15,
+         "diagnosisCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.90",
+                  "code":"A42.9",
+                  "display":"Actinomycosis, unspecified"
+               }
+            ],
+            "text":"Actinomycosis, unspecified"
+         }
+      }
+   ],
+   "procedure":[
+      {
+         "id":"5024",
+         "sequence":1,
+         "procedureCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"15273",
+                  "display":"Under Skin Substitute Grafts"
+               }
+            ],
+            "text":"Under Skin Substitute Grafts"
+         }
+      },
+      {
+         "id":"5888",
+         "sequence":1,
+         "procedureCodeableConcept":{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"124673",
+                  "display":"Back Surgery"
+               }
+            ],
+            "text":"Back Surgery"
+         }
+      }
+   ],
+   "enterer":{
+      "reference":"#4955"
+   },
+   "careTeam":[
+      {
+         "sequence": 2,
+         "provider": {
+            "reference": "#4955"
+         }
+      },
+      {
+         "sequence":1,
+         "provider":{
+            "reference":"#4969"
+            }
+      }
+   ],
+   "healthCareService":{
+      "name": "Medical Care",
+      "code":"1"
+   },
+   "insurer":{
+      "reference":"#322"
+   },
+   "payee":{
+      "party":{
+         "reference":"#f001"
+      }
+   },
+  "item":[{
+    "sequence" : 1,
+    "careTeamSequence" : [2,1],
+    "diagnosisSequence" : [1,5,6,7,8,12],
+    "procedureSequence" : [2,1],
+    "quantity":{"value":"4",
+      "unit":"QN"
+    },
+    "revenue" : {
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"13",
+                  "display":"revenue"
+               }
+            ],
+            "text":"Back Surgery"
+         },
+    "category" : {
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"124673",
+                  "display":"Back Surgery"
+               }
+            ],
+            "text":"Back Surgery"
+         },
+    "productOrService" : {
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"1B3",
+                  "display":"Back Surgery"
+               }
+            ],
+            "text":"Back Surgery"
+         },
+    "modifier" : [{
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"a6",
+                  "display":"modifier1"
+               }
+            ],
+            "text":"modifier1"
+         },
+        {
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"e1",
+                  "display":"Modifier2"
+               }
+            ],
+            "text":"modifier1"
+         }
+    ],
+    "servicedDate":"23042011",
+    "unitPrice":{
+      "value":"333"
+    },
+    "net":{
+      "value":"234"
+    }
+  }],
+  "priority":
+          {
+            "coding":[
+               {
+                  "system":"2.16.840.1.113883.6.12",
+                  "code":"normal",
+                  "display":"Normal"
+               }
+            ],
+            "text":"Normal"
+         }
+}

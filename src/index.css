@@ -5,6 +5,27 @@ body {
   color:gray;
   width: inherit;
 }
+.l-form{
+  width: 40%;
+  float: left;
+}
+.r-form{
+  width: 50%;
+  float: left;
+}
+.middle-form{
+  width: 10%;
+  float: left;
+  margin-top: 2%;
+}
+.x12-pre {
+  background: none;
+  margin: 0px;
+  height: auto;
+  font-size: 12px;
+  border: none;
+  overflow: visible;
+}
 .left-form { 
   width: 50%;
   float: left;
