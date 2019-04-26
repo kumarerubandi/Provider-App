@@ -9,7 +9,8 @@ class X12Converter extends Component {
         super(props);
         this.state = {
             x12_response: "",
-            claim_json:JSON.stringify({claim_json}, undefined, 4),
+            x12_error: "",
+            claim_json: JSON.stringify({ claim_json }, undefined, 4),
         };
         this.goHome = this.goHome.bind(this);
         this.createX12Response = this.createX12Response.bind(this);
@@ -39,14 +40,23 @@ class X12Converter extends Component {
     }
 
     async convertJsonToX12() {
+        this.setState({ 'x12_response': "" });
+        this.setState({ 'x12_error': "" });
         let x12_data = await this.createX12Response();
-        this.setState({ 'x12_response': x12_data['x12_response'] });
+        console.log("x12-------", x12_data)
+        if (x12_data.error == "") {
+            this.setState({ 'x12_response': x12_data['x12_response'] });
+        }
+        else {
+            this.setState({ 'x12_error': x12_data['error'] });
+        }
+        console.log("state------", this.state);
     }
 
-    handleClaimJson(event){
-        this.setState({claim_json: event.target.value});
+    handleClaimJson(event) {
+        this.setState({ claim_json: event.target.value });
     }
-        
+
     render() {
         return (
             <React.Fragment>
@@ -61,9 +71,9 @@ class X12Converter extends Component {
                     </div>
                     <div className="content">
                         <div className="l-form" style={{ paddingLeft: "2%", paddingTop: "1%" }}>
-                            <div style={{ paddingTop: "10px" , color: "#8a6d3b", marginBottom : "10px"}}><strong> FHIR Claim resource : </strong></div>
-                            <textarea value={this.state.claim_json} 
-                            onChange={this.handleClaimJson} cols={75} rows={32} />
+                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> FHIR Claim resource : </strong></div>
+                            <textarea value={this.state.claim_json}
+                                onChange={this.handleClaimJson} cols={75} rows={32} />
                             {/* <ReactJson src={claim_json} enableClipboard={false}
                                 collapsed={false}
                                 indentWidth={4}
@@ -79,18 +89,24 @@ class X12Converter extends Component {
                             </button>
                         </div>
                         <div className="r-form" style={{ paddingTop: "1%" }} >
-                            <div style={{ paddingTop: "10px" , color: "#8a6d3b", marginLeft : "10px" }}><strong> X12 278 : </strong></div>
-                            
-                            <div className='decision-card alert-warning' style={{ height: "520px" , overflowX: "scroll" }}>
-                                {(this.state.x12_response && this.state.x12_response.length > 0) && 
+                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}><strong> X12 278 : </strong></div>
+
+                            <div className='decision-card alert-warning' style={{ height: "520px", overflowX: "scroll" }}>
+                                {(this.state.x12_response && this.state.x12_response.length > 0) &&
                                     <div>
                                         {this.state.x12_response.split("~").map((i, key) => {
                                             return <pre key={key} className="x12-pre">{i}~</pre>;
                                         })}
                                     </div>
                                 }
-                                {!this.state.x12_response && this.state.x12_response !== "" &&
-                                    <div> Invalid FHIR resource !! </div>
+                                {(this.state.x12_error && this.state.x12_error.length > 0) &&
+                                    <div> Invalid FHIR resource !!
+                                        <div>
+                                            {this.state.x12_error.split(".").map((i, key) => {
+                                                return <pre key={key} className="x12-pre">{i}~</pre>;
+                                            })}
+                                        </div>
+                                    </div>
                                 }
                             </div>
                         </div>
