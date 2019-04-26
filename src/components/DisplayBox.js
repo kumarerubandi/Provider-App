@@ -7,7 +7,10 @@ import Text from 'terra-text';
 //import cx from 'classnames';
 // import PropTypes from 'prop-types';
 import axios from 'axios';
-
+import { createToken } from '../components/Authentication';
+import Client from 'fhir-kit-client';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 // const propTypes = {
     /**
@@ -37,7 +40,7 @@ import axios from 'axios';
     //cardResponses: PropTypes.object,
   // };
 
-export default class DisplayBox extends Component{
+class DisplayBox extends Component{
     constructor(props){
         super(props);
         this.launchLink = this.launchLink.bind(this);
@@ -47,7 +50,22 @@ export default class DisplayBox extends Component{
         this.retrieveLaunchContext = this.retrieveLaunchContext.bind(this);
 
         this.state={
-            value: ""
+            value: "",
+            accessToken: '',
+            messageJson:{
+              "status": "draft",
+              "category": "Notification",
+              "focus": [
+                  {
+                      "code": "Patient",
+                      "profile": {
+                          "reference": "StructureDefinition/example"
+                      },
+                      "min": 2,
+                      "max": "2"
+                  }
+              ]
+          }
         };
     }
   /**
@@ -56,6 +74,31 @@ export default class DisplayBox extends Component{
    * @param {*} suggestion - CDS service-defined suggestion to take based on CDS Hooks specification
    * @param {*} url - CDS service endpoint URL
    */
+
+  updateLaunchLink(links){
+    let messageJson = this.state.messageJson;
+    console.log(links.appContext,'appcontext','kkkkk')
+    messageJson['description'] = encodeURIComponent(JSON.stringify(links[0].appContext));``
+    try {
+        const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        console.log('The token is : ', token);
+        fhirClient.bearerToken = token;
+        fhirClient.create({
+            resourceType: 'MessageDefinition',
+            body: messageJson,
+            headers: { "Content-Type": "application/fhir+json" }
+        }).then((data) => {
+            console.log(data);
+        }).catch((err) => {
+            console.log(err);
+            
+        })
+    } catch (error) {
+        console.error('Unable to create MessageDefinition', error.message);
+    }
+  }
+
   takeSuggestion(suggestion, url) {
     if (!this.props.isDemoCard) {
       if (suggestion.label) {
@@ -160,6 +203,8 @@ export default class DisplayBox extends Component{
  * @param {*} patientId - The identifier of the patient in context
  * @param {*} fhirBaseUrl - The base URL of the FHIR server in context
  */
+
+
 retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
     return new Promise((resolve, reject) => {
       const headers = {
@@ -290,6 +335,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                   let linksSection;
                   if (card.links) {
                     card.links = this.modifySmartLaunchUrls(card) || card.links;
+                    this.updateLaunchLink(card.links);
+                   
                     linksSection = card.links.map((link, ind) => (
                       <Button
                         key={ind}
@@ -344,3 +391,11 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
 
         }
       }
+
+function mapStateToProps(state) {
+  console.log(state);
+  return {
+      config: state.config,
+  };
+};
+export default withRouter(connect(mapStateToProps)(DisplayBox));
