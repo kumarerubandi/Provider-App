@@ -53,6 +53,7 @@ class DisplayBox extends Component{
             value: "",
             accessToken: '',
             messageJson:{
+              "resourceType": "MessageDefinition",
               "status": "draft",
               "category": "Notification",
               "focus": [
@@ -74,30 +75,6 @@ class DisplayBox extends Component{
    * @param {*} suggestion - CDS service-defined suggestion to take based on CDS Hooks specification
    * @param {*} url - CDS service endpoint URL
    */
-
-  updateLaunchLink(links){
-    let messageJson = this.state.messageJson;
-    console.log(links.appContext,'appcontext','kkkkk')
-    messageJson['description'] = encodeURIComponent(JSON.stringify(links[0].appContext));``
-    try {
-        const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        console.log('The token is : ', token);
-        fhirClient.bearerToken = token;
-        fhirClient.create({
-            resourceType: 'MessageDefinition',
-            body: messageJson,
-            headers: { "Content-Type": "application/fhir+json" }
-        }).then((data) => {
-            console.log(data);
-        }).catch((err) => {
-            console.log(err);
-            
-        })
-    } catch (error) {
-        console.error('Unable to create MessageDefinition', error.message);
-    }
-  }
 
   takeSuggestion(suggestion, url) {
     if (!this.props.isDemoCard) {
@@ -220,25 +197,38 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
         console.log("Inside app context if")
         launchParameters.appContext = link.appContext;
       }
-
+      
+      // axios({
+      //   method: 'post',
+      //   url: `${fhirBaseUrl}/_services/smart/Launch`,
+      //   headers,
+      //   data: {
+      //     launchUrl: link.url,
+      //     parameters: launchParameters,
+      //   },
+      // })
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
-      axios({
-        method: 'post',
-        url: `${fhirBaseUrl}/_services/smart/Launch`,
-        headers,
-        data: {
-          launchUrl: link.url,
-          parameters: launchParameters,
-        },
+      let messageJson = this.state.messageJson;
+      messageJson['description'] = encodeURIComponent(JSON.stringify(link));
+      const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
+      // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+      console.log('The token is : ', accessToken,messageJson);
+      // fhirClient.bearerToken = token;
+      fhirClient.create({
+          resourceType: "MessageDefinition",
+          body: messageJson,
+          headers: { "Content-Type": "application/fhir+json",
+                      "Authorization": accessToken
+          }
       }).then((result) => {
-        console.log("fhir result",result.data.launch_id);
-        if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launch_id')) {
+        console.log("fhir result",result.id);
+        if (result && Object.prototype.hasOwnProperty.call(result, 'id')) {
           if (link.url.indexOf('?') < 0) {
             link.url += '?';
           } else {
             link.url += '&';
           }
-          link.url += `launch=${result.data.launch_id}`;
+          link.url += `launch=${result.id}`;
           link.url += `&iss=${fhirBaseUrl}`;
           return resolve(link);
         }
@@ -335,7 +325,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                   let linksSection;
                   if (card.links) {
                     card.links = this.modifySmartLaunchUrls(card) || card.links;
-                    this.updateLaunchLink(card.links);
                    
                     linksSection = card.links.map((link, ind) => (
                       <Button
