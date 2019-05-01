@@ -14,6 +14,7 @@ import Configuration from '../containers/configuration';
 import { library } from '@fortawesome/fontawesome-svg-core'
 //import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faIgloo,faNotesMedical } from '@fortawesome/free-solid-svg-icons';
+import CDEX from '../containers/CDEX';
 
 library.add(faIgloo,faNotesMedical)
 export default class App extends Component {
@@ -24,6 +25,7 @@ export default class App extends Component {
                     <Route exact path="/" component={() => { return <Redirect to="/login" />}} />
                     <Route path={"/login"} component={LoginPage} />                    
                     <Route path={"/x12converter"} component={X12Converter} />
+                    <Route path={"/cdex"} component={CDEX} />
                     <Route path={"/cd"} component={CoverageDetermination} />
                     {/* <Route path={"/prior_auth"} component={PriorAuthorization} /> */}
                     <Route path={"/provider_request"} component={ProviderRequest} />                    
