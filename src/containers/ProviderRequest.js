@@ -272,6 +272,9 @@ class ProviderRequest extends Component {
     if (req === "x12-converter") {
       window.location = `${window.location.protocol}//${window.location.host}/x12converter`;
     }
+    if (req === "cdex-view") {
+      window.location = `${window.location.protocol}//${window.location.host}/cdex`;
+    }
   }
 
   setPatientView(req, res) {
@@ -474,6 +477,9 @@ class ProviderRequest extends Component {
               <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               X12 Converter</div>
+              <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
+              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
+              CDEX</div>
           </div>
           <div className="content">
             <div className="left-form">

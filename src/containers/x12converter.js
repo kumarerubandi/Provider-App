@@ -63,7 +63,7 @@ class X12Converter extends Component {
                 <div>
                     <div>
                         <div className="main_heading">
-                            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Configuration</span>
+                            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - X12 Converter</span>
                             <div className="menu_conf" onClick={() => this.goHome()}>
                                 <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
                                 Home</div>
