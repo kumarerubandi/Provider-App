@@ -74,6 +74,9 @@ class CDEX extends Component {
     }
 
     async getPatientDetails(patient_id, communication_request, identifier) {
+        this.setState({ patient_name: "" });
+        this.setState({ sender_resource: "" });
+        this.setState({ sender_name: "" });
         var tempUrl = this.state.config.provider.fhir_url + "Patient?identifier=" + identifier;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let patient = await fetch(tempUrl, {
@@ -113,15 +116,25 @@ class CDEX extends Component {
             let s = await this.getSenderDetails(communication_request);
         }
         if (communication_request.hasOwnProperty('payload')) {
-            communication_request['payload'].map((c) => {
-                console.log("ccccccc", c);
-                // if (c['id'] == communication_request['payload']['reference'].replace('#', '')) {
-
-                // }
-            });
+            await this.getDocuments(communication_request['payload']);
         }
         this.setState({ form_load: true });
     }
+
+    async getDocuments(payload){
+        payload.map((c) => {
+            console.log("ccccccc", c);
+            if(c.hasOwnProperty('contentReference')){
+                if ( c['contentReference']['reference'].replace('#', '')) {
+
+                }
+            }
+        });
+    }
+
+    // async getDocumentResources(){
+        
+    // }
 
     async getSenderDetails(communication_request) {
         let sender_obj;
@@ -150,7 +163,7 @@ class CDEX extends Component {
                     this.setState({ sender_name: sender_res['name'] });
                 }
             }
-            console.log("sender['name']", this.state.sender_name);
+            // console.log("sender['name']", this.state.sender_name);
         }
     }
 
@@ -167,7 +180,7 @@ class CDEX extends Component {
         }).then(response => {
             return response.json();
         }).then((response) => {
-            console.log("----------response", response);
+            // console.log("----------response", response);
             if (response.hasOwnProperty('entry')) {
                 if (response['entry'][0].hasOwnProperty('resource')) {
                     return response['entry'][0]['resource'];
