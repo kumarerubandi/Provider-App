@@ -12,7 +12,10 @@ class CDEX extends Component {
         this.state = {
             config: this.props.config,
             comm_req: [],
-            patient: {}
+            patient: {},
+            form_load: false,
+            patient_name:"",
+            docs_required:""
         };
         this.goHome = this.goHome.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -65,25 +68,31 @@ class CDEX extends Component {
         this.setState({ comm_req: resources });
     }
 
-    async getPatientDetails(patient_id) {
-        console.log("innnnnnnn", patient_id)
-        // var tempUrl = this.state.config.provider.fhir_url;
-        // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        // let patient = await fetch(tempUrl + "Patient/" + patient_id, {
-        //     method: "GET",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         'Authorization': 'Bearer ' + token
-        //     }
-        // }).then(response => {
-        //     return response.json();
-        // }).then((response) => {
-        //     console.log("----------response", response);
-        //     return response;
-        // }).catch(reason =>
-        //     console.log("No response recieved from the server", reason)
-        // );
+    async getPatientDetails(patient_id, communication_request) {
+        var tempUrl = this.state.config.provider.fhir_url + "Patient/" + patient_id.replace('#', '');
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let patient = await fetch(tempUrl, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            console.log("----------response", response);
+            return response;
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        console.log("patient---", patient);
+        if (patient) {
+            this.setState({ patient: patient });
+            // if (patient.hasOwnProperty("name")){
 
+            // }
+            this.setState({ form_load: true });
+        }
     }
 
     render() {
@@ -95,7 +104,7 @@ class CDEX extends Component {
                 if (d['category'][0]['coding'][0].hasOwnProperty('code') && d['subject'].hasOwnProperty('reference')) {
                     return (
                         <div>
-                            <button onClick={this.getPatientDetails(d['subject']['reference'])}>
+                            <button onClick={() => this.getPatientDetails(d['subject']['reference'], d)}>
                                 {d['category'][0]['coding'][0]['code']} for the patient with id {d['subject']['reference']}
                             </button>
                         </div>
@@ -119,11 +128,15 @@ class CDEX extends Component {
                             <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> Communication Requests </strong></div>
                             <div>{content}</div>
                         </div>
-                        <div className="r-form" style={{ paddingTop: "1%" }} >
-                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}></div>
-
-
+                        <div className="middle-form">
+                            
                         </div>
+                        {this.state.form_load &&
+                            <div className="r-form" style={{ paddingTop: "1%" }} >
+                                <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}></div>
+                                <strong>Communication Request for the patient {this.state}</strong>
+
+                            </div>}
                     </div>
                 </div>
             </React.Fragment >
