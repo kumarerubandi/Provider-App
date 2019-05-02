@@ -18,10 +18,10 @@
         "patient_view_path":"cds-services/patient_view"
       },
       "payer":{
-        "fhir_url": "http://3.92.187.150:8280/payer_fhir/baseDstu3/"
+        "fhir_url": "http://3.92.187.150:8280/payer_fhir/baseDstu3"
       },
       "provider":{
-        "fhir_url": "http://3.92.187.150:8280/fhir/baseDstu3/",
+        "fhir_url": "http://3.92.187.150:8280/fhir/baseDstu3",
         "client_secret": "237b167a-c4d0-4861-856d-6decf5426022",
         "client_id": "app-login",
         "authorized_fhir": true
@@ -38,7 +38,7 @@
         "vsac_user":"prathyanusha",
         "vsac_password":"Anusha56"
       },
-      "xmlx12_url":"http://127.0.0.1:5000/",
+      "xmlx12_url":"http://3.92.187.150:5000/",
       "requirements": [
     {
        "rule": "The treating physician examined the patient and determined that he or she has a severe lung disease (some examples: chronic obstructive pulmonary disease, diffuse interstitial lung disease, cystic fibrosis, bronchiectasis, and widespread pulmonary neoplasm)",
