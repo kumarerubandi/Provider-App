@@ -18,6 +18,31 @@ body {
   float: left;
   margin-top: 2%;
 }
+.main-list{
+    border: 1px solid ghostwhite;
+    /* background: ghostwhite; */
+    padding: 20px 10px;
+    font-size: 15px;
+    font-family: inherit;
+    margin-bottom: 10px;
+    border-radius: 3px;
+        width: 85%;
+}
+.list-btn{
+ float: right;
+    color: white;
+    font-family: sans-serif;
+    line-height: 10px;
+    background: #3FB1CF;
+}
+.data-label{
+  color: #8a6d3b;
+  padding:10px;
+  font-size:15px;
+}
+.data1{
+  color:#333333;
+}
 .x12-pre {
   background: none;
   margin: 0px;
@@ -225,9 +250,9 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 }
 .header{
   text-align: left;
-  font-size: 18px;
-  padding: 20px 10px 0px 15px;
-  color: #8a6d3b;
+    font-size: 15px;
+    padding: 10px;
+    color: #8a6d3b;
   /* border-bottom: 1px solid lightgrey; */
 }
 .header1{

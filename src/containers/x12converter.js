@@ -10,12 +10,13 @@ class X12Converter extends Component {
         this.state = {
             x12_response: "",
             x12_error: "",
-            claim_json: JSON.stringify({ claim_json }, undefined, 4),
+            claim_json: JSON.stringify(claim_json, undefined, 4),
         };
         this.goHome = this.goHome.bind(this);
         this.createX12Response = this.createX12Response.bind(this);
         this.convertJsonToX12 = this.convertJsonToX12.bind(this);
         this.handleClaimJson = this.handleClaimJson.bind(this);
+        console.log(this.state.claim_json);
     }
 
     goHome() {
@@ -54,7 +55,9 @@ class X12Converter extends Component {
     }
 
     handleClaimJson(event) {
+        console.log(this.state.claim_json);
         this.setState({ claim_json: event.target.value });
+        console.log(this.state.claim_json);
     }
 
     render() {
@@ -72,7 +75,7 @@ class X12Converter extends Component {
                     <div className="content">
                         <div className="l-form" style={{ paddingLeft: "2%", paddingTop: "1%" }}>
                             <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> FHIR Claim resource : </strong></div>
-                            <textarea value={this.state.claim_json}
+                            <textarea style={{ width: "98%"}} value={this.state.claim_json}
                                 onChange={this.handleClaimJson} cols={75} rows={32} />
                             {/* <ReactJson src={claim_json} enableClipboard={false}
                                 collapsed={false}

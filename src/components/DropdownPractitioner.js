@@ -5,7 +5,6 @@ export const options = [
   { key: 'Practitioner/example', value: 'Practitioner/1', text: 'Practitioner a' },
   { key: 'Practitioner/2', value: 'Practitioner/2', text: 'Practitioner b' },
   { key: 'Practitioner/3', value: 'Practitioner/3', text: 'Practitioner c' },
-
 ]
 
 let blackBorder = "blackBorder";
