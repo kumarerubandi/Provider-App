@@ -6,6 +6,9 @@ import Client from 'fhir-kit-client';
 import { createToken } from '../components/Authentication';
 import { Link } from 'react-router-dom';
 import { send } from 'q';
+import DocumentInput from '../components/DocumentInput';
+import Loader from 'react-loader-spinner';
+
 
 class CDEX extends Component {
     constructor(props) {
@@ -15,10 +18,13 @@ class CDEX extends Component {
             comm_req: [],
             patient: {},
             form_load: false,
+            loading: false,
             patient_name: "",
             docs_required: [],
             sender_resource: '',
-            sender_name: ''
+            sender_name: '',
+            files:[],
+            contentStrings:[]
         };
         this.goHome = this.goHome.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -26,6 +32,9 @@ class CDEX extends Component {
         this.getPatientDetails = this.getPatientDetails.bind(this);
         this.getSenderDetails = this.getSenderDetails.bind(this);
         this.getSenderResource = this.getSenderResource.bind(this);
+        this.startLoading = this.startLoading.bind(this);
+        this.updateDocuments = this.updateDocuments.bind(this);
+
     }
 
     goHome() {
@@ -39,7 +48,7 @@ class CDEX extends Component {
     async getCommunicationRequests() {
         var tempUrl = this.state.config.provider.fhir_url;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        // console.log('The token is : ', token, tempUrl);
+        console.log('The token is : ', token, tempUrl);
         const fhirResponse = await fetch(tempUrl + "CommunicationRequest", {
             method: "GET",
             headers: {
@@ -122,6 +131,7 @@ class CDEX extends Component {
     }
 
     async getDocuments(payload){
+        let strings = this.state.contentStrings;
         payload.map((c) => {
             console.log("ccccccc", c);
             if(c.hasOwnProperty('contentReference')){
@@ -129,13 +139,66 @@ class CDEX extends Component {
 
                 }
             }
+            if(c.hasOwnProperty('contentString')){
+                strings.push(c.contentString)
+            }
+                this.setState({contentStrings:strings})
         });
+        console.log(this.state.contentStrings)
+
     }
 
     // async getDocumentResources(){
         
     // }
-
+    startLoading() {
+        this.setState({ loading: true }, () => {
+        this.submit_info();
+        })
+      }
+    
+    async submit_info(){
+        let comm_request=await this.getCommunicationRequests();
+        console.log(comm_request,'submitted')
+        // var fileInputData = {
+        //     "resourceType": "Communication",
+        //     "status": "complete",
+        //     "identifier": [
+        //         {
+        //             "use": "official"
+        //         }
+        //     ],
+        //     "payload": [],
+        // }
+        // if (this.state.files != null) {
+        //     for (var i = 0; i < this.state.files.length; i++) {
+        //         (function (file) {
+        //             let content_type = file.type;
+        //             let file_name = file.name;
+        //             var reader = new FileReader();
+        //             reader.onload = function (e) {
+        //                 // get file content  
+        //                 fileInputData.payload.push({
+        //                     "contentAttachment": {
+        //                         "data": reader.result,
+        //                         "contentType": content_type,
+        //                         "title": file_name,
+        //                         "language": "en"
+        //                     }
+        //                 })
+        //             }
+        //             reader.readAsBinaryString(file);
+        //         })(this.state.files[i])
+        //     }
+        // }
+        // console.log("Resource Json before communication--",fileInputData );
+        // // this.props.saveDocuments(this.props.files,fileInputData)
+        // this.setState({communicationJson:fileInputData})
+    }
+    updateDocuments(elementName, object){
+        console.log(elementName,object,'is it workinggg')
+        this.setState({[elementName]:object})
+    }
     async getSenderDetails(communication_request) {
         let sender_obj;
         communication_request['contained'].map((c) => {
@@ -218,6 +281,15 @@ class CDEX extends Component {
                 }
             }
         });
+        let requests = this.state.contentStrings.map((request) => {
+            if (request) {
+                return (
+                    <div>
+                        {request}
+                    </div>
+                )
+            }
+        });
         return (
             <React.Fragment>
                 <div>
@@ -243,6 +315,21 @@ class CDEX extends Component {
                                 Patient : <strong>{this.state.patient_name}</strong>
                                 <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}></div>
                                 Sender {this.state.sender_resource} : <strong>{this.state.sender_name}</strong>
+                                <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}></div>
+                                Request : <strong>{requests}</strong>
+                                <DocumentInput
+                                    updateCallback={this.updateDocuments}
+                                />
+                                <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
+                                        <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
+                                    <Loader
+                                        type="Oval"
+                                        color="#fff"
+                                        height="15"
+                                        width="15"
+                                    />
+                                    </div>
+                                </button>
                             </div>}
                     </div>
                 </div>

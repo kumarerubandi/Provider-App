@@ -163,12 +163,7 @@ class Review extends Component {
         var condition_details = [];
         var fileInputData = {
             "resourceType": "Communication",
-            "id": "376",
-            "meta": {
-                "versionId": "1",
-                "lastUpdated": "2018-10-08T07:22:32.421+00:00"
-            },
-            "status": "preparation",
+            "status": "completed",
             "identifier": [
                 {
                     "use": "official"
