@@ -134,7 +134,7 @@ class CDEX extends Component {
                         {this.state.form_load &&
                             <div className="r-form" style={{ paddingTop: "1%" }} >
                                 <div style={{ paddingTop: "10px", color: "#8a6d3b", marginLeft: "10px" }}></div>
-                                <strong>Communication Request for the patient {this.state}</strong>
+                                {/* <strong>Communication Request for the patient {this.state}</strong> */}
 
                             </div>}
                     </div>
