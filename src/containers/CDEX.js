@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom';
 import { send } from 'q';
 import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
+import { Input } from 'semantic-ui-react';
+
 
 
 class CDEX extends Component {
@@ -24,7 +26,11 @@ class CDEX extends Component {
             sender_resource: '',
             sender_name: '',
             files: [],
-            contentStrings: []
+            contentStrings: [],
+            communicationRequest:{},
+            searchParameter:'',
+            observationList:[],
+            documentReference:{}
         };
         this.goHome = this.goHome.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -34,6 +40,7 @@ class CDEX extends Component {
         this.getSenderResource = this.getSenderResource.bind(this);
         this.startLoading = this.startLoading.bind(this);
         this.updateDocuments = this.updateDocuments.bind(this);
+        this.onChangeSearchParameter = this.onChangeSearchParameter.bind(this);
 
     }
 
@@ -127,11 +134,21 @@ class CDEX extends Component {
         if (communication_request.hasOwnProperty('payload')) {
             await this.getDocuments(communication_request['payload']);
         }
+        this.setState({communicationRequest:communication_request});
         this.setState({ form_load: true });
     }
-
+    randomString() {
+        var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+        var string_length = 8;
+        var randomstring = '';
+        for (var i=0; i<string_length; i++) {
+            var rnum = Math.floor(Math.random() * chars.length);
+            randomstring += chars.substring(rnum,rnum+1);
+        }
+        return randomstring
+    }
     async getDocuments(payload) {
-        let strings = this.state.contentStrings;
+        let strings = [];
         payload.map((c) => {
             console.log("ccccccc", c);
             if (c.hasOwnProperty('contentReference')) {
@@ -142,15 +159,52 @@ class CDEX extends Component {
             if (c.hasOwnProperty('contentString')) {
                 strings.push(c.contentString)
             }
-            this.setState({ contentStrings: strings })
+        this.setState({ contentStrings: strings })
         });
-        console.log(this.state.contentStrings)
+
 
     }
+    async getObservationDetails(){
+        let searchParameter =this.state.searchParameter
+        // console.log(searchParameter,'search')
+        var tempUrl = this.state.config.provider.fhir_url + "/Observation?code:text=" + searchParameter;
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let observations = await fetch(tempUrl, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            // console.log("----------response", response);
+            if (response.hasOwnProperty('entry')) {
+                return response
+            }
+            // console.log(response,'res')
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        console.log(observations,'obss')
+        let observationUrls=this.state.observationList
+        if(observations!=undefined){
+            if("entry" in observations){
+                observations.entry.map((observation)=>{
+                    if(observationUrls.indexOf(observation.fullUrl)==-1){
+                        observationUrls.push(observation.fullUrl)
+                    }
+                })
+            }
+        }
+        else{
+            console.log('enter correct search Parameter')
+        }
+       
+        this.setState({observationList:observationUrls})
+        console.log(this.state.observationList)
+    }
 
-    // async getDocumentResources(){
-
-    // }
     startLoading() {
         this.setState({ loading: true }, () => {
             this.submit_info();
@@ -158,46 +212,166 @@ class CDEX extends Component {
     }
 
     async submit_info() {
-        let comm_request = await this.getCommunicationRequests();
-        console.log(comm_request, 'submitted')
-        // var fileInputData = {
-        //     "resourceType": "Communication",
-        //     "status": "complete",
-        //     "identifier": [
-        //         {
-        //             "use": "official"
-        //         }
-        //     ],
-        //     "payload": [],
-        // }
-        // if (this.state.files != null) {
-        //     for (var i = 0; i < this.state.files.length; i++) {
-        //         (function (file) {
-        //             let content_type = file.type;
-        //             let file_name = file.name;
-        //             var reader = new FileReader();
-        //             reader.onload = function (e) {
-        //                 // get file content  
-        //                 fileInputData.payload.push({
-        //                     "contentAttachment": {
-        //                         "data": reader.result,
-        //                         "contentType": content_type,
-        //                         "title": file_name,
-        //                         "language": "en"
-        //                     }
-        //                 })
-        //             }
-        //             reader.readAsBinaryString(file);
-        //         })(this.state.files[i])
-        //     }
-        // }
-        // console.log("Resource Json before communication--",fileInputData );
+        let randomString=this.randomString()
+        let communicationRequest= this.state.communicationRequest;
+        console.log(this.state.communicationRequest,'submitted',communicationRequest.sender.reference)
+        let communicationRequestJson={};
+        let doc_ref={};
+        this.setState({ loading: false });
+        var documentReferenceJson={
+            "resourceType" : "DocumentReference",
+            "identifier": [
+                {
+                  "system": "urn:ietf:rfc:3986",
+                  "value": randomString
+                }
+              ],
+              "status": "current",
+              "docStatus": "preliminary",
+              "content": [],
+              "subject": {
+                "reference": "Patient/"+this.state.patient.id
+              },
+        }
+        
+        var fileInputData = {
+            "resourceType": "Communication",
+            "status": "completed",
+            "subject":{
+                "reference":communicationRequest.subject.reference
+            },
+            "recipient": [
+                {
+                    "reference": communicationRequest.sender.reference
+                }
+            ],
+            "sender": {
+                "reference": communicationRequest.recipient[0].reference
+            },
+            "occurrencePeriod":communicationRequest.occurrencePeriod,
+            "authoredOn":communicationRequest.authoredOn,
+            "category":communicationRequest.category,
+            "contained":communicationRequest.contained,
+            "basedOn":[
+                {
+                    'reference':"#"+communicationRequest.id
+                }
+            ],
+            "identifier": [
+                {
+                    "system": "http://www.providerco.com/communication",
+                    "value": randomString
+                }
+            ],
+            "payload": []
+        }
+        
+        console.log(this.state.patient.id,'iddd')
+        let observationList=this.state.observationList;
+        for(var j =0;j<this.state.observationList.length;j++){
+            (function (file) {
+                let url = observationList[j];
+                documentReferenceJson.content.push({
+                        "attachment": {
+                          "contentType": "application/hl7-v3+xml",
+                          "language": "en-US",
+                          "url": url,
+                          "title": "Physical",
+                        },
+                        "format": {
+                          "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
+                          "code": "urn:ihe:pcc:handp:2008",
+                          "display": "History and Physical Specification"
+                        }
+                })
+            })(observationList[j])
+        }
+        var documentReferenceUrl = this.state.config.provider.fhir_url + "/DocumentReference";
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let documentReference = await fetch(documentReferenceUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + token
+            },
+            body:JSON.stringify(documentReferenceJson)
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            // console.log("----------response", response);
+            if (response.hasOwnProperty('entry')) {
+                return response
+            }
+            this.setState({documentReference:response})
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        console.log(this.state.documentReference,'opoopods',documentReference)
+        
+        communicationRequestJson["resourceType"]=communicationRequest.resourceType
+        communicationRequestJson["id"]=communicationRequest.id
+        communicationRequestJson["identifier"]=communicationRequest.identifier
+        
+        doc_ref["resourceType"]=this.state.documentReference.resourceType
+        doc_ref["id"]=this.state.documentReference.id
+        doc_ref["identifier"]=this.state.documentReference.identifier
+        fileInputData.payload.push({"contentReference":{"reference":"#"+this.state.documentReference.id}})
+
+        fileInputData.contained.push(communicationRequestJson)
+        fileInputData.contained.push(doc_ref)
+
+        if (this.state.files != null) {
+            for (var i = 0; i < this.state.files.length; i++) {
+                (function (file) {
+                    let content_type = file.type;
+                    let file_name = file.name;
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        // get file content  
+                        fileInputData.payload.push({
+                            "contentAttachment": {
+                                "data": reader.result,
+                                "contentType": content_type,
+                                "title": file_name,
+                                "language": "en"
+                            }
+                        })
+                    }
+                    reader.readAsBinaryString(file);
+                })(this.state.files[i])
+            }
+        }
+        console.log("Resource Json before communication--",fileInputData );
+        var communicationUrl = this.state.config.payer.fhir_url + "/Communication";
+        let Communication = await fetch(communicationUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + token
+            },
+            body:JSON.stringify(fileInputData)
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            console.log("----------response", response);
+            if (response.hasOwnProperty('entry')) {
+                return response
+            }
+            // this.setState({response})
+            console.log(response,'res')
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
         // // this.props.saveDocuments(this.props.files,fileInputData)
         // this.setState({communicationJson:fileInputData})
         this.setState({loading:false});
     }
+    onChangeSearchParameter(event) {
+        let searchParameter = this.state.searchParameter;
+        searchParameter = event.target.value
+        this.setState({ searchParameter: searchParameter})
+    }
     updateDocuments(elementName, object) {
-        console.log(elementName, object, 'is it workinggg')
         this.setState({ [elementName]: object })
     }
     async getSenderDetails(communication_request) {
@@ -259,7 +433,7 @@ class CDEX extends Component {
     render() {
         let data = this.state.comm_req;
         let content = data.map((d, i) => {
-            console.log(d, i);
+            // console.log(d, i);
             if (d.hasOwnProperty("category") && d.hasOwnProperty("subject") && d.hasOwnProperty("contained")) {
                 if (d['category'][0]['coding'][0].hasOwnProperty('code') && d['subject'].hasOwnProperty('reference')) {
                     let identifier = '';
@@ -283,12 +457,13 @@ class CDEX extends Component {
             }
         });
         let requests = this.state.contentStrings.map((request) => {
-            if (request) {
+            if (request ) {
                 return (
                     <div>
                         {request}
                     </div>
                 )
+                
             }
         });
         return (
@@ -318,10 +493,22 @@ class CDEX extends Component {
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
-
+                                <div>
+                                    <div className='data-label'>Search Parameter</div>
+                                        <div className="dropdown">
+                                            <Input className='ui fluid  input' type="text" name="searchParameter"
+                                                onChange={this.onChangeSearchParameter}
+                                                >
+                                            </Input>
+                                            <button className="btn list-btn" onClick={() => this.getObservationDetails()}>
+                                                Search</button>
+                                        </div>
+                                </div>
+                                <div>
                                 <DocumentInput
                                     updateCallback={this.updateDocuments}
                                 />
+                                </div>
                                 <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                                         <Loader
