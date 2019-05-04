@@ -9,7 +9,7 @@ import { send } from 'q';
 import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
 import { Input } from 'semantic-ui-react';
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 
 
 class CDEX extends Component {
@@ -27,10 +27,10 @@ class CDEX extends Component {
             sender_name: '',
             files: [],
             contentStrings: [],
-            communicationRequest:{},
-            searchParameter:'',
-            observationList:[],
-            documentReference:{}
+            communicationRequest: {},
+            searchParameter: '',
+            observationList: [],
+            documentReference: {}
         };
         this.goHome = this.goHome.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -134,16 +134,16 @@ class CDEX extends Component {
         if (communication_request.hasOwnProperty('payload')) {
             await this.getDocuments(communication_request['payload']);
         }
-        this.setState({communicationRequest:communication_request});
+        this.setState({ communicationRequest: communication_request });
         this.setState({ form_load: true });
     }
     randomString() {
         var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
         var string_length = 8;
         var randomstring = '';
-        for (var i=0; i<string_length; i++) {
+        for (var i = 0; i < string_length; i++) {
             var rnum = Math.floor(Math.random() * chars.length);
-            randomstring += chars.substring(rnum,rnum+1);
+            randomstring += chars.substring(rnum, rnum + 1);
         }
         return randomstring
     }
@@ -159,13 +159,13 @@ class CDEX extends Component {
             if (c.hasOwnProperty('contentString')) {
                 strings.push(c.contentString)
             }
-        this.setState({ contentStrings: strings })
+            this.setState({ contentStrings: strings })
         });
 
 
     }
-    async getObservationDetails(){
-        let searchParameter =this.state.searchParameter;
+    async getObservationDetails() {
+        let searchParameter = this.state.searchParameter;
         // console.log(searchParameter,'search')
         var tempUrl = this.state.config.provider.fhir_url + "/Observation?code:text=" + searchParameter;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -186,22 +186,22 @@ class CDEX extends Component {
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
-        console.log(observations,'obss')
-        let observationUrls=this.state.observationList
-        if(observations!=undefined){
-            if("entry" in observations){
-                observations.entry.map((observation)=>{
-                    if(observationUrls.indexOf(observation.fullUrl)==-1){
+        console.log(observations, 'obss')
+        let observationUrls = this.state.observationList
+        if (observations != undefined) {
+            if ("entry" in observations) {
+                observations.entry.map((observation) => {
+                    if (observationUrls.indexOf(observation.fullUrl) == -1) {
                         observationUrls.push(observation.fullUrl)
                     }
                 })
             }
         }
-        else{
+        else {
             console.log('enter correct search Parameter')
         }
-       
-        this.setState({observationList:observationUrls})
+
+        this.setState({ observationList: observationUrls })
         console.log(this.state.observationList)
     }
 
@@ -212,33 +212,33 @@ class CDEX extends Component {
     }
 
     async submit_info() {
-        let randomString=this.randomString()
-        let communicationRequest= this.state.communicationRequest;
-        console.log(this.state.communicationRequest,'submitted',communicationRequest.sender.reference)
-        let communicationRequestJson={};
-        let doc_ref={};
+        let randomString = this.randomString()
+        let communicationRequest = this.state.communicationRequest;
+        console.log(this.state.communicationRequest, 'submitted', communicationRequest.sender.reference)
+        let communicationRequestJson = {};
+        let doc_ref = {};
         this.setState({ loading: false });
-        var documentReferenceJson={
-            "resourceType" : "DocumentReference",
+        var documentReferenceJson = {
+            "resourceType": "DocumentReference",
             "identifier": [
                 {
-                  "system": "urn:ietf:rfc:3986",
-                  "value": randomString
+                    "system": "urn:ietf:rfc:3986",
+                    "value": randomString
                 }
-              ],
-              "status": "current",
-              "docStatus": "preliminary",
-              "content": [],
-              "subject": {
-                "reference": "Patient/"+this.state.patient.id
-              },
+            ],
+            "status": "current",
+            "docStatus": "preliminary",
+            "content": [],
+            "subject": {
+                "reference": "Patient/" + this.state.patient.id
+            },
         }
-        
+
         var fileInputData = {
             "resourceType": "Communication",
             "status": "completed",
-            "subject":{
-                "reference":communicationRequest.subject.reference
+            "subject": {
+                "reference": communicationRequest.subject.reference
             },
             "recipient": [
                 {
@@ -248,13 +248,13 @@ class CDEX extends Component {
             "sender": {
                 "reference": communicationRequest.recipient[0].reference
             },
-            "occurrencePeriod":communicationRequest.occurrencePeriod,
-            "authoredOn":communicationRequest.authoredOn,
-            "category":communicationRequest.category,
-            "contained":communicationRequest.contained,
-            "basedOn":[
+            "occurrencePeriod": communicationRequest.occurrencePeriod,
+            "authoredOn": communicationRequest.authoredOn,
+            "category": communicationRequest.category,
+            "contained": communicationRequest.contained,
+            "basedOn": [
                 {
-                    'reference':"#"+communicationRequest.id
+                    'reference': "#" + communicationRequest.id
                 }
             ],
             "identifier": [
@@ -265,24 +265,24 @@ class CDEX extends Component {
             ],
             "payload": []
         }
-        
-        console.log(this.state.patient.id,'iddd')
-        let observationList=this.state.observationList;
-        for(var j =0;j<this.state.observationList.length;j++){
+
+        console.log(this.state.patient.id, 'iddd')
+        let observationList = this.state.observationList;
+        for (var j = 0; j < this.state.observationList.length; j++) {
             (function (file) {
                 let url = observationList[j];
                 documentReferenceJson.content.push({
-                        "attachment": {
-                          "contentType": "application/hl7-v3+xml",
-                          "language": "en-US",
-                          "url": url,
-                          "title": "Physical",
-                        },
-                        "format": {
-                          "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
-                          "code": "urn:ihe:pcc:handp:2008",
-                          "display": "History and Physical Specification"
-                        }
+                    "attachment": {
+                        "contentType": "application/hl7-v3+xml",
+                        "language": "en-US",
+                        "url": url,
+                        "title": "Physical",
+                    },
+                    "format": {
+                        "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
+                        "code": "urn:ihe:pcc:handp:2008",
+                        "display": "History and Physical Specification"
+                    }
                 })
             })(observationList[j])
         }
@@ -294,7 +294,7 @@ class CDEX extends Component {
                 "Content-Type": "application/json",
                 'Authorization': 'Bearer ' + token
             },
-            body:JSON.stringify(documentReferenceJson)
+            body: JSON.stringify(documentReferenceJson)
         }).then(response => {
             return response.json();
         }).then((response) => {
@@ -302,20 +302,20 @@ class CDEX extends Component {
             if (response.hasOwnProperty('entry')) {
                 return response
             }
-            this.setState({documentReference:response})
+            this.setState({ documentReference: response })
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
-        console.log(this.state.documentReference,'opoopods',documentReference)
-        
-        communicationRequestJson["resourceType"]=communicationRequest.resourceType
-        communicationRequestJson["id"]=communicationRequest.id
-        communicationRequestJson["identifier"]=communicationRequest.identifier
-        
-        doc_ref["resourceType"]=this.state.documentReference.resourceType
-        doc_ref["id"]=this.state.documentReference.id
-        doc_ref["identifier"]=this.state.documentReference.identifier
-        fileInputData.payload.push({"contentReference":{"reference":"#"+this.state.documentReference.id}})
+        console.log(this.state.documentReference, 'opoopods', documentReference)
+
+        communicationRequestJson["resourceType"] = communicationRequest.resourceType
+        communicationRequestJson["id"] = communicationRequest.id
+        communicationRequestJson["identifier"] = communicationRequest.identifier
+
+        doc_ref["resourceType"] = this.state.documentReference.resourceType
+        doc_ref["id"] = this.state.documentReference.id
+        doc_ref["identifier"] = this.state.documentReference.identifier
+        fileInputData.payload.push({ "contentReference": { "reference": "#" + this.state.documentReference.id } })
 
         fileInputData.contained.push(communicationRequestJson)
         fileInputData.contained.push(doc_ref)
@@ -341,7 +341,7 @@ class CDEX extends Component {
                 })(this.state.files[i])
             }
         }
-        console.log("Resource Json before communication--",fileInputData );
+        console.log("Resource Json before communication--", fileInputData);
         var communicationUrl = this.state.config.payer.fhir_url + "/Communication";
         let Communication = await fetch(communicationUrl, {
             method: "POST",
@@ -349,7 +349,7 @@ class CDEX extends Component {
                 "Content-Type": "application/json",
                 'Authorization': 'Bearer ' + token
             },
-            body:JSON.stringify(fileInputData)
+            body: JSON.stringify(fileInputData)
         }).then(response => {
             return response.json();
         }).then((response) => {
@@ -359,18 +359,18 @@ class CDEX extends Component {
             }
             NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
             // this.setState({response})
-            console.log(response,'res')
+            console.log(response, 'res')
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
         // // this.props.saveDocuments(this.props.files,fileInputData)
         // this.setState({communicationJson:fileInputData})
-        this.setState({loading:false});
+        this.setState({ loading: false });
     }
     onChangeSearchParameter(event) {
         let searchParameter = this.state.searchParameter;
         searchParameter = event.target.value
-        this.setState({ searchParameter: searchParameter});
+        this.setState({ searchParameter: searchParameter });
         this.getObservationDetails();
     }
     updateDocuments(elementName, object) {
@@ -436,36 +436,34 @@ class CDEX extends Component {
         let data = this.state.comm_req;
         let content = data.map((d, i) => {
             // console.log(d, i);
-            if (d.hasOwnProperty("category") && d.hasOwnProperty("subject") && d.hasOwnProperty("contained")) {
-                if (d['category'][0]['coding'][0].hasOwnProperty('code') && d['subject'].hasOwnProperty('reference')) {
-                    let identifier = '';
-                    let patient_obj = d['contained'].map((c) => {
-                        if (c.hasOwnProperty('id')) {
-                            if (c['id'] == d['subject']['reference'].replace('#', '')) {
-                                identifier = c['identifier'][0]['value'];
-                            }
+            if (d.hasOwnProperty("subject") && d.hasOwnProperty("contained")) {
+                let identifier = '';
+                let patient_obj = d['contained'].map((c) => {
+                    if (c.hasOwnProperty('id')) {
+                        if (c['id'] == d['subject']['reference'].replace('#', '')) {
+                            identifier = c['identifier'][0]['value'];
                         }
-                    })
-                    if (identifier) {
-                        return (
-                            <div key={i} className="main-list">
-                                {i + 1}.  {d['category'][0]['coding'][0]['code']} - {identifier}
-                                <button className="btn list-btn" onClick={() => this.getPatientDetails(identifier, d, identifier)}>
-                                    Review</button>
-                            </div>
-                        )
                     }
+                })
+                if (identifier) {
+                    return (
+                        <div key={i} className="main-list">
+                            {i + 1}.  {d['resourceType']} (#{d['id']}) for {identifier}
+                            <button className="btn list-btn" onClick={() => this.getPatientDetails(identifier, d, identifier)}>
+                                Review</button>
+                        </div>
+                    )
                 }
             }
         });
-        let requests = this.state.contentStrings.map((request,key) => {
-            if (request ) {
+        let requests = this.state.contentStrings.map((request, key) => {
+            if (request) {
                 return (
                     <div key={key}>
                         {request}
                     </div>
                 )
-                
+
             }
         });
         return (
@@ -499,26 +497,26 @@ class CDEX extends Component {
                                     <div>Search Observations form FHIR
                                         <small> - Enter a search keyword. (ex: height)</small>
                                     </div>
-                                        <Input style={{ width:"100%"}} 
+                                    <Input style={{ width: "100%" }}
                                         icon='search' iconPosition='right'
                                         placeholder='Search'
                                         className='ui fluid  input' type="text" name="searchParameter"
                                         onChange={this.onChangeSearchParameter}
-                                            >
-                                        </Input>
-                                        {/* <button style={{ width:"30%", float:"left"}}className="btn list-btn" onClick={() => this.getObservationDetails()}>
+                                    >
+                                    </Input>
+                                    {/* <button style={{ width:"30%", float:"left"}}className="btn list-btn" onClick={() => this.getObservationDetails()}>
                                             Search</button> */}
-                                        {this.state.observationList.length > 0 &&
-                                            <div className="data1">Found {this.state.observationList.length} observation(s)</div>
-                                        }
-                                        {this.state.observationList.length === 0 &&
-                                            <div className="data1">When no observations found. Please upload requested documents.</div>
-                                        }
+                                    {this.state.observationList.length > 0 &&
+                                        <div className="data1">Found {this.state.observationList.length} observation(s)</div>
+                                    }
+                                    {this.state.observationList.length === 0 &&
+                                        <div className="data1">When no observations found. Please upload requested documents.</div>
+                                    }
                                 </div>
                                 <div>
-                                <DocumentInput
-                                    updateCallback={this.updateDocuments}
-                                />
+                                    <DocumentInput
+                                        updateCallback={this.updateDocuments}
+                                    />
                                 </div>
                                 <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
@@ -530,7 +528,7 @@ class CDEX extends Component {
                                         />
                                     </div>
                                 </button>
-                                <NotificationContainer/>
+                                <NotificationContainer />
                             </div>}
                     </div>
                 </div>
