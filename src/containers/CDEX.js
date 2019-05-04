@@ -56,7 +56,7 @@ class CDEX extends Component {
         var tempUrl = this.state.config.provider.fhir_url;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         // console.log('The token is : ', token, tempUrl);
-        const fhirResponse = await fetch(tempUrl + "/CommunicationRequest", {
+        const fhirResponse = await fetch(tempUrl + "/CommunicationRequest?_count=100000", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
