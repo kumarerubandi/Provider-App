@@ -9,7 +9,7 @@ import { send } from 'q';
 import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
 import { Input } from 'semantic-ui-react';
-
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 
 class CDEX extends Component {
@@ -165,7 +165,7 @@ class CDEX extends Component {
 
     }
     async getObservationDetails(){
-        let searchParameter =this.state.searchParameter
+        let searchParameter =this.state.searchParameter;
         // console.log(searchParameter,'search')
         var tempUrl = this.state.config.provider.fhir_url + "/Observation?code:text=" + searchParameter;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -357,6 +357,7 @@ class CDEX extends Component {
             if (response.hasOwnProperty('entry')) {
                 return response
             }
+            NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
             // this.setState({response})
             console.log(response,'res')
         }).catch(reason =>
@@ -369,7 +370,8 @@ class CDEX extends Component {
     onChangeSearchParameter(event) {
         let searchParameter = this.state.searchParameter;
         searchParameter = event.target.value
-        this.setState({ searchParameter: searchParameter})
+        this.setState({ searchParameter: searchParameter});
+        this.getObservationDetails();
     }
     updateDocuments(elementName, object) {
         this.setState({ [elementName]: object })
@@ -456,10 +458,10 @@ class CDEX extends Component {
                 }
             }
         });
-        let requests = this.state.contentStrings.map((request) => {
+        let requests = this.state.contentStrings.map((request,key) => {
             if (request ) {
                 return (
-                    <div>
+                    <div key={key}>
                         {request}
                     </div>
                 )
@@ -493,16 +495,25 @@ class CDEX extends Component {
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
-                                <div>
-                                    <div className='data-label'>Search Parameter</div>
-                                        <div className="dropdown">
-                                            <Input className='ui fluid  input' type="text" name="searchParameter"
-                                                onChange={this.onChangeSearchParameter}
-                                                >
-                                            </Input>
-                                            <button className="btn list-btn" onClick={() => this.getObservationDetails()}>
-                                                Search</button>
-                                        </div>
+                                <div className='data-label'>
+                                    <div>Search Observations form FHIR
+                                        <small> - Enter a search keyword. (ex: height)</small>
+                                    </div>
+                                        <Input style={{ width:"100%"}} 
+                                        icon='search' iconPosition='right'
+                                        placeholder='Search'
+                                        className='ui fluid  input' type="text" name="searchParameter"
+                                        onChange={this.onChangeSearchParameter}
+                                            >
+                                        </Input>
+                                        {/* <button style={{ width:"30%", float:"left"}}className="btn list-btn" onClick={() => this.getObservationDetails()}>
+                                            Search</button> */}
+                                        {this.state.observationList.length > 0 &&
+                                            <div className="data1">Found {this.state.observationList.length} observation(s)</div>
+                                        }
+                                        {this.state.observationList.length === 0 &&
+                                            <div className="data1">When no observations found. Please upload requested documents.</div>
+                                        }
                                 </div>
                                 <div>
                                 <DocumentInput
@@ -519,6 +530,7 @@ class CDEX extends Component {
                                         />
                                     </div>
                                 </button>
+                                <NotificationContainer/>
                             </div>}
                     </div>
                 </div>

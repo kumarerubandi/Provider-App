@@ -26,7 +26,10 @@ body {
     font-family: inherit;
     margin-bottom: 10px;
     border-radius: 3px;
-        width: 85%;
+    width: 85%;
+    border: 1px solid #b5b5b5a3;
+    box-shadow: 1px 1px 4px -2px grey;
+    /* margin-bottom: 6px; */
 }
 .list-btn{
  float: right;
