@@ -93,7 +93,7 @@ class CDEX extends Component {
         this.setState({ patient_name: "" });
         this.setState({ sender_resource: "" });
         this.setState({ sender_name: "" });
-        var tempUrl = this.state.config.provider.fhir_url + "/Patient?identifier=" + identifier;
+        var tempUrl = this.state.config.provider.fhir_url + "/"+patient_id;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let patient = await fetch(tempUrl, {
             method: "GET",
@@ -105,28 +105,44 @@ class CDEX extends Component {
             return response.json();
         }).then((response) => {
             // console.log("----------response", response);
-            if (response.hasOwnProperty('entry')) {
-                if (response['entry'][0].hasOwnProperty('resource')) {
-                    return response['entry'][0]['resource'];
+            let patient = response;
+            console.log("patient---", patient);
+            if (patient) {
+                this.setState({ patient: patient });
+                if (patient.hasOwnProperty("name")) {
+                    var name = '';
+                    if (patient['name'][0].hasOwnProperty('given')) {
+                        // patient['name'][0]['given'].map((n) => {
+                        //     name += ' ' + n;
+                        // });
+
+                        name = patient['name'][0]['given'][0] +" "+ patient['name'][0]['family'];
+                        console.log("name---"+name);
+                        this.setState({ patient_name: name })
+                    }
                 }
+                console.log("patient name----------", this.state.patient_name);
             }
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
         // console.log("patient---", patient);
-        if (patient) {
-            this.setState({ patient: patient });
-            if (patient.hasOwnProperty("name")) {
-                var name = '';
-                if (patient['name'][0].hasOwnProperty('given')) {
-                    patient['name'][0]['given'].map((n) => {
-                        name += ' ' + n;
-                    });
-                    this.setState({ patient_name: name })
-                }
-            }
-            // console.log("patient name----------", this.state.patient_name);
-        }
+        // if (patient) {
+        //     this.setState({ patient: patient });
+        //     if (patient.hasOwnProperty("name")) {
+        //         var name = '';
+        //         if (patient['name'][0].hasOwnProperty('given')) {
+        //             // patient['name'][0]['given'].map((n) => {
+        //             //     name += ' ' + n;
+        //             // });
+
+        //             name = patient['name'][0]['given'][0] + patient['name'][0]['family'];
+        //             console.log("name---"+name);
+        //             this.setState({ patient_name: name })
+        //         }
+        //     }
+        //     // console.log("patient name----------", this.state.patient_name);
+        // }
         // console.log("state patient-------", this.state.patient);
         if (communication_request.hasOwnProperty('sender')) {
             let s = await this.getSenderDetails(communication_request);
@@ -151,13 +167,13 @@ class CDEX extends Component {
         let strings = [];
         payload.map((c) => {
             console.log("ccccccc", c);
-            if (c.hasOwnProperty('contentReference')) {
-                if (c['contentReference']['reference'].replace('#', '')) {
+            // if (c.hasOwnProperty('contentReference')) {
+            //     if (c['contentReference']['reference'].replace('#', '')) {
 
-                }
-            }
-            if (c.hasOwnProperty('contentString')) {
-                strings.push(c.contentString)
+            //     }
+            // }
+            if (c.hasOwnProperty('extension')) {
+                strings.push(c.extension[0]['valueCodeableConcept']['coding'][0]['display']);
             }
             this.setState({ contentStrings: strings })
         });
@@ -215,30 +231,30 @@ class CDEX extends Component {
         let randomString = this.randomString()
         let communicationRequest = this.state.communicationRequest;
         console.log(this.state.communicationRequest, 'submitted', communicationRequest.sender.reference)
-        let communicationRequestJson = {};
+        // let communicationRequestJson = {};
         let doc_ref = {};
         this.setState({ loading: false });
-        var documentReferenceJson = {
-            "resourceType": "DocumentReference",
-            "identifier": [
-                {
-                    "system": "urn:ietf:rfc:3986",
-                    "value": randomString
-                }
-            ],
-            "status": "current",
-            "docStatus": "preliminary",
-            "content": [],
-            "subject": {
-                "reference": "Patient/" + this.state.patient.id
-            },
-        }
+        // var documentReferenceJson = {
+        //     "resourceType": "DocumentReference",
+        //     "identifier": [
+        //         {
+        //             "system": "urn:ietf:rfc:3986",
+        //             "value": randomString
+        //         }
+        //     ],
+        //     "status": "current",
+        //     "docStatus": "preliminary",
+        //     "content": [],
+        //     "subject": {
+        //         "reference": "Patient/" + this.state.patient.id
+        //     },
+        // }
 
         var fileInputData = {
             "resourceType": "Communication",
             "status": "completed",
             "subject": {
-                "reference": communicationRequest.subject.reference
+                "reference": '#'+this.state.patient['id']
             },
             "recipient": [
                 {
@@ -267,58 +283,59 @@ class CDEX extends Component {
         }
 
         console.log(this.state.patient.id, 'iddd')
-        let observationList = this.state.observationList;
-        for (var j = 0; j < this.state.observationList.length; j++) {
-            (function (file) {
-                let url = observationList[j];
-                documentReferenceJson.content.push({
-                    "attachment": {
-                        "contentType": "application/hl7-v3+xml",
-                        "language": "en-US",
-                        "url": url,
-                        "title": "Physical",
-                    },
-                    "format": {
-                        "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
-                        "code": "urn:ihe:pcc:handp:2008",
-                        "display": "History and Physical Specification"
-                    }
-                })
-            })(observationList[j])
-        }
-        var documentReferenceUrl = this.state.config.provider.fhir_url + "/DocumentReference";
+        // let observationList = this.state.observationList;
+        // for (var j = 0; j < this.state.observationList.length; j++) {
+        //     (function (file) {
+        //         let url = observationList[j];
+        //         documentReferenceJson.content.push({
+        //             "attachment": {
+        //                 "contentType": "application/hl7-v3+xml",
+        //                 "language": "en-US",
+        //                 "url": url,
+        //                 "title": "Physical",
+        //             },
+        //             "format": {
+        //                 "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
+        //                 "code": "urn:ihe:pcc:handp:2008",
+        //                 "display": "History and Physical Specification"
+        //             }
+        //         })
+        //     })(observationList[j])
+        // }
+        // var documentReferenceUrl = this.state.config.provider.fhir_url + "/DocumentReference";
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        let documentReference = await fetch(documentReferenceUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(documentReferenceJson)
-        }).then(response => {
-            return response.json();
-        }).then((response) => {
-            // console.log("----------response", response);
-            if (response.hasOwnProperty('entry')) {
-                return response
-            }
-            this.setState({ documentReference: response })
-        }).catch(reason =>
-            console.log("No response recieved from the server", reason)
-        );
-        console.log(this.state.documentReference, 'opoopods', documentReference)
+        // let documentReference = await fetch(documentReferenceUrl, {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         'Authorization': 'Bearer ' + token
+        //     },
+        //     body: JSON.stringify(documentReferenceJson)
+        // }).then(response => {
+        //     return response.json();
+        // }).then((response) => {
+        //     // console.log("----------response", response);
+        //     if (response.hasOwnProperty('entry')) {
+        //         return response
+        //     }
+        //     this.setState({ documentReference: response })
+        // }).catch(reason =>
+        //     console.log("No response recieved from the server", reason)
+        // );
+        // console.log(this.state.documentReference, 'opoopods', documentReference)
 
-        communicationRequestJson["resourceType"] = communicationRequest.resourceType
-        communicationRequestJson["id"] = communicationRequest.id
-        communicationRequestJson["identifier"] = communicationRequest.identifier
+        // communicationRequestJson["resourceType"] = communicationRequest.resourceType
+        // communicationRequestJson["id"] = communicationRequest.id
+        // communicationRequestJson["identifier"] = communicationRequest.identifier
 
-        doc_ref["resourceType"] = this.state.documentReference.resourceType
-        doc_ref["id"] = this.state.documentReference.id
-        doc_ref["identifier"] = this.state.documentReference.identifier
-        fileInputData.payload.push({ "contentReference": { "reference": "#" + this.state.documentReference.id } })
+        // doc_ref["resourceType"] = this.state.documentReference.resourceType
+        // doc_ref["id"] = this.state.documentReference.id
+        // doc_ref["identifier"] = this.state.documentReference.identifier
+        // fileInputData.payload.push({ "contentReference": { "reference": "#" + this.state.documentReference.id } })
 
-        fileInputData.contained.push(communicationRequestJson)
-        fileInputData.contained.push(doc_ref)
+        fileInputData.contained.push(JSON.stringify(communicationRequest))
+        fileInputData.contained.push(JSON.stringify(this.state.patient))
+        // fileInputData.contained.push(doc_ref)
 
         if (this.state.files != null) {
             for (var i = 0; i < this.state.files.length; i++) {
@@ -329,11 +346,12 @@ class CDEX extends Component {
                     reader.onload = function (e) {
                         // get file content  
                         fileInputData.payload.push({
-                            "contentAttachment": {
+                            "cdex-payload-query-string":"",
+                             "cdex-payload-clinical-note-type":[],
+                            "content": {
                                 "data": reader.result,
                                 "contentType": content_type,
-                                "title": file_name,
-                                "language": "en"
+                                "title": file_name
                             }
                         })
                     }
@@ -386,21 +404,23 @@ class CDEX extends Component {
         });
         if (sender_obj) {
             this.setState({ sender_resource: sender_obj['resourceType'] });
-            const sender_res = await this.getSenderResource(sender_obj);
-            if (sender_res['resourceType'] == 'Patient' || sender_res['resourceType'] == 'Practitioner') {
-                if (sender_res.hasOwnProperty("name")) {
-                    var sender_name = '';
-                    if (sender_res['name'][0].hasOwnProperty('given')) {
-                        sender_res['name'][0]['given'].map((n) => {
-                            sender_name += ' ' + n;
-                        });
-                        this.setState({ sender_name: sender_name });
-                    }
-                }
-            }
-            else if (sender_res['resourceType'] == 'Organization') {
-                if (sender_res.hasOwnProperty("name")) {
-                    this.setState({ sender_name: sender_res['name'] });
+            // const sender_res = await this.getSenderResource(sender_obj);
+            // if (sender_res['resourceType'] == 'Patient' || sender_res['resourceType'] == 'Practitioner') {
+            //     if (sender_res.hasOwnProperty("name")) {
+            //         var sender_name = '';
+            //         if (sender_res['name'][0].hasOwnProperty('given')) {
+            //             sender_res['name'][0]['given'].map((n) => {
+            //                 sender_name += ' ' + n;
+            //             });
+            //             this.setState({ sender_name: sender_name });
+            //         }
+            //     }
+            // }
+            // else 
+            if (sender_obj['resourceType'] === 'Organization') {
+                if (sender_obj.hasOwnProperty("identifier")) {
+                    let sender = sender_obj['identifier'][0]['value'];
+                    this.setState({ sender_name:  sender});
                 }
             }
             // console.log("sender['name']", this.state.sender_name);
@@ -437,23 +457,21 @@ class CDEX extends Component {
         let content = data.map((d, i) => {
             // console.log(d, i);
             if (d.hasOwnProperty("subject") && d.hasOwnProperty("contained")) {
-                let identifier = '';
-                let patient_obj = d['contained'].map((c) => {
-                    if (c.hasOwnProperty('id')) {
-                        if (c['id'] == d['subject']['reference'].replace('#', '')) {
-                            identifier = c['identifier'][0]['value'];
-                        }
-                    }
-                })
-                if (identifier) {
-                    return (
-                        <div key={i} className="main-list">
-                            {i + 1}.  {d['resourceType']} (#{d['id']}) for {identifier}
-                            <button className="btn list-btn" onClick={() => this.getPatientDetails(identifier, d, identifier)}>
-                                Review</button>
-                        </div>
-                    )
-                }
+                let patientId = d['subject']['reference'];
+                // let patient_obj = d['contained'].map((c) => {
+                //     if (c.hasOwnProperty('id')) {
+                //         if (c['id'] == d['subject']['reference'].replace('#', '')) {
+                //             patientId = c['identifier'][0]['value'];
+                //         }
+                //     }
+                // })
+                return (
+                    <div key={i} className="main-list">
+                        {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId}
+                        <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
+                            Review</button>
+                    </div>
+                )
             }
         });
         let requests = this.state.contentStrings.map((request, key) => {
@@ -493,26 +511,26 @@ class CDEX extends Component {
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
-                                <div className='data-label'>
+                                {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
                                         <small> - Enter a search keyword. (ex: height)</small>
                                     </div>
                                     <Input style={{ width: "100%" }}
-                                        icon='search' iconPosition='right'
+                                        icon='search'
                                         placeholder='Search'
                                         className='ui fluid  input' type="text" name="searchParameter"
                                         onChange={this.onChangeSearchParameter}
                                     >
                                     </Input>
-                                    {/* <button style={{ width:"30%", float:"left"}}className="btn list-btn" onClick={() => this.getObservationDetails()}>
-                                            Search</button> */}
+                                    // {/* <button style={{ width:"30%", float:"left"}}className="btn list-btn" onClick={() => this.getObservationDetails()}>
+                                    //         Search</button> 
                                     {this.state.observationList.length > 0 &&
                                         <div className="data1">Found {this.state.observationList.length} observation(s)</div>
                                     }
                                     {this.state.observationList.length === 0 &&
                                         <div className="data1">When no observations found. Please upload requested documents.</div>
                                     }
-                                </div>
+                                </div> */}
                                 <div>
                                     <DocumentInput
                                         updateCallback={this.updateDocuments}
