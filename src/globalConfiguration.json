@@ -18,7 +18,7 @@
         "patient_view_path":"cds-services/patient_view"
       },
       "payer":{
-        "fhir_url": "http://3.92.187.150:8280/payer_fhir/baseDstu3"
+        "fhir_url": "http://3.92.187.150:8280/payer_fhir/r4"
       },
       "provider":{
         "fhir_url": "http://3.92.187.150:8280/fhir/baseDstu3",

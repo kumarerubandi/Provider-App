@@ -32,7 +32,7 @@ class CDEX extends Component {
             observationList: [],
             documentReference: {}
         };
-        this.goHome = this.goHome.bind(this);
+        this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
         this.displayCommunicataionRequests = this.displayCommunicataionRequests.bind(this);
         this.getPatientDetails = this.getPatientDetails.bind(this);
@@ -44,8 +44,8 @@ class CDEX extends Component {
 
     }
 
-    goHome() {
-        window.location = `${window.location.protocol}//${window.location.host}/provider_request`;
+    goTo(title) {
+        window.location = window.location.protocol + "//" + window.location.host +"/" + title;
     }
 
     componentDidMount() {
@@ -93,6 +93,10 @@ class CDEX extends Component {
         this.setState({ patient_name: "" });
         this.setState({ sender_resource: "" });
         this.setState({ sender_name: "" });
+        let f = this.state.files;
+        f = null;
+        this.setState({ files: f });
+        console.log(this.state.files)
         var tempUrl = this.state.config.provider.fhir_url + "/"+patient_id;
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let patient = await fetch(tempUrl, {
@@ -490,9 +494,13 @@ class CDEX extends Component {
                     <div>
                         <div className="main_heading">
                             <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - CDEX</span>
-                            <div className="menu_conf" onClick={() => this.goHome()}>
+                            <div className="menu_conf" onClick={() => this.goTo('provider_request')}>
                                 <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
                                 Home</div>
+                            <div className="menu_conf" onClick={() => this.goTo('configuration')}>
+                            <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
+                            Configuration</div>
+                            
                         </div>
                     </div>
                     <div className="content">

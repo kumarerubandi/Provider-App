@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { saveConfiguration } from '../actions/index';
 import 'react-notifications/lib/notifications.css';
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 
 // const NotificationContainer = window.ReactNotifications.NotificationContainer;
 // const NotificationManager = window.ReactNotifications.NotificationManager;
@@ -70,7 +70,7 @@ class Configuration extends Component {
         this.onChangeTokenType = this.onChangeTokenType.bind(this);
         this.onSaveConfiguration = this.onSaveConfiguration.bind(this);
         this.restToDefaults = this.restToDefaults.bind(this);
-        this.goHome = this.goHome.bind(this);
+        this.goTo = this.goTo.bind(this);
     }
 
     onChangeTokenExpiry(event) {
@@ -107,7 +107,11 @@ class Configuration extends Component {
         let config = this.state.config;
         config.provider.client_id = event.target.value
         this.setState({ config })
-
+    }
+    onChangeAuthorizedFhir(event) {
+        let config = this.state.config;
+        config.provider.authorized_fhir = event.target.value
+        this.setState({ config })
     }
     onChangeClientSecret(event) {
         let config = this.state.config;
@@ -140,8 +144,8 @@ class Configuration extends Component {
         NotificationManager.success('Your changes have been updated successfully', 'Reset Successfull');
 
     }
-    goHome() {
-        window.location = `${window.location.protocol}//${window.location.host}/provider_request`;
+    goTo(title) {
+        window.location = window.location.protocol + "//" + window.location.host + "/" + title;
     }
     renderConfiguration() {
         return (
@@ -149,9 +153,15 @@ class Configuration extends Component {
                 <div>
                     <div className="main_heading">
                         <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Configuration</span>
-                        <div className="menu_conf" onClick={() => this.goHome()}>
-                        <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
-                        Home</div>
+                        <div className="menu_conf" onClick={() => this.goTo('provider_request')}>
+                            <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
+                            Home</div>
+                        <div className="menu_conf" onClick={() => this.goTo('cdex')}>
+                            <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
+                            CDEX</div>
+                        <div className="menu_conf" onClick={() => this.goTo('x12converter')}>
+                            <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
+                            X12 Converter</div>
                     </div>
                     <div className="content">
                         <div className="left-form">
@@ -281,7 +291,7 @@ class Configuration extends Component {
                                 onClick={this.restToDefaults}>Reset to defaults</button>
                         </div>
                     </div>
-                    <NotificationContainer/>
+                    <NotificationContainer />
                 </div>
             </React.Fragment>
         )
