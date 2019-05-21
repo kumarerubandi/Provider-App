@@ -695,3 +695,10 @@ color: green;
     width: 25%;
     margin-left: 38%;
 }
+
+.check-box{
+  float:right
+}
+.input-checkbox{
+  margin-left:10px
+}

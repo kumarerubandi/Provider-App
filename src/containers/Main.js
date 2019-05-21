@@ -303,7 +303,9 @@ class Review extends Component {
             const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
             const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
             console.log('The token is : ', token);
-            fhirClient.bearerToken = token;
+            if(this.props.config.authorized_fhir){
+                fhirClient.bearerToken = token;
+            }
             fhirClient.create({
                 resourceType: 'Claim',
                 body: claim_json,
@@ -779,9 +781,11 @@ class Review extends Component {
         withRouter(({ history }) => (history.push('/')))
     }
     async getClaimResponse(claim_id) {
-        const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        fhirClient.bearerToken = token;
+        const fhirClient=new Client({ baseUrl: this.props.config.payer.fhir_url });
+        const token=await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        if(this.props.config.authorized_fhir){
+            fhirClient.bearerToken = token;
+        }
         this.searchFHIR(fhirClient, 'ClaimResponse', 'request=' + claim_id, 'payer')
 
     }

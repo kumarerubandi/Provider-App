@@ -8,9 +8,8 @@ import { Link } from 'react-router-dom';
 import { send } from 'q';
 import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
-import { Input } from 'semantic-ui-react';
+import { Input , Checkbox } from 'semantic-ui-react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
-
 
 class CDEX extends Component {
     constructor(props) {
@@ -30,7 +29,14 @@ class CDEX extends Component {
             communicationRequest: {},
             searchParameter: '',
             observationList: [],
-            documentReference: {}
+            documentReference: {},
+            startDate:'',
+            endDate:'',
+            recievedDate:'',
+            check:false,
+            content:[],
+            providerOrganization:{},
+            payerOrganization:{}
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -41,6 +47,7 @@ class CDEX extends Component {
         this.startLoading = this.startLoading.bind(this);
         this.updateDocuments = this.updateDocuments.bind(this);
         this.onChangeSearchParameter = this.onChangeSearchParameter.bind(this);
+        this.handleChange = this.handleChange.bind(this);
 
     }
 
@@ -54,14 +61,18 @@ class CDEX extends Component {
 
     async getCommunicationRequests() {
         var tempUrl = this.state.config.provider.fhir_url;
+        let headers = {
+            "Content-Type": "application/json",
+        }
         const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        // console.log('The token is : ', token, tempUrl);
+        console.log(token,'token')
+        if(this.props.config.provider.authorized_fhir){
+            console.log('The token is : ', token, tempUrl);
+            headers['Authorization'] = 'Bearer ' + token
+        }
         const fhirResponse = await fetch(tempUrl + "/CommunicationRequest?_count=100000", {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
-            }
+            headers: headers
         }).then(response => {
             // console.log("Recieved response", response);
             return response.json();
@@ -93,18 +104,25 @@ class CDEX extends Component {
         this.setState({ patient_name: "" });
         this.setState({ sender_resource: "" });
         this.setState({ sender_name: "" });
+        this.setState({ observationList: [] });
+        this.setState({ check: false });
+        this.setState({ content: [] });
+
         let f = this.state.files;
         f = null;
         this.setState({ files: f });
         console.log(this.state.files)
         var tempUrl = this.state.config.provider.fhir_url + "/"+patient_id;
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token= await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let headers={
+            "Content-Type": "application/json",
+        }
+        if(this.props.config.provider.authorized_fhir){
+            headers['Authorization'] = 'Bearer ' + token
+        }
         let patient = await fetch(tempUrl, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
-            }
+            headers: headers
         }).then(response => {
             return response.json();
         }).then((response) => {
@@ -125,7 +143,7 @@ class CDEX extends Component {
                         this.setState({ patient_name: name })
                     }
                 }
-                console.log("patient name----------", this.state.patient_name);
+                console.log("patient name----------", this.state.patient_name,this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value);
             }
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
@@ -149,12 +167,22 @@ class CDEX extends Component {
         // }
         // console.log("state patient-------", this.state.patient);
         if (communication_request.hasOwnProperty('sender')) {
-            let s = await this.getSenderDetails(communication_request);
+            let s = await this.getSenderDetails(communication_request,token);
         }
         if (communication_request.hasOwnProperty('payload')) {
             await this.getDocuments(communication_request['payload']);
         }
+        if (communication_request.hasOwnProperty('occurrencePeriod')) {
+            // await this.getDocuments(communication_request['payload']);
+            this.setState({startDate:communication_request.occurrencePeriod.start})
+            this.setState({endDate:communication_request.occurrencePeriod.end})
+        }
+        if (communication_request.hasOwnProperty('authoredOn')) {
+            this.setState({recievedDate:communication_request.authoredOn})
+        }
         this.setState({ communicationRequest: communication_request });
+        await this.getObservationDetails();
+        
         this.setState({ form_load: true });
     }
     randomString() {
@@ -176,53 +204,74 @@ class CDEX extends Component {
 
             //     }
             // }
-            if (c.hasOwnProperty('extension')) {
-                strings.push(c.extension[0]['valueCodeableConcept']['coding'][0]['display']);
+            // if (c.hasOwnProperty('extension')) {
+            //     strings.push(c.extension[0]['valueCodeableConcept']['coding'][0]['display']);
+            // }
+            if(c.hasOwnProperty('contentString')){
+                strings.push(c.contentString)
             }
             this.setState({ contentStrings: strings })
         });
 
 
     }
-    async getObservationDetails() {
-        let searchParameter = this.state.searchParameter;
+    async getObservationDetails(token) {
+        // let searchParameter = this.state.searchParameter;
         // console.log(searchParameter,'search')
-        var tempUrl = this.state.config.provider.fhir_url + "/Observation?code:text=" + searchParameter;
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        let observations = await fetch(tempUrl, {
-            method: "GET",
-            headers: {
+        let communicationRequest = this.state.communicationRequest
+        let payload=communicationRequest.payload
+        let code;
+        let patientId = communicationRequest.subject.reference
+        let dateParameter;
+        payload.map(async (p)=>{
+            if(p.hasOwnProperty('extension')){
+                code = p.extension[0].valueCodeableConcept.coding[0].code
+            }
+            if(this.state.endDate !==''){
+                dateParameter= "&date=gt"+this.state.startDate+"&date=lt"+this.state.endDate
+            }
+            else{
+                dateParameter= "&date=gt"+this.state.startDate
+            }
+            console.log(dateParameter,patientId,code,this.state.config.provider.fhir_url)
+            var Url  = this.state.config.provider.fhir_url + "/Observation?code:code="+code+"&subject="+patientId+dateParameter;
+            console.log(Url,'ttt',Url)
+            const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+            let headers = {
                 "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
             }
-        }).then(response => {
-            return response.json();
-        }).then((response) => {
-            // console.log("----------response", response);
-            if (response.hasOwnProperty('entry')) {
-                return response
+            if(this.props.config.provider.authorized_fhir){
+                headers['Authorization'] = 'Bearer ' + token
             }
-            // console.log(response,'res')
-        }).catch(reason =>
-            console.log("No response recieved from the server", reason)
-        );
-        console.log(observations, 'obss')
-        let observationUrls = this.state.observationList
-        if (observations != undefined) {
-            if ("entry" in observations) {
-                observations.entry.map((observation) => {
-                    if (observationUrls.indexOf(observation.fullUrl) == -1) {
-                        observationUrls.push(observation.fullUrl)
-                    }
-                })
+            let observations = await fetch(Url, {
+                method: "GET",
+                headers: headers
+            }).then(response => {
+                return response.json();
+            }).then((response) => {
+                // console.log("----------response", response);
+                if (response.hasOwnProperty('entry')) {
+                    return response
+                }
+                // console.log(response,'res')
+            }).catch(reason =>
+                console.log("No response recieved from the server", reason)
+            );
+            console.log(observations, 'obss')
+            let observationList = this.state.observationList
+            if(observations !== undefined ){
+                if ("entry" in observations) {
+                    observations.entry.map((observation) => {
+                        if (observationList.indexOf(observation.resource) == -1) {
+                            observationList.push(observation.resource)
+                        }
+                    })
+                }
             }
-        }
-        else {
-            console.log('enter correct search Parameter')
-        }
-
-        this.setState({ observationList: observationUrls })
-        console.log(this.state.observationList)
+            // observationList.push(observations)
+            this.setState({observationList:observationList})
+            // console.log(observationList,'ooo')
+        })
     }
 
     startLoading() {
@@ -253,28 +302,30 @@ class CDEX extends Component {
         //         "reference": "Patient/" + this.state.patient.id
         //     },
         // }
-
+        console.log(this.state.payerOrganization,this.state.providerOrganization)
+        var date = new Date()
+        var authoredOn=date.toISOString()
         var fileInputData = {
             "resourceType": "Communication",
             "status": "completed",
             "subject": {
-                "reference": '#'+this.state.patient['id']
+                "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
             },
             "recipient": [
                 {
-                    "reference": communicationRequest.sender.reference
+                    "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
                 }
             ],
             "sender": {
-                "reference": communicationRequest.recipient[0].reference
+                "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
             },
             "occurrencePeriod": communicationRequest.occurrencePeriod,
-            "authoredOn": communicationRequest.authoredOn,
+            "authoredOn": authoredOn,
             "category": communicationRequest.category,
-            "contained": communicationRequest.contained,
+            // "contained": communicationRequest.contained,
             "basedOn": [
                 {
-                    'reference': "#" + communicationRequest.id
+                    'reference': this.state.communicationRequest.resourceType+"?identifier="+this.state.communicationRequest.identifier[0].value
                 }
             ],
             "identifier": [
@@ -287,27 +338,16 @@ class CDEX extends Component {
         }
 
         console.log(this.state.patient.id, 'iddd')
-        // let observationList = this.state.observationList;
-        // for (var j = 0; j < this.state.observationList.length; j++) {
-        //     (function (file) {
-        //         let url = observationList[j];
-        //         documentReferenceJson.content.push({
-        //             "attachment": {
-        //                 "contentType": "application/hl7-v3+xml",
-        //                 "language": "en-US",
-        //                 "url": url,
-        //                 "title": "Physical",
-        //             },
-        //             "format": {
-        //                 "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
-        //                 "code": "urn:ihe:pcc:handp:2008",
-        //                 "display": "History and Physical Specification"
-        //             }
-        //         })
-        //     })(observationList[j])
-        // }
+        // let content = this.state.content;
+        for (var j = 0; j < this.state.content.length; j++) {
+            (function (contentString) {
+                // let url = observationList[j];
+                fileInputData.payload.push({
+                    "contentString":contentString})
+            })(this.state.content[j])
+        }
+        console.log(fileInputData,'data')
         // var documentReferenceUrl = this.state.config.provider.fhir_url + "/DocumentReference";
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         // let documentReference = await fetch(documentReferenceUrl, {
         //     method: "POST",
         //     headers: {
@@ -337,8 +377,8 @@ class CDEX extends Component {
         // doc_ref["identifier"] = this.state.documentReference.identifier
         // fileInputData.payload.push({ "contentReference": { "reference": "#" + this.state.documentReference.id } })
 
-        fileInputData.contained.push(JSON.stringify(communicationRequest))
-        fileInputData.contained.push(JSON.stringify(this.state.patient))
+        // fileInputData.contained.push(JSON.stringify(communicationRequest))
+        // fileInputData.contained.push(JSON.stringify(this.state.patient))
         // fileInputData.contained.push(doc_ref)
 
         if (this.state.files != null) {
@@ -350,8 +390,8 @@ class CDEX extends Component {
                     reader.onload = function (e) {
                         // get file content  
                         fileInputData.payload.push({
-                            "cdex-payload-query-string":"",
-                             "cdex-payload-clinical-note-type":[],
+                            // "cdex-payload-query-string":"",
+                            //  "cdex-payload-clinical-note-type":[],
                             "content": {
                                 "data": reader.result,
                                 "contentType": content_type,
@@ -364,13 +404,17 @@ class CDEX extends Component {
             }
         }
         console.log("Resource Json before communication--", fileInputData);
+        let headers={
+            "Content-Type": "application/json",
+        }
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        if(this.props.config.payer.authorizedPayerFhir){
+            headers['Authorization'] = 'Bearer ' + token
+        }
         var communicationUrl = this.state.config.payer.fhir_url + "/Communication";
         let Communication = await fetch(communicationUrl, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
-            },
+            headers: headers,
             body: JSON.stringify(fileInputData)
         }).then(response => {
             return response.json();
@@ -385,8 +429,8 @@ class CDEX extends Component {
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
-        // // this.props.saveDocuments(this.props.files,fileInputData)
-        // this.setState({communicationJson:fileInputData})
+        // this.props.saveDocuments(this.props.files,fileInputData)
+        this.setState({communicationJson:fileInputData})
         this.setState({ loading: false });
     }
     onChangeSearchParameter(event) {
@@ -395,19 +439,82 @@ class CDEX extends Component {
         this.setState({ searchParameter: searchParameter });
         this.getObservationDetails();
     }
+    handleChange(observation,event) {
+        let check = this.state.check;
+        let value;
+        console.log(event.target.checked,"is it true")
+        check = event.target.checked
+        this.setState({ check: check });
+        let content = this.state.content
+        value = observation.code.coding[0].display+": "+observation.valueQuantity.value+" "+observation.valueQuantity.unit
+        
+        // this.state.observationList.map((observation)=>{
+        //     value = observation.valueQuantity.value +observation.valueQuantity.unit
+        //     if (content.indexOf(value) == -1) {
+        //         content.push(value)
+        //     }
+        // })
+        if(content.indexOf(value)==-1 && check == true){
+            content.push(value)
+        }
+        else {
+            var index = content.indexOf(value);
+            if (index !== -1){
+                content.splice(index, 1);
+            }
+            // content.pop(value)
+        }
+        console.log(content,'please')
+        this.setState({content:content})
+        
+
+    }
     updateDocuments(elementName, object) {
         this.setState({ [elementName]: object })
     }
-    async getSenderDetails(communication_request) {
+    async getSenderDetails(communication_request,token) {
         let sender_obj;
-        communication_request['contained'].map((c) => {
-            if (c['id'] == communication_request['sender']['reference'].replace('#', '')) {
-                // console.log("------------sender", c);
-                sender_obj = c;
-            }
-        });
-        if (sender_obj) {
-            this.setState({ sender_resource: sender_obj['resourceType'] });
+        let senderreference;
+        let recipientReference;
+        console.log(communication_request,'comm')
+        if(communication_request.hasOwnProperty('sender')){
+            senderreference = communication_request.sender.reference
+        }
+        if(communication_request.hasOwnProperty('recipient')){
+            recipientReference = communication_request.recipient[0].reference
+        }
+        // communication_request['contained'].map((c) => {
+        //     if (c['id'] == communication_request['sender']['reference'].replace('#', '')) {
+        //         // console.log("------------sender", c);
+        //         sender_obj = c;
+        //     }
+        // });
+        var tempUrl = this.state.config.provider.fhir_url;
+        // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let headers={
+            "Content-Type": "application/json",
+        }
+        if(this.props.config.provider.authorized_fhir){
+            headers['Authorization'] = 'Bearer ' + token
+        }
+        const fhirResponse = await fetch(tempUrl +"/"+ senderreference, {
+            method: "GET",
+            headers: headers
+        }).then(response => {
+            console.log("Recieved response", response);
+            return response.json();
+        }).then((response) => {
+            console.log("----------response", response);
+            return response;
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        // return fhirResponse;
+        console.log(fhirResponse,'respo')
+        if (fhirResponse) {
+            this.setState({payerOrganization:fhirResponse})
+            this.setState({ sender_name:  fhirResponse.name});
+            // this.setState({ sender_resource: fhirResponse['resourceType'] });
             // const sender_res = await this.getSenderResource(sender_obj);
             // if (sender_res['resourceType'] == 'Patient' || sender_res['resourceType'] == 'Practitioner') {
             //     if (sender_res.hasOwnProperty("name")) {
@@ -421,30 +528,55 @@ class CDEX extends Component {
             //     }
             // }
             // else 
-            if (sender_obj['resourceType'] === 'Organization') {
-                if (sender_obj.hasOwnProperty("identifier")) {
-                    let sender = sender_obj['identifier'][0]['value'];
-                    this.setState({ sender_name:  sender});
-                }
-            }
+            // if (sender_obj['resourceType'] === 'Organization') {
+            //     if (sender_obj.hasOwnProperty("identifier")) {
+            //         let sender = sender_obj['identifier'][0]['value'];
+            //         this.setState({ sender_name:  sender});
+            //     }
+            // }
             // console.log("sender['name']", this.state.sender_name);
         }
-    }
-
-    async getSenderResource(c) {
-        var sender_url = this.state.config.provider.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
-        console.log("url---------", sender_url);
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        let sender = await fetch(sender_url, {
+        const recipientResponse = await fetch(tempUrl +"/"+recipientReference, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
+            console.log("Recieved response", response);
             return response.json();
         }).then((response) => {
-            // console.log("----------response", response);
+            console.log("----------response", response);
+            return response;
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        // return fhirResponse;
+        console.log(recipientResponse,'rest')
+        if (fhirResponse) {
+            this.setState({providerOrganization:recipientResponse})
+        }
+
+
+    }
+
+    async getSenderResource(c) {
+        var sender_url = this.state.config.provider.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
+        console.log("url---------", sender_url);
+        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let headers={
+            "Content-Type": "application/json",
+        }
+        if(this.props.config.provider.authorized_fhir){
+            headers['Authorization'] = 'Bearer ' + token
+        }
+        let sender = await fetch(sender_url, {
+            method: "GET",
+            headers: headers
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            console.log("----------response", response);
             if (response.hasOwnProperty('entry')) {
                 if (response['entry'][0].hasOwnProperty('resource')) {
                     return response['entry'][0]['resource'];
@@ -458,9 +590,20 @@ class CDEX extends Component {
 
     render() {
         let data = this.state.comm_req;
+        console.log( this.state.comm_req,'how may')
         let content = data.map((d, i) => {
             // console.log(d, i);
-            if (d.hasOwnProperty("subject") && d.hasOwnProperty("contained")) {
+            let startDate = d["occurrencePeriod"]['start']
+            let endDate;
+            if(d['occurrencePeriod'].hasOwnProperty("end")){
+            endDate = d["occurrencePeriod"]['end']
+            }
+            else{
+                endDate="No End Date"
+            }
+            let recievedDate = d["authoredOn"]
+            console.log(startDate.substring(0,10),'stdate')
+            if (d.hasOwnProperty("subject") ) {
                 let patientId = d['subject']['reference'];
                 // let patient_obj = d['contained'].map((c) => {
                 //     if (c.hasOwnProperty('id')) {
@@ -471,7 +614,7 @@ class CDEX extends Component {
                 // })
                 return (
                     <div key={i} className="main-list">
-                        {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId}
+                        {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId} Start Date ({startDate.substring(0,10)}),End Date({endDate.substring(0,10)}), Recieved On ({recievedDate.substring(0,10)})
                         <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
                             Review</button>
                     </div>
@@ -483,6 +626,24 @@ class CDEX extends Component {
                 return (
                     <div key={key}>
                         {request}
+                    </div>
+                )
+
+            }
+        });
+        let observations = this.state.observationList.map((observation, key) => {
+            if (observation) {
+                return (
+                    <div key={key}>
+                        <label for="ui checkbox">  {observation.code.coding[0].display+":"}{observation.valueQuantity.value+" "+observation.valueQuantity.unit}</label>
+                        <input 
+                            className='ui checkbox'
+                            name = {key}
+                            type="checkbox"
+                            defaultChecked={this.state.check}
+                            value={this.state.check}
+                            onChange={(e)=>this.handleChange(observation,e)}
+                        />
                     </div>
                 )
 
@@ -517,8 +678,23 @@ class CDEX extends Component {
                                     Sender {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
                                 </div>
                                 <div className="data-label">
+                                   Start Date : <span className="data1">{this.state.startDate}</span>
+                                </div>
+                                <div className="data-label">
+                                   End Date : <span className="data1">{this.state.endDate}</span>
+                                </div>
+                                <div className="data-label">
+                                   Recieved Date : <span className="data1">{this.state.recievedDate}</span>
+                                </div>
+                                <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
+                                {this.state.observationList.length >0 &&
+                                    <div className="data-label">
+                                        Obsersvation : <span className="data1">{observations}</span>
+                                    </div>
+                                }
+                                
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
                                         <small> - Enter a search keyword. (ex: height)</small>

@@ -34,7 +34,8 @@ class Configuration extends Component {
                     patient_view_path: props.config.crd.patient_view_path
                 },
                 payer: {
-                    fhir_url: props.config.payer.fhir_url
+                    fhir_url: props.config.payer.fhir_url,
+                    authorizedPayerFhir:props.config.payer.authorizedPayerFhir
                 },
                 provider: {
                     fhir_url: props.config.provider.fhir_url,
@@ -62,7 +63,9 @@ class Configuration extends Component {
         this.onChangeCoverageDecisionPath = this.onChangeCoverageDecisionPath.bind(this);
         this.onChangeCoverageRequirementPath = this.onChangeCoverageRequirementPath.bind(this);
         this.onChangePayerFhirUrl = this.onChangePayerFhirUrl.bind(this);
+        this.handleAPFChange = this.handleAPFChange.bind(this);
         this.onChangeProviderFhirUrl = this.onChangeProviderFhirUrl.bind(this);
+        this.onChangeAuthorizedFhir = this.onChangeAuthorizedFhir.bind(this);
         this.onChangeClientSecret = this.onChangeClientSecret.bind(this);
         this.onChangeClientId = this.onChangeClientId.bind(this);
         this.onChangeAuthTokenUrl = this.onChangeAuthTokenUrl.bind(this);
@@ -98,6 +101,12 @@ class Configuration extends Component {
         config.payer.fhir_url = event.target.value
         this.setState({ config })
     }
+    handleAPFChange(event) {
+        let config = this.state.config;
+        config.payer.authorizedPayerFhir = event.target.checked
+        console.log(event.target.checked,'check')
+        this.setState({ config })
+    }
     onChangeProviderFhirUrl(event) {
         let config = this.state.config;
         config.provider.fhir_url = event.target.value
@@ -110,7 +119,7 @@ class Configuration extends Component {
     }
     onChangeAuthorizedFhir(event) {
         let config = this.state.config;
-        config.provider.authorized_fhir = event.target.value
+        config.provider.authorized_fhir = event.target.checked
         this.setState({ config })
     }
     onChangeClientSecret(event) {
@@ -223,7 +232,15 @@ class Configuration extends Component {
                                     onChange={this.onChangePayerFhirUrl}
                                     defaultValue={this.state.config.payer.fhir_url}>
                                 </Input>
+
                             </div>
+                            <div className="header-child">Authorized Payer Fhir<input
+                                            name="authorize_payer_fhir"
+                                            type="checkbox"
+                                            className="input-checkbox"
+                                            value={this.state.config.payer.authorizedPayerFhir}
+                                            checked={this.state.config.payer.authorizedPayerFhir}
+                                            onChange={this.handleAPFChange} /></div>
 
                             {/* <div className='header'>CDS Service</div>
                     <div className="leftStateInput"><div className='header-child'>VSAC Username</div>
@@ -284,7 +301,16 @@ class Configuration extends Component {
                                     onChange={this.onChangeClientId}
                                     defaultValue={this.state.config.provider.client_id}>
                                 </Input>
+
+                                <div className="header-child">Authorized Fhir<input
+                                            name="authorize_fhir"
+                                            className="input-checkbox"
+                                            type="checkbox"
+                                            value={this.state.config.provider.authorized_fhir}
+                                            checked={this.state.config.provider.authorized_fhir}
+                                            onChange={this.onChangeAuthorizedFhir} /></div>
                             </div>
+
                             <button className="submit-btn btn btn-class button-ready"
                                 onClick={this.onSaveConfiguration}>Save</button>
                             <button className="btn default-btn"

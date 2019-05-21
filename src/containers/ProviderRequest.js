@@ -237,14 +237,17 @@ class ProviderRequest extends Component {
   }
 
   async getResourceData(token, prefectInput) {
+    let headers = {
+      "Content-Type": "application/json"
+    }
     console.log("Prefetch input--", JSON.stringify(prefectInput));
     const url = this.props.config.crd.crd_url + "prefetch";
+    if(this.props.authorized_fhir){
+      headers.authorization = "Bearer " + token
+    }
     await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "authorization": "Bearer " + token,
-      },
+      headers:headers,
       body: JSON.stringify(prefectInput),
     }).then((response) => {
       return response.json();
