@@ -10,6 +10,7 @@ import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
 import { Input , Checkbox } from 'semantic-ui-react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { faCommentDollar } from '@fortawesome/free-solid-svg-icons';
 
 class CDEX extends Component {
     constructor(props) {
@@ -34,9 +35,13 @@ class CDEX extends Component {
             endDate:'',
             recievedDate:'',
             check:false,
+            documentCheck:false,
             content:[],
             providerOrganization:{},
-            payerOrganization:{}
+            payerOrganization:{},
+            valueString:'',
+            documentList:[],
+            documentContent:[],
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -48,6 +53,7 @@ class CDEX extends Component {
         this.updateDocuments = this.updateDocuments.bind(this);
         this.onChangeSearchParameter = this.onChangeSearchParameter.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleDocumentChange = this.handleDocumentChange.bind(this);
 
     }
 
@@ -181,7 +187,20 @@ class CDEX extends Component {
             this.setState({recievedDate:communication_request.authoredOn})
         }
         this.setState({ communicationRequest: communication_request });
-        await this.getObservationDetails();
+        // communication_request.payload.map(async (p)=>{
+        //     if(p.hasOwnProperty('extension')){
+        //         console.log(p,'pp')
+        //         if(p.extension[0].hasOwnProperty('valueString')){
+        //             console.log('here-123')
+        //             await this.getObservationDetails(p.extension[0].valueString);
+        //         }
+    
+        //     }
+        // })
+        
+        await this.getObservationDetails()
+        await this.getClinicalNoteDetails()
+
         
         this.setState({ form_load: true });
     }
@@ -198,7 +217,7 @@ class CDEX extends Component {
     async getDocuments(payload) {
         let strings = [];
         payload.map((c) => {
-            console.log("ccccccc", c);
+            // console.log("ccccccc", c);
             // if (c.hasOwnProperty('contentReference')) {
             //     if (c['contentReference']['reference'].replace('#', '')) {
 
@@ -215,7 +234,7 @@ class CDEX extends Component {
 
 
     }
-    async getObservationDetails(token) {
+    async getObservationDetails() {
         // let searchParameter = this.state.searchParameter;
         // console.log(searchParameter,'search')
         let communicationRequest = this.state.communicationRequest
@@ -223,53 +242,132 @@ class CDEX extends Component {
         let code;
         let patientId = communicationRequest.subject.reference
         let dateParameter;
+        let valueString;
         payload.map(async (p)=>{
             if(p.hasOwnProperty('extension')){
-                code = p.extension[0].valueCodeableConcept.coding[0].code
-            }
-            if(this.state.endDate !==''){
-                dateParameter= "&date=gt"+this.state.startDate+"&date=lt"+this.state.endDate
-            }
-            else{
-                dateParameter= "&date=gt"+this.state.startDate
-            }
-            console.log(dateParameter,patientId,code,this.state.config.provider.fhir_url)
-            var Url  = this.state.config.provider.fhir_url + "/Observation?code:code="+code+"&subject="+patientId+dateParameter;
-            console.log(Url,'ttt',Url)
-            const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-            let headers = {
-                "Content-Type": "application/json",
-            }
-            if(this.props.config.provider.authorized_fhir){
-                headers['Authorization'] = 'Bearer ' + token
-            }
-            let observations = await fetch(Url, {
-                method: "GET",
-                headers: headers
-            }).then(response => {
-                return response.json();
-            }).then((response) => {
-                // console.log("----------response", response);
-                if (response.hasOwnProperty('entry')) {
-                    return response
-                }
-                // console.log(response,'res')
-            }).catch(reason =>
-                console.log("No response recieved from the server", reason)
-            );
-            console.log(observations, 'obss')
-            let observationList = this.state.observationList
-            if(observations !== undefined ){
-                if ("entry" in observations) {
-                    observations.entry.map((observation) => {
-                        if (observationList.indexOf(observation.resource) == -1) {
-                            observationList.push(observation.resource)
+                if(p['extension'][0].hasOwnProperty('valueString')){
+                    valueString = p['extension'][0]['valueString'];
+                    console.log(valueString,'vallll')
+                    var Url  = this.state.config.provider.fhir_url + "/"+valueString;
+                    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    let headers = {
+                        "Content-Type": "application/json",
+                    }
+                    if(this.props.config.provider.authorized_fhir){
+                        headers['Authorization'] = 'Bearer ' + token
+                    }
+                    let observations = await fetch(Url, {
+                        method: "GET",
+                        headers: headers
+                    }).then(response => {
+                        console.log(response)
+                        return response.json();
+                    }).then((response) => {
+                        // console.log("----------response", response);
+                        if (response.hasOwnProperty('entry')) {
+                            return response
                         }
-                    })
+                        // console.log(response,'res')
+                    }).catch(reason =>
+                        console.log("No response recieved from the server", reason)
+                    );
+                    console.log(observations, 'observations')
+                    let observationList = this.state.observationList
+                    if(observations !== undefined ){
+                        if ("entry" in observations) {
+                            observations.entry.map((observation) => {
+                                    // observation['valueString']=valueString
+                                // if (observationList.indexOf(observation.resource) == -1) {
+                                //     observationList.push(observation.resource)
+                                // }
+                                observationList.push({
+                                    "extension":p['extension'],
+                                    "observation":observation.resource
+                                })
+                            })
+                        }
+                    }
+                    console.log(observationList,'observationList')
+                    // observationList.push(observations)
+                    this.setState({observationList:observationList})
                 }
+                else{
+                    console.log('no observations found')
+                }   
             }
-            // observationList.push(observations)
-            this.setState({observationList:observationList})
+            // console.log(observationList,'ooo')
+        })
+    }
+
+    async getClinicalNoteDetails() {
+        // let searchParameter = this.state.searchParameter;
+        // console.log(searchParameter,'search')
+        let communicationRequest = this.state.communicationRequest
+        let payload=communicationRequest.payload
+        let patientId = communicationRequest.subject.reference
+        let dateParameter;
+        payload.map(async (p)=>{
+            if(p.hasOwnProperty('extension')){
+                if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
+                    var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
+                    console.log(code,'vallll')
+                    console.log(p['contentString'],'yo whts goin on ')
+                    var string = p['contentString'].split('during ')
+                    console.log(string,'string')
+                    var dates = string[1].split(" - ")
+                    console.log(dates,'dates')
+                    var searchString = "?type="+code+"&patient.identifier="+this.state.patient.identifier[0].value+"&period=gt"+dates[0]+"&period=lt"+dates[1]
+                    console.log(searchString,'searchstring')
+                    var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
+                    // var Url=''
+                    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    let headers = {
+                        "Content-Type": "application/json",
+                    }
+                    if(this.props.config.provider.authorized_fhir){
+                        headers['Authorization'] = 'Bearer ' + token
+                    }
+                    let documents = await fetch(Url, {
+                        method: "GET",
+                        headers: headers
+                    }).then(response => {
+                        console.log(response)
+                        return response.json();
+                    }).then((response) => {
+                        // console.log("----------response", response);
+                        if (response.hasOwnProperty('entry')) {
+                            return response
+                        }
+                        // console.log(response,'res')
+                    }).catch(reason =>
+                        console.log("No response recieved from the server", reason)
+                    );
+                    console.log(documents, 'documents')
+
+                    let documentList = this.state.documentList
+                    if(documents !== undefined ){
+                        if ("entry" in documents) {
+                            documents.entry.map((document) => {
+                                    // observation['valueString']=valueString
+                                // if (observationList.indexOf(observation.resource) == -1) {
+                                //     observationList.push(observation.resource)
+                                // }
+                                documentList.push({
+                                    "extension":p['extension'],
+                                    "document":document.resource
+                                })
+                            })
+                        }
+                    }
+                    console.log(documentList,'documentList')
+                    // // observationList.push(observations)
+                    this.setState({documentList:documentList})
+                    // this.setState({valueString:valueString})
+                }
+                else{
+                    console.log('no Documents found')
+                }   
+            }
             // console.log(observationList,'ooo')
         })
     }
@@ -287,24 +385,10 @@ class CDEX extends Component {
         // let communicationRequestJson = {};
         let doc_ref = {};
         this.setState({ loading: false });
-        // var documentReferenceJson = {
-        //     "resourceType": "DocumentReference",
-        //     "identifier": [
-        //         {
-        //             "system": "urn:ietf:rfc:3986",
-        //             "value": randomString
-        //         }
-        //     ],
-        //     "status": "current",
-        //     "docStatus": "preliminary",
-        //     "content": [],
-        //     "subject": {
-        //         "reference": "Patient/" + this.state.patient.id
-        //     },
-        // }
         console.log(this.state.payerOrganization,this.state.providerOrganization)
         var date = new Date()
         var authoredOn=date.toISOString()
+        // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
         var fileInputData = {
             "resourceType": "Communication",
             "status": "completed",
@@ -337,49 +421,33 @@ class CDEX extends Component {
             "payload": []
         }
 
-        console.log(this.state.patient.id, 'iddd')
+        console.log(this.state.patient.id, 'iddd',communicationRequest)
         // let content = this.state.content;
+        
         for (var j = 0; j < this.state.content.length; j++) {
-            (function (contentString) {
+            (function (content) {
                 // let url = observationList[j];
+                console.log(content,'content',content.extension)
                 fileInputData.payload.push({
-                    "contentString":contentString})
+                    'extension': content.extension,
+                    'cdex-payload-query-string': {'url':content.extension[0].url,'extension':content.extension,'valueString':content.extension[0].valueString},
+                    "contentString":content.contentString})
             })(this.state.content[j])
         }
+        
         console.log(fileInputData,'data')
-        // var documentReferenceUrl = this.state.config.provider.fhir_url + "/DocumentReference";
-        // let documentReference = await fetch(documentReferenceUrl, {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         'Authorization': 'Bearer ' + token
-        //     },
-        //     body: JSON.stringify(documentReferenceJson)
-        // }).then(response => {
-        //     return response.json();
-        // }).then((response) => {
-        //     // console.log("----------response", response);
-        //     if (response.hasOwnProperty('entry')) {
-        //         return response
-        //     }
-        //     this.setState({ documentReference: response })
-        // }).catch(reason =>
-        //     console.log("No response recieved from the server", reason)
-        // );
-        // console.log(this.state.documentReference, 'opoopods', documentReference)
-
-        // communicationRequestJson["resourceType"] = communicationRequest.resourceType
-        // communicationRequestJson["id"] = communicationRequest.id
-        // communicationRequestJson["identifier"] = communicationRequest.identifier
-
-        // doc_ref["resourceType"] = this.state.documentReference.resourceType
-        // doc_ref["id"] = this.state.documentReference.id
-        // doc_ref["identifier"] = this.state.documentReference.identifier
-        // fileInputData.payload.push({ "contentReference": { "reference": "#" + this.state.documentReference.id } })
-
-        // fileInputData.contained.push(JSON.stringify(communicationRequest))
-        // fileInputData.contained.push(JSON.stringify(this.state.patient))
-        // fileInputData.contained.push(doc_ref)
+        
+        for (var j = 0; j < this.state.documentContent.length; j++) {
+            (function (content) {
+                // let url = observationList[j];
+                console.log(content,'content',content)
+                fileInputData.payload.push({
+                    'extension': content.extension,
+                    'cdex-payload-clinical-string': {'url':content.extension[0].url,'extension':content.extension,'valueCodeableConcept':content.extension[0].valueCodeableConcept},
+                    "contentAttachment":content.contentAttachment})
+            })(this.state.documentContent[j])
+        }
+        
 
         if (this.state.files != null) {
             for (var i = 0; i < this.state.files.length; i++) {
@@ -411,7 +479,9 @@ class CDEX extends Component {
         if(this.props.config.payer.authorizedPayerFhir){
             headers['Authorization'] = 'Bearer ' + token
         }
+        // var communicationUrl = '';
         var communicationUrl = this.state.config.payer.fhir_url + "/Communication";
+
         let Communication = await fetch(communicationUrl, {
             method: "POST",
             headers: headers,
@@ -439,13 +509,13 @@ class CDEX extends Component {
         this.setState({ searchParameter: searchParameter });
         this.getObservationDetails();
     }
-    handleChange(observation,event) {
+    handleChange(obs,event) {
+        let observation = obs.observation
         let check = this.state.check;
         let value;
         console.log(event.target.checked,"is it true")
         check = event.target.checked
         this.setState({ check: check });
-        let content = this.state.content
         value = observation.code.coding[0].display+": "+observation.valueQuantity.value+" "+observation.valueQuantity.unit
         
         // this.state.observationList.map((observation)=>{
@@ -454,19 +524,76 @@ class CDEX extends Component {
         //         content.push(value)
         //     }
         // })
-        if(content.indexOf(value)==-1 && check == true){
-            content.push(value)
+        let content =this.state.content;
+        if(check ==true){
+            content.push({
+                "extension":obs.extension,
+                "contentString":value
+            })
         }
-        else {
-            var index = content.indexOf(value);
-            if (index !== -1){
-                content.splice(index, 1);
+        else{
+            for(var i=0;i<content.length;i++){
+                console.log(content.hasOwnProperty('value'),'check')
+                if(content[i].hasOwnProperty('contentString') && content[i].contentString == value){
+                        console.log(content[i])
+                        content.splice(i,1)
+                }
             }
-            // content.pop(value)
         }
-        console.log(content,'please')
+        console.log(content,'content')
         this.setState({content:content})
+
         
+        // if(obs.hasOwnProperty('value')== false && check == true){
+        //     // content.push(value)
+        //     obs['value'] = value
+        // }
+        // else {
+        //     var index = content.indexOf(value);
+        //     if (obs.hasOwnProperty('value') === true){
+        //         // content.splice(index, 1);
+        //         delete obs['value']
+        //     }
+        //     // content.pop(value)
+        // }
+        // console.log(obs,'new checked observation')
+        // this.setState({content:content})
+        
+
+    }
+
+    handleDocumentChange(docs,event) {
+        let document = docs.document
+        let documentCheck = this.state.documentCheck;
+        let value;
+        console.log(event.target.checked,"is it true")
+        documentCheck = event.target.checked
+        this.setState({ documentCheck: documentCheck });
+        let content =this.state.documentContent;
+        let data = document.content[0].attachment.data
+
+        console.log('doc',docs)
+        if(documentCheck ==true){
+            content.push({
+                "extension":docs.extension,
+                "contentAttachment":{
+                        "contentType": document.content[0].attachment.contentType, 
+                        "data": document.content[0].attachment.data,
+                        "title": document.content[0].attachment.title
+                    }
+            })
+        }
+        else{
+            for(var i=0;i<content.length;i++){
+                console.log(content.hasOwnProperty('value'),'check')
+                if(content[i].hasOwnProperty('contentAttachment') && content[i].contentAttachment.data == data){
+                        console.log(content[i])
+                        content.splice(i,1)
+                }
+            }
+        }
+        console.log(content,'content-111111111')
+        this.setState({documentContent:content})        
 
     }
     updateDocuments(elementName, object) {
@@ -476,7 +603,6 @@ class CDEX extends Component {
         let sender_obj;
         let senderreference;
         let recipientReference;
-        console.log(communication_request,'comm')
         if(communication_request.hasOwnProperty('sender')){
             senderreference = communication_request.sender.reference
         }
@@ -590,7 +716,7 @@ class CDEX extends Component {
 
     render() {
         let data = this.state.comm_req;
-        console.log( this.state.comm_req,'how may')
+        // console.log( this.state.comm_req,'how may')
         let content = data.map((d, i) => {
             // console.log(d, i);
             let startDate = d["occurrencePeriod"]['start']
@@ -602,7 +728,7 @@ class CDEX extends Component {
                 endDate="No End Date"
             }
             let recievedDate = d["authoredOn"]
-            console.log(startDate.substring(0,10),'stdate')
+            // console.log(startDate.substring(0,10),'stdate')
             if (d.hasOwnProperty("subject") ) {
                 let patientId = d['subject']['reference'];
                 // let patient_obj = d['contained'].map((c) => {
@@ -635,7 +761,7 @@ class CDEX extends Component {
             if (observation) {
                 return (
                     <div key={key}>
-                        <label for="ui checkbox">  {observation.code.coding[0].display+":"}{observation.valueQuantity.value+" "+observation.valueQuantity.unit}</label>
+                        <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label>
                         <input 
                             className='ui checkbox'
                             name = {key}
@@ -643,6 +769,25 @@ class CDEX extends Component {
                             defaultChecked={this.state.check}
                             value={this.state.check}
                             onChange={(e)=>this.handleChange(observation,e)}
+                        />
+                    </div>
+                )
+
+            }
+        });
+        let documents = this.state.documentList.map((document, key) => {
+            if (document) {
+                console.log('document,doc',document)
+                return (
+                    <div key={key}>
+                        <label for="ui checkbox">  {document.document.type.coding[0].display+":"}{document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</label>
+                        <input 
+                            className='ui checkbox'
+                            name = {key}
+                            type="checkbox"
+                            defaultChecked={this.state.documentCheck}
+                            value={this.state.documentCheck}
+                            onChange={(e)=>this.handleDocumentChange(document,e)}
                         />
                     </div>
                 )
@@ -694,6 +839,11 @@ class CDEX extends Component {
                                         Obsersvation : <span className="data1">{observations}</span>
                                     </div>
                                 }
+                                {this.state.documentList.length >0 &&
+                                    <div className="data-label">
+                                        Documents : <span className="data1">{documents}</span>
+                                    </div>
+                                }
                                 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
@@ -715,11 +865,15 @@ class CDEX extends Component {
                                         <div className="data1">When no observations found. Please upload requested documents.</div>
                                     }
                                 </div> */}
-                                <div>
+                                {(this.state.documentList.length<= 0 && this.state.observationList.length<=0 ) &&
+                                    <div>
                                     <DocumentInput
                                         updateCallback={this.updateDocuments}
                                     />
-                                </div>
+                                    </div>
+                                
+                                }
+                                
                                 <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                                         <Loader
