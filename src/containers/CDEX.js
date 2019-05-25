@@ -8,9 +8,13 @@ import { Link } from 'react-router-dom';
 import { send } from 'q';
 import DocumentInput from '../components/DocumentInput';
 import Loader from 'react-loader-spinner';
-import { Input , Checkbox } from 'semantic-ui-react';
+import { Input , Checkbox, IconGroup } from 'semantic-ui-react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { faCommentDollar } from '@fortawesome/free-solid-svg-icons';
+import Moment from 'react-moment';
+import moment from "moment"
+
+
 
 class CDEX extends Component {
     constructor(props) {
@@ -95,13 +99,19 @@ class CDEX extends Component {
         let resources = [];
         let resp = await this.getCommunicationRequests();
         // console.log("resp------", resp);
-        if (resp.entry != undefined) {
-            Object.keys(resp.entry).forEach((key) => {
-                if (resp.entry[key].resource != undefined) {
-                    resources.push(resp.entry[key].resource);
-                }
-            });
+        if(resp != undefined){
+            if (resp.entry != undefined) {
+                Object.keys(resp.entry).forEach((key) => {
+                    if (resp.entry[key].resource != undefined) {
+                        resources.push(resp.entry[key].resource);
+                    }
+                });
+            }
         }
+        else{
+            console.log('no communications')
+        }
+        
         // console.log("-------", resources);
         this.setState({ comm_req: resources });
     }
@@ -113,6 +123,8 @@ class CDEX extends Component {
         this.setState({ observationList: [] });
         this.setState({ check: false });
         this.setState({ content: [] });
+        this.setState({ documentContent: [] });
+        this.setState({documentList:[]})
 
         let f = this.state.files;
         f = null;
@@ -761,15 +773,21 @@ class CDEX extends Component {
             if (observation) {
                 return (
                     <div key={key}>
-                        <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label>
-                        <input 
-                            className='ui checkbox'
-                            name = {key}
-                            type="checkbox"
-                            defaultChecked={this.state.check}
-                            value={this.state.check}
-                            onChange={(e)=>this.handleChange(observation,e)}
-                        />
+                        <div className='data-label1'>
+                        {observation.observation.code.coding[0].display+" : "}<span className="data2">{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</span>
+                            <span>
+                                <input 
+                                    className='ui checkbox'
+                                    name = {key}
+                                    type="checkbox"
+                                    defaultChecked={this.state.check}
+                                    value={this.state.check}
+                                    onChange={(e)=>this.handleChange(observation,e)}
+                                />
+                            </span>
+                        </div>
+                        {/* <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label> */}
+                        
                     </div>
                 )
 
@@ -777,18 +795,23 @@ class CDEX extends Component {
         });
         let documents = this.state.documentList.map((document, key) => {
             if (document) {
-                console.log('document,doc',document)
+                console.log('document,doc',document.document)
+                var label =  document.document.type.coding[0].display+" : "
+                var value = document.document.description+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)
                 return (
                     <div key={key}>
-                        <label for="ui checkbox">  {document.document.type.coding[0].display+":"}{document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</label>
-                        <input 
+                        <div className="data-label1">
+                            {document.document.type.coding[0].display+" : "}<span className="data2">{document.document.description+","+"  Status - "+document.document.status+","+"  Time Period - "+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</span>
+                            <span><input 
                             className='ui checkbox'
                             name = {key}
                             type="checkbox"
                             defaultChecked={this.state.documentCheck}
                             value={this.state.documentCheck}
                             onChange={(e)=>this.handleDocumentChange(document,e)}
-                        />
+
+                        /></span></div>
+                        
                     </div>
                 )
 
@@ -823,13 +846,13 @@ class CDEX extends Component {
                                     Sender {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
                                 </div>
                                 <div className="data-label">
-                                   Start Date : <span className="data1">{this.state.startDate}</span>
+                                   Start Date : <span className="data1">{moment(this.state.startDate).format(" YYYY-MM-DD, hh:mm a")}</span>
                                 </div>
                                 <div className="data-label">
-                                   End Date : <span className="data1">{this.state.endDate}</span>
+                                   End Date : <span className="data1">{moment(this.state.endDate).format(" YYYY-MM-DD, hh:mm a")}</span>
                                 </div>
                                 <div className="data-label">
-                                   Recieved Date : <span className="data1">{this.state.recievedDate}</span>
+                                   Recieved Date : <span className="data1">{moment(this.state.recievedDate).format(" YYYY-MM-DD, hh:mm a")}</span>
                                 </div>
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
@@ -842,7 +865,7 @@ class CDEX extends Component {
                                 {this.state.documentList.length >0 &&
                                     <div className="data-label">
                                         Documents : <span className="data1">{documents}</span>
-                                    </div>
+                                    </div>  
                                 }
                                 
                                 {/* <div className='data-label'>
