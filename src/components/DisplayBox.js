@@ -55,7 +55,7 @@ class DisplayBox extends Component{
             messageJson:{
               "resourceType": "MessageDefinition",
               "status": "draft",
-              "category": "Notification",
+              "category": "notification",
               "focus": [
                   {
                       "code": "Patient",
