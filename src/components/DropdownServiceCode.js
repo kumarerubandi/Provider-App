@@ -28,7 +28,7 @@ export default class DropdownServiceCode extends Component {
     // console.log( jsonData[value]);
       if(jsonData[value] !== undefined){
           let codesList = []
-          console.log( jsonData[value]);
+          // console.log( jsonData[value]);
           for(const key in jsonData[value]){
             console.log(key,jsonData[value][key])
               codesList.push({'key':key,'value':key,'text':key+" - "+jsonData[value][key]})

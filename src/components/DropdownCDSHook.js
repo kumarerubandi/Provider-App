@@ -22,7 +22,7 @@ export default class DropdownResourceType extends Component {
   };
 
   handleChange = (e, { value }) => {
-    console.log(this.props);
+    console.log(this.props,value);
     this.props.updateCB(this.props.elementName, value)
     this.setState({ currentValue: value })
   }

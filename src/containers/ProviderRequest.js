@@ -76,8 +76,10 @@ class ProviderRequest extends Component {
       frequency: null,
       loadCards: false,
       showMenu: false,
-      service_code:"",
-      category_name:"",
+      service_code: "",
+      category_name: "",
+      device_code: "",
+      device_text: "",
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -129,9 +131,10 @@ class ProviderRequest extends Component {
   }
 
   updateStateElement = (elementName, text) => {
-    console.log(elementName,'elenAME')
+    console.log(elementName, 'elenAME', text);
     if (elementName === "hook") {
       this.setState({ validateIcdCode: false })
+
       for (const key in orderReview) {
         if (key === text) {
           text = "order-review";
@@ -147,7 +150,8 @@ class ProviderRequest extends Component {
         }
         for (const key in homeOxygen) {
           if (key === text) {
-            text = "home-oxygen-theraphy";
+            this.setState({ device_code: key, device_text: homeOxygen[key] });
+            text = "home-oxygen-therapy";
             this.setState({ [elementName]: text });
           }
         }
@@ -242,12 +246,12 @@ class ProviderRequest extends Component {
     }
     console.log("Prefetch input--", JSON.stringify(prefectInput));
     const url = this.props.config.crd.crd_url + "prefetch";
-    if(this.props.authorized_fhir){
+    if (this.props.authorized_fhir) {
       headers.authorization = "Bearer " + token
     }
     await fetch(url, {
       method: "POST",
-      headers:headers,
+      headers: headers,
       body: JSON.stringify(prefectInput),
     }).then((response) => {
       return response.json();
@@ -403,7 +407,7 @@ class ProviderRequest extends Component {
     let json_request = await this.getJson();
     let accessToken = this.state.accessToken;
     accessToken = token;
-    this.setState({accessToken});
+    this.setState({ accessToken });
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.coverage_requirement_path;
@@ -419,6 +423,7 @@ class ProviderRequest extends Component {
         body: JSON.stringify(json_request)
       })
       const res_json = await fhirResponse.json();
+      console.log("------response json",res_json);
       this.setState({ response: res_json });
 
       if (fhirResponse && fhirResponse.status) {
@@ -471,16 +476,16 @@ class ProviderRequest extends Component {
               </button>
               <div className="menu-content">
                 <button className="logout-btn" onClick={this.onClickLogout}>
-                <i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-sign-out" aria-hidden="true"></i>Logout</button>
+                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-sign-out" aria-hidden="true"></i>Logout</button>
               </div>
             </div>
             <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
               Configuration</div>
-              <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
+            <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               X12 Converter</div>
-              <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
+            <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
           </div>
@@ -531,27 +536,27 @@ class ProviderRequest extends Component {
                 }
               </div>
 
-              <DropdownServiceCode elementName="service_code"  updateCB={this.updateStateElement}
-                      />
+              <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
+              />
 
 
-              {this.state.auth_active !== 'active'&& 
+              {this.state.auth_active !== 'active' &&
                 <div>
-                  {this.state.category_name==='Durable Medical Equipment' &&
-                  <div>
-                    <div className="header">
-                      ICD 10 / HCPCS Codes*
+                  {this.state.category_name === 'Durable Medical Equipment' &&
+                    <div>
+                      <div className="header">
+                        ICD 10 / HCPCS Codes*
                     </div>
-                    <div className="dropdown">
-                      <DropdownCDSHook
-                        elementName="hook"
-                        updateCB={this.updateStateElement}
-                      />
+                      <div className="dropdown">
+                        <DropdownCDSHook
+                          elementName="hook"
+                          updateCB={this.updateStateElement}
+                        />
+                      </div>
+                      {this.state.validateIcdCode === true &&
+                        <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                      }
                     </div>
-                    {this.state.validateIcdCode === true &&
-                      <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                    }
-                  </div>
                   }
                   <div>
                     <div className="header">
@@ -719,9 +724,9 @@ class ProviderRequest extends Component {
             {(this.state.loading === false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
               <div className="right-form">
                 <DisplayBox
-                  response={this.state.response} 
-                  req_type="coverage_requirement" 
-                  userId={this.state.practitionerId} 
+                  response={this.state.response}
+                  req_type="coverage_requirement"
+                  userId={this.state.practitionerId}
                   fhirAccessToken={this.state.accessToken}
                   fhirServerUrl={this.props.config.provider.fhir_url}
                   patientId={this.state.patientId} hook={this.state.hook} />
@@ -738,11 +743,11 @@ class ProviderRequest extends Component {
             {this.state.loading === false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
               <div className="right-form">
                 <DisplayBox
-                  response={this.state.response} req_type="coverage_determination" 
-                  userId={this.state.practitionerId} patientId={this.state.patient} 
-                  hook={this.state.hook} 
+                  response={this.state.response} req_type="coverage_determination"
+                  userId={this.state.practitionerId} patientId={this.state.patient}
+                  hook={this.state.hook}
                   fhirAccessToken={this.state.accessToken}
-                  fhirServerUrl={this.props.config.provider.fhir_url}/>
+                  fhirServerUrl={this.props.config.provider.fhir_url} />
               </div>
             }
           </div>
@@ -750,9 +755,50 @@ class ProviderRequest extends Component {
       </React.Fragment>);
   };
 
+  async getRequestID() {
+
+    const min = 1;
+    const max = 1000000000;
+    const num = parseInt(min + Math.random() * (max - min));
+    console.log("num----------", num);
+    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    let req_check = await this.getResources(token, "DeviceRequest", num);
+    // console.log("random------------", req_check);
+    if (req_check.hasOwnProperty('total')) {
+      if (req_check.total > 0) {
+        await this.getRequestID(this.state.accessToken);
+      }
+      else {
+        return num;
+      }
+    }
+  }
+
+  async getResources(token, resource, identifier) {
+    var url = this.props.config.payer.fhir_url + '/' + resource + "?identifier=" + identifier;
+    // console.log("url-------",url,token);
+    let sender = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer ' + token
+      }
+    }).then(response => {
+      // console.log("response----------",response);
+      return response.json();
+    }).then((response) => {
+      // console.log("----------response", response);
+      return response;
+    }).catch(reason =>
+      console.log("No response recieved from the server", reason)
+    );
+    return sender;
+  }
+
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
+
     let coverage = {
       resource: {
         resourceType: "Coverage",
@@ -773,6 +819,37 @@ class ProviderRequest extends Component {
         ]
       }
     };
+    let deviceRequest = {
+      "resourceType": "DeviceRequest",
+      "identifier": [
+        {
+          "value": await this.getRequestID()
+        }
+      ],
+      "status": "active",
+      "intent": "instance-order",
+      "priority": "routine",
+      "codeCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": this.state.device_code
+          }
+        ],
+        "text": this.state.device_text
+      },
+      "subject": {
+        "reference": "Patient?identifier=" + patientId
+      },
+      // "encounter": {
+      //   "reference": "Encounter/"+this.state.encounterId
+      // },
+      "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
+      "authoredOn": "2013-05-08T09:33:27+07:00",
+      "requester": {
+        "reference": "Practitioner?identifier=" + this.state.practitionerId
+      }
+    }
     let medicationJson = {
       resourceType: "MedicationOrder",
       dosageInstruction: [
@@ -814,12 +891,14 @@ class ProviderRequest extends Component {
       }
 
     };
+    // "99183": "Physician attendance and supervision of hyperbaric oxygen therapy, per session",
+    // console.log("------------final device request", deviceRequest)
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
       fhirServer: this.state.fhirUrl,
       hook: this.state.hook,
       payerName: this.state.payer,
-      service_code:this.state.service_code,
+      service_code: this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
         "token_type": this.props.config.authorization_service.token_type, // json
@@ -841,6 +920,9 @@ class ProviderRequest extends Component {
               resourceType: "Patient",
               id: patientId,
             }
+          },
+          {
+            resource: deviceRequest
           }
           ]
         }
@@ -872,7 +954,7 @@ class ProviderRequest extends Component {
 function mapStateToProps(state) {
   console.log(state);
   return {
-      config: state.config,
+    config: state.config,
   };
 };
 export default withRouter(connect(mapStateToProps)(ProviderRequest));
