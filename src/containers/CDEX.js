@@ -74,9 +74,9 @@ class CDEX extends Component {
         let headers = {
             "Content-Type": "application/json",
         }
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         console.log(token,'token')
-        if(this.props.config.provider.authorized_fhir){
+        if(this.state.config.provider.authorized_fhir){
             console.log('The token is : ', token, tempUrl);
             headers['Authorization'] = 'Bearer ' + token
         }
@@ -131,11 +131,11 @@ class CDEX extends Component {
         this.setState({ files: f });
         console.log(this.state.files)
         var tempUrl = this.state.config.provider.fhir_url + "/"+patient_id;
-        const token= await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token= await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers={
             "Content-Type": "application/json",
         }
-        if(this.props.config.provider.authorized_fhir){
+        if(this.state.config.provider.authorized_fhir){
             headers['Authorization'] = 'Bearer ' + token
         }
         let patient = await fetch(tempUrl, {
@@ -261,11 +261,11 @@ class CDEX extends Component {
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
                     var Url  = this.state.config.provider.fhir_url + "/"+valueString;
-                    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
                     let headers = {
                         "Content-Type": "application/json",
                     }
-                    if(this.props.config.provider.authorized_fhir){
+                    if(this.state.config.provider.authorized_fhir){
                         headers['Authorization'] = 'Bearer ' + token
                     }
                     let observations = await fetch(Url, {
@@ -332,7 +332,7 @@ class CDEX extends Component {
                     console.log(searchString,'searchstring')
                     var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
                     // var Url=''
-                    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
                     let headers = {
                         "Content-Type": "application/json",
                     }
@@ -487,7 +487,7 @@ class CDEX extends Component {
         let headers={
             "Content-Type": "application/json",
         }
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token = await createToken(this.state.config.payer.grant_type,'payer',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         if(this.props.config.payer.authorizedPayerFhir){
             headers['Authorization'] = 'Bearer ' + token
         }
@@ -701,7 +701,7 @@ class CDEX extends Component {
     async getSenderResource(c) {
         var sender_url = this.state.config.provider.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
         console.log("url---------", sender_url);
-        const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers={
             "Content-Type": "application/json",
         }

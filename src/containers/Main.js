@@ -301,11 +301,9 @@ class Review extends Component {
         this.setState({ 'x12_response': x12_data['x12_response'] });
         try {
             const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
-            const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+            const token = await createToken(this.props.config.payer.grant_type,'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
             console.log('The token is : ', token);
-            if(this.props.config.authorized_fhir){
-                fhirClient.bearerToken = token;
-            }
+            fhirClient.bearerToken = token;
             fhirClient.create({
                 resourceType: 'Claim',
                 body: claim_json,
@@ -782,7 +780,7 @@ class Review extends Component {
     }
     async getClaimResponse(claim_id) {
         const fhirClient=new Client({ baseUrl: this.props.config.payer.fhir_url });
-        const token=await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token=await createToken(this.props.config.payer.grant_type,'payer',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         if(this.props.config.authorized_fhir){
             fhirClient.bearerToken = token;
         }

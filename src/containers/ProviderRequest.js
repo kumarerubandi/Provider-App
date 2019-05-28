@@ -191,9 +191,7 @@ class ProviderRequest extends Component {
 
   async readFHIR(resourceType, resourceId) {
     const fhirClient = new Client({ baseUrl: this.state.fhirUrl });
-    if (this.props.config.provider.authorized_fhir) {
-      fhirClient.bearerToken = this.state.accessToken;
-    }
+    fhirClient.bearerToken = this.state.accessToken;
     let readResponse = await fhirClient.read({ resourceType: resourceType, id: resourceId });
     console.log('Read Rsponse', readResponse)
     return readResponse;
@@ -398,7 +396,7 @@ class ProviderRequest extends Component {
   async submit_info() {
     this.setState({ loadingSteps: false, stepsErrorString: undefined });
     this.resetSteps();
-    let token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    let token = await createToken('password','provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
     token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
