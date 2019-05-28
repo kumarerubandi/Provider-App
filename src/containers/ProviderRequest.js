@@ -755,18 +755,17 @@ class ProviderRequest extends Component {
       </React.Fragment>);
   };
 
-  async getRequestID() {
+  async getRequestID(token) {
 
     const min = 1;
     const max = 1000000000;
     const num = parseInt(min + Math.random() * (max - min));
     console.log("num----------", num);
-    const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
     let req_check = await this.getResources(token, "DeviceRequest", num);
     // console.log("random------------", req_check);
     if (req_check.hasOwnProperty('total')) {
       if (req_check.total > 0) {
-        await this.getRequestID(this.state.accessToken);
+        await this.getRequestID(token);
       }
       else {
         return num;
@@ -798,7 +797,7 @@ class ProviderRequest extends Component {
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
-
+    const token = await createToken('password','provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
     let coverage = {
       resource: {
         resourceType: "Coverage",
@@ -823,7 +822,7 @@ class ProviderRequest extends Component {
       "resourceType": "DeviceRequest",
       "identifier": [
         {
-          "value": await this.getRequestID()
+          "value": await this.getRequestID(token)
         }
       ],
       "status": "active",
