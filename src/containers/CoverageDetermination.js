@@ -130,7 +130,7 @@ export default class CoverageDetermination extends Component {
   }
 
   async getResourceRecords(appContext) {
-    let tokenResponse = await createToken(config.username,config.password);
+    let tokenResponse = await createToken('password','provider',config.username,config.password,true);
     console.log(tokenResponse);
     await this.getValusets( tokenResponse,appContext);
   }
@@ -199,7 +199,7 @@ export default class CoverageDetermination extends Component {
     // let jwt = await createJwt();
     // console.log('jwttttt', jwt)
     // jwt = "Bearer " + jwt;
-    let token = await createToken(config.username,config.password);
+    let token = await createToken('passwrod','provider',config.username,config.password,true);
     token = "Bearer " + token;
     var myHeaders = new Headers({
         "Content-Type": "application/json",
