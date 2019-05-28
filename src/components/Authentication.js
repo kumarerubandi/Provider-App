@@ -27,7 +27,7 @@ export async function createToken(grantType,user,username,password,login=false){
             // else{
             //     params['client_id'] = config.payer.client_id
             // }
-            params['client_id'] = config.provider.client_id
+            params['client_id'] = 'app-login'
             params['username'] = username
             params['password'] = password
         }

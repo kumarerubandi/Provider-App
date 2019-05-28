@@ -55,7 +55,7 @@ class DisplayBox extends Component{
             messageJson:{
               "resourceType": "MessageDefinition",
               "status": "draft",
-              "category": "notification",
+              "category": {"code":"notification"},
               "focus": [
                   {
                       "code": "Patient",
@@ -192,10 +192,12 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       const launchParameters = {
         patient: patientId,
       };
+      let description;
 
       if (link.appContext) {
         console.log("Inside app context if")
         launchParameters.appContext = link.appContext;
+        description = "template="+ link.appContext.template+ "&request="+JSON.stringify(link.appContext.request)+"&filepath="+link.appContext.filepath+"&patient="+link.appContext.patient
       }
       
       // axios({
@@ -209,9 +211,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       // })
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
       let messageJson = this.state.messageJson;
-      console.log("JSON.stringify(link)----",JSON.stringify(link))
-      messageJson['description'] = encodeURIComponent(JSON.stringify(link));
-      const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
+      messageJson['description'] = encodeURIComponent(description);
+      const fhirClient = new Client({ baseUrl: "http://3.92.187.150:8280/ehr-server/stu3" });
       // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       // console.log('The token is : ', accessToken,messageJson);
       // fhirClient.bearerToken = token;

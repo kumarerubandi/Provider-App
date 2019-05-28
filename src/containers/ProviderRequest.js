@@ -240,13 +240,11 @@ class ProviderRequest extends Component {
 
   async getResourceData(token, prefectInput) {
     let headers = {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      'Authorization': "Bearer " + token   
     }
     // console.log("Prefetch input--", JSON.stringify(prefectInput));
     const url = this.props.config.crd.crd_url + "prefetch";
-    if (this.props.authorized_fhir) {
-      headers.authorization = "Bearer " + token
-    }
     await fetch(url, {
       method: "POST",
       headers: headers,
@@ -402,10 +400,12 @@ class ProviderRequest extends Component {
       "Content-Type": "application/json",
       "authorization": token,
     });
-    let json_request = await this.getJson();
     let accessToken = this.state.accessToken;
     accessToken = token;
+    console.log(accessToken,'accesstoken')
     this.setState({ accessToken });
+    let json_request = await this.getJson();
+    
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.coverage_requirement_path;
@@ -542,7 +542,7 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active' &&
                 <div>
-                  {this.state.category_name === 'Durable Medical Equipment' &&
+                  
                     <div>
                       <div className="header">
                         ICD 10 / HCPCS Codes*
@@ -557,7 +557,7 @@ class ProviderRequest extends Component {
                         <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                       }
                     </div>
-                  }
+                  
                   <div>
                     <div className="header">
                       NPI
@@ -776,12 +776,15 @@ class ProviderRequest extends Component {
   async getResources(token, resource, identifier) {
     var url = this.props.config.payer.fhir_url + '/' + resource + "?identifier=" + identifier;
     // console.log("url-------",url,token);
+    let headers={
+      "Content-Type": "application/json",
+    }
+    if(this.props.config.payer.authorizedPayerFhir){
+      headers['Authorization'] = "Bearer " + token
+    }
     let sender = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': 'Bearer ' + token
-      }
+      headers: headers
     }).then(response => {
       // console.log("response----------",response);
       return response.json();
