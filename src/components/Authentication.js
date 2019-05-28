@@ -10,7 +10,7 @@ export async function createToken(grantType,user,username,password,login=false){
     warning: "warningClass"
   };
     const tokenUrl = config.authorization_service.auth_token_url;
-    console.log("Retrieving OAuth token from "+tokenUrl,types.info);
+    // console.log("Retrieving OAuth token from "+tokenUrl,types.info);
     let params={}
     if(login == true){
         params['grant_type'] = grantType
@@ -55,7 +55,7 @@ export async function createToken(grantType,user,username,password,login=false){
     }else{
     console.log("No client id provided in GlobalConfiguration",this.warning);
     }
-    console.log('params',params.client_id,params )
+    // console.log('params',params.client_id,params )
     // Encodes the params to be compliant with
     // x-www-form-urlencoded content types.
     const searchParams = Object.keys(params).map((key) => {

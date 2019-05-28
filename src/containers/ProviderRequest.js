@@ -131,7 +131,7 @@ class ProviderRequest extends Component {
   }
 
   updateStateElement = (elementName, text) => {
-    console.log(elementName, 'elenAME', text);
+    // console.log(elementName, 'elenAME', text);
     if (elementName === "hook") {
       this.setState({ validateIcdCode: false })
 
@@ -193,12 +193,12 @@ class ProviderRequest extends Component {
     const fhirClient = new Client({ baseUrl: this.state.fhirUrl });
     fhirClient.bearerToken = this.state.accessToken;
     let readResponse = await fhirClient.read({ resourceType: resourceType, id: resourceId });
-    console.log('Read Rsponse', readResponse)
+    // console.log('Read Rsponse', readResponse)
     return readResponse;
   }
 
   async getPrefetchData() {
-    console.log(this.state.hook);
+    // console.log(this.state.hook);
     var docs = [];
     if (this.state.hook === "patient-view") {
       var prefectInput = { "Patient": this.state.patientId };
@@ -242,7 +242,7 @@ class ProviderRequest extends Component {
     let headers = {
       "Content-Type": "application/json"
     }
-    console.log("Prefetch input--", JSON.stringify(prefectInput));
+    // console.log("Prefetch input--", JSON.stringify(prefectInput));
     const url = this.props.config.crd.crd_url + "prefetch";
     if (this.props.authorized_fhir) {
       headers.authorization = "Bearer " + token
@@ -356,7 +356,7 @@ class ProviderRequest extends Component {
         if (index !== 0) {
           steps[index - 1].step_status = "step_done"
         }
-        console.log(index, steps[index])
+        // console.log(index, steps[index])
         if (index !== steps.length) {
           steps[index].step_status = "step_loading"
         }
@@ -413,7 +413,7 @@ class ProviderRequest extends Component {
     if (this.state.hook === 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
-    console.log("Fetching response from " + url + ",types.info")
+    // console.log("Fetching response from " + url + ",types.info")
     console.log("json_request",json_request)
     try {
       const fhirResponse = await fetch(url, {
@@ -421,9 +421,9 @@ class ProviderRequest extends Component {
         headers: myHeaders,
         body: JSON.stringify(json_request)
       })
-      console.log("fhir-----------",fhirResponse);
+      // console.log("fhir-----------",fhirResponse);
       const res_json = await fhirResponse.json();
-      console.log("------response json",res_json);
+      // console.log("------response json",res_json);
       this.setState({ response: res_json });
 
       if (fhirResponse && fhirResponse.status) {
@@ -542,7 +542,7 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active' &&
                 <div>
-                  {/* {this.state.category_name === 'Durable Medical Equipment' && */}
+                  {this.state.category_name === 'Durable Medical Equipment' &&
                     <div>
                       <div className="header">
                         ICD 10 / HCPCS Codes*
@@ -557,7 +557,7 @@ class ProviderRequest extends Component {
                         <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                       }
                     </div>
-                  {/* } */}
+                  }
                   <div>
                     <div className="header">
                       NPI
@@ -760,7 +760,7 @@ class ProviderRequest extends Component {
     const min = 1;
     const max = 1000000000;
     const num = parseInt(min + Math.random() * (max - min));
-    console.log("num----------", num);
+    // console.log("num----------", num);
     let req_check = await this.getResources(token, "DeviceRequest", num);
     // console.log("random------------", req_check);
     if (req_check.hasOwnProperty('total')) {

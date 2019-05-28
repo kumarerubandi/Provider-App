@@ -87,8 +87,8 @@ class DisplayBox extends Component{
           });
         }
         console.log("Take suggestion");
-      console.log(suggestion);
-      console.log(this.props);
+      // console.log(suggestion);
+      // console.log(this.props);
         this.props.takeSuggestion(suggestion);
       } else {
         console.error('There was no label on this suggestion', suggestion);
@@ -209,10 +209,11 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       // })
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
       let messageJson = this.state.messageJson;
+      console.log("JSON.stringify(link)----",JSON.stringify(link))
       messageJson['description'] = encodeURIComponent(JSON.stringify(link));
       const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
       // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-      console.log('The token is : ', accessToken,messageJson);
+      // console.log('The token is : ', accessToken,messageJson);
       // fhirClient.bearerToken = token;
       fhirClient.create({
           resourceType: "MessageDefinition",
@@ -221,7 +222,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                       "Authorization": accessToken
           }
       }).then((result) => {
-        console.log("fhir result",result.id);
+        console.log("message def result",result);
         if (result && Object.prototype.hasOwnProperty.call(result, 'id')) {
           if (link.url.indexOf('?') < 0) {
             link.url += '?';
