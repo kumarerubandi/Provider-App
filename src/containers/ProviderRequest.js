@@ -414,12 +414,14 @@ class ProviderRequest extends Component {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
     console.log("Fetching response from " + url + ",types.info")
+    console.log("json_request",json_request)
     try {
       const fhirResponse = await fetch(url, {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(json_request)
       })
+      console.log("fhir-----------",fhirResponse);
       const res_json = await fhirResponse.json();
       console.log("------response json",res_json);
       this.setState({ response: res_json });
@@ -540,7 +542,7 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active' &&
                 <div>
-                  {this.state.category_name === 'Durable Medical Equipment' &&
+                  {/* {this.state.category_name === 'Durable Medical Equipment' && */}
                     <div>
                       <div className="header">
                         ICD 10 / HCPCS Codes*
@@ -555,7 +557,7 @@ class ProviderRequest extends Component {
                         <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                       }
                     </div>
-                  }
+                  {/* } */}
                   <div>
                     <div className="header">
                       NPI
