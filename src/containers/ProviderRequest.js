@@ -170,10 +170,10 @@ class ProviderRequest extends Component {
       formValidate = false;
       this.setState({ validatePatient: true });
     }
-    if (this.state.hook === '' || this.state.hook === null) {
-      formValidate = false;
-      this.setState({ validateIcdCode: true });
-    }
+    // if ((this.state.hook === '' || this.state.hook === null) ) {
+    //   formValidate = false;
+    //   this.setState({ validateIcdCode: true });
+    // }
     return formValidate;
   }
 
@@ -543,7 +543,7 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active' &&
                 <div>
-                  
+                  {this.state.category_name === 'Durable Medical Equipment' &&
                     <div>
                       <div className="header">
                         ICD 10 / HCPCS Codes*
@@ -558,7 +558,7 @@ class ProviderRequest extends Component {
                         <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                       }
                     </div>
-                  
+                  }
                   <div>
                     <div className="header">
                       NPI
