@@ -38,6 +38,7 @@ class ProviderRequest extends Component {
       patient: null,
       fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
+      dtr_fhir:this.props.config.dtr.dtr_fhir,
       scope: '',
       payer: '',
       patientId: '',
@@ -897,7 +898,7 @@ class ProviderRequest extends Component {
     // console.log("------------final device request", deviceRequest)
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
-      fhirServer: this.props.config.dtr.dtr_fhir,
+      fhirServer: this.startLoading.dtr_fhir,
       hook: this.state.hook,
       payerName: this.state.payer,
       service_code: this.state.service_code,
