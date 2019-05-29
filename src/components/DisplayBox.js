@@ -231,7 +231,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
             link.url += '&';
           }
           link.url += `launch=${result.id}`;
-          link.url += `&iss=${fhirBaseUrl}`;
+          // link.url += `&iss=${fhirBaseUrl}`;
+          link.url += `&iss=http://3.92.187.150:8280/ehr-server/stu3`;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');

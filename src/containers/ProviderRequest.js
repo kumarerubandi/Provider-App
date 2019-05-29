@@ -846,8 +846,8 @@ class ProviderRequest extends Component {
       // "encounter": {
       //   "reference": "Encounter/"+this.state.encounterId
       // },
-      "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
-      "authoredOn": "2013-05-08T09:33:27+07:00",
+      // "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
+      // "authoredOn": "2013-05-08T09:33:27+07:00",
       "requester": {
         "reference": "Practitioner?identifier=" + this.state.practitionerId
       }
