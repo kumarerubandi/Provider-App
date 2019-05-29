@@ -898,7 +898,7 @@ class ProviderRequest extends Component {
     // console.log("------------final device request", deviceRequest)
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
-      fhirServer: this.startLoading.dtr_fhir,
+      fhirServer: this.state.dtr_fhir,
       hook: this.state.hook,
       payerName: this.state.payer,
       service_code: this.state.service_code,
