@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 //import { connect } from 'react-redux';
 import styles from './card-list.css';
+import {button} from 'semantic-ui-react'
 import Button from 'terra-button';
 import TerraCard from 'terra-card';
 import Text from 'terra-text';
@@ -212,7 +213,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
       let messageJson = this.state.messageJson;
       messageJson['description'] = encodeURIComponent(description);
-      const fhirClient = new Client({ baseUrl: "http://3.92.187.150:8280/ehr-server/stu3" });
+      const fhirClient = new Client({ baseUrl: this.props.config.dtr.dtr_fhir  });
       // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       // console.log('The token is : ', accessToken,messageJson);
       // fhirClient.bearerToken = token;
@@ -232,7 +233,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           }
           link.url += `launch=${result.id}`;
           // link.url += `&iss=${fhirBaseUrl}`;
-          link.url += `&iss=http://3.92.187.150:8280/ehr-server/stu3`;
+          link.url += `&iss=`+this.props.config.dtr.dtr_fhir;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
@@ -266,6 +267,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
         }
         return (
           <div className={styles['card-source']}>
+
             Source:
             <a // eslint-disable-line jsx-a11y/anchor-is-valid
               className={styles['source-link']}
@@ -274,6 +276,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
             >
               {source.label}
             </a>
+            
             {icon}
           </div>
         );
@@ -296,6 +299,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           // Iterate over each card in the cards array
           if(this.props.response!=null){
             console.log("Resspsp",this.props.response.hasOwnProperty('requirements'),this.props.response);
+            // var prior_auth = this.props.response.links[0].appContext.prior_auth
             if(this.props.req_type !== "coverage_determination" && (this.props.response.hasOwnProperty('cards')) && this.props.response.cards !=null){
                 this.props.response.cards
                 .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
@@ -311,6 +315,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                   // -- Detail (ReactMarkdown supports Github-flavored markdown) --
                   const detailSection = '';
 
+              
                   // -- Suggestions --
                   let suggestionsSection;
                   if (card.suggestions) {
@@ -330,14 +335,25 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                     card.links = this.modifySmartLaunchUrls(card) || card.links;
                    
                     linksSection = card.links.map((link, ind) => (
-                      <Button
-                        key={ind}
+                     <div key={ind}>
+                     <div className="div-prior-auth">
+                        {link.appContext.prior_auth==true &&
+                              <span>Prior Authorization necessary</span>
+                          }
+                          {link.appContext.prior_auth== false &&
+                                <span>No Prior Authorization is Needed</span>
+                          }
+                      </div>
+                      <button class="ui primary button"
+                        
                         onClick={e => this.launchLink(e, link)}
                         text={link.label}
                         variant={Button.Opts.Variants['DE-EMPHASIS']}
-                      />
+                      >{link.label}</button>
+                      </div>
                     ));
                   }
+                  
 
                   const builtCard = (
                     <TerraCard key={cardInd} className='decision-card alert-info'>
@@ -347,6 +363,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                       <div className={styles['suggestions-section']}>
                         {suggestionsSection}
                       </div>
+                     
                       <div className={styles['links-section']}>
                         {linksSection}
                       </div>
