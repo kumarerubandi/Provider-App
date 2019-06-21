@@ -48,7 +48,7 @@ class Review extends Component {
           scope         : settings.scope + " launch",
           launch_id     : this.state.launch,
           api_server_uri: this.state.iss
-          // api_server_uri: "http://3.92.187.150:8280/fhir/baseDstu3/"
+          // api_server_uri: "http://54.227.218.17:8280/fhir/baseDstu3/"
       });
       
       settings = this.getSettings();
@@ -58,16 +58,16 @@ class Review extends Component {
       if (this.props.config.provider.authorized_fhir === true){
          var { authorizeUrl, tokenUrl } = await fhirClient.smartAuthMetadata();
       
-         if(settings.api_server_uri.search('3.92.187.150') > 0){
+         if(settings.api_server_uri.search('54.227.218.17') > 0){
            authorizeUrl
-            = {protocol:"https://",host:"3.92.187.150:8443/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
-           tokenUrl = {protocol:"https:",host:"3.92.187.150:8443",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
+            = {protocol:"https://",host:"54.227.218.17:8443/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
+           tokenUrl = {protocol:"https:",host:"54.227.218.17:8443",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
          }
 
          // //////////////
 
-         //  authorizeUrl= {protocol:"https://",host:"3.92.187.150:8443/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
-         //  tokenUrl = {protocol:"https:",host:"3.92.187.150:8443",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
+         //  authorizeUrl= {protocol:"https://",host:"54.227.218.17:8443/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
+         //  tokenUrl = {protocol:"https:",host:"54.227.218.17:8443",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
 
          // //////////////
          const oauth2 = simpleOauthModule.create({
