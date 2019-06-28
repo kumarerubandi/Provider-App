@@ -64,6 +64,7 @@ class CDEX extends Component {
         this.onChangeSearchParameter = this.onChangeSearchParameter.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
+        this.showError = this.showError.bind(this);
 
     }
 
@@ -221,7 +222,10 @@ class CDEX extends Component {
         //     }
         // })
         
-        await this.getObservationDetails()
+        await this.getObservationDetails().then(() => {
+            // this.showError()
+        })
+
         // await this.getClinicalNoteDetails()
 
         
@@ -256,6 +260,17 @@ class CDEX extends Component {
         });
 
 
+    }
+    async showError(){
+        if(this.state.communicationPayload.length ==0){
+            this.setState({error : true});
+            this.setState({errorMsg : "No Documents Found!!"})
+        }   
+        else{
+            this.setState({error:false});
+            
+        }
+    
     }
     async getObservationDetails() {
         // let searchParameter = this.state.searchParameter;
@@ -310,7 +325,9 @@ class CDEX extends Component {
                                 })
                     // console.log(observationList,'observationList')
                     // observationList.push(observations)
-                    this.setState({communicationPayload:communicationPayload})
+                    this.setState({communicationPayload:communicationPayload},() => { 
+                        this.showError();
+                    })
                 }
                 else{
                     console.log('no observations found')
@@ -385,13 +402,14 @@ class CDEX extends Component {
                             })
                         }
                     }
-                    else{
-                        this.setState({error : true});
-                        this.setState({errorMsg : "No Documents Found!!"})
-                    }
-                    console.log(communicationPayload,'documentList')
+
                     // // observationList.push(observations)
-                    this.setState({communicationPayload:communicationPayload})
+                    this.setState({communicationPayload:communicationPayload},() => { 
+                        this.showError();
+                    })
+                    console.log(this.state.communicationPayload,'documentList')
+
+                    // console.log()
                     // this.setState({extensionUrl:extensionUrl})
                     // this.setState({extValueCodableConcept:code})
                     
@@ -403,8 +421,11 @@ class CDEX extends Component {
                     console.log('no Documents found')
                 }      
             }
+
             // console.log(observationList,'ooo')
         })
+        console.log(this.state.communicationPayload.length,'police')
+        // await this.showError()
     }
 
     // async getClinicalNoteDetails() {
@@ -482,7 +503,8 @@ class CDEX extends Component {
     //     })
     // }
 
-    startLoading() {
+    
+        startLoading() {
         this.setState({ loading: true }, () => {
             if(!this.state.error){
             this.submit_info();
@@ -516,14 +538,14 @@ class CDEX extends Component {
                     // "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
                     'reference': "Patient?given="+this.state.patient.name[0].given[0]+"&family="+this.state.patient.name[0].family+"&address-postalcode="+this.state.patient.address[0].postalCode+"&birthdate="+this.state.patient.birthDate
                 },
-                "recipient": [
-                    {
-                        "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
-                    }
-                ],
-                "sender": {
-                    "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
-                },
+                // "recipient": [
+                //     {
+                //         "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
+                //     }
+                // ],
+                // "sender": {
+                //     "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
+                // },
                 "occurrencePeriod": communicationRequest.occurrencePeriod,
                 "authoredOn": authoredOn,
                 "category": communicationRequest.category,
@@ -878,6 +900,10 @@ class CDEX extends Component {
                         endDate="No End Date"
                     }
             }
+            else{
+                startDate=false
+                endDate=false
+            }
             
             
             let recievedDate = d["authoredOn"]
@@ -891,13 +917,16 @@ class CDEX extends Component {
                 //         }
                 //     }
                 // })
-                return (
-                    <div key={i} className="main-list">
-                        {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId} Start Date ({startDate.substring(0,10)}),End Date({endDate.substring(0,10)}), Recieved On ({recievedDate.substring(0,10)})
-                        <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
-                            Review</button>
-                    </div>
-                )
+                if(startDate && endDate){
+                    return (
+                        <div key={i} className="main-list">
+                            {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId} Start Date ({startDate.substring(0,10)}),End Date({endDate.substring(0,10)}), Recieved On ({recievedDate.substring(0,10)})
+                            <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
+                                Review</button>
+                        </div>
+                    )
+                }
+                
             }
         });
         let requests = this.state.contentStrings.map((request, key) => {
