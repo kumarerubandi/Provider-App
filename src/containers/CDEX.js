@@ -33,7 +33,6 @@ class CDEX extends Component {
             contentStrings: [],
             communicationRequest: {},
             searchParameter: '',
-            observationList: [],
             documentReference: {},
             startDate:'',
             endDate:'',
@@ -44,8 +43,15 @@ class CDEX extends Component {
             providerOrganization:{},
             payerOrganization:{},
             valueString:'',
-            documentList:[],
+            communicationPayload:[],
             documentContent:[],
+            observationValuestring:'',
+            extensionUrl:'',
+            extValueCodableConcept:'',
+            error:false,
+            errorMsg: '',
+            success:false,
+            successMsg: '',
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -124,7 +130,12 @@ class CDEX extends Component {
         this.setState({ check: false });
         this.setState({ content: [] });
         this.setState({ documentContent: [] });
-        this.setState({documentList:[]})
+        this.setState({communicationPayload:[]})
+        this.setState({observationValuestring:''})
+        this.setState({extensionUrl:''})
+        this.setState({extValueCodableConcept:''})
+        this.setState({error:false})
+        this.setState({success:false})
 
         let f = this.state.files;
         f = null;
@@ -211,7 +222,7 @@ class CDEX extends Component {
         // })
         
         await this.getObservationDetails()
-        await this.getClinicalNoteDetails()
+        // await this.getClinicalNoteDetails()
 
         
         this.setState({ form_load: true });
@@ -260,7 +271,9 @@ class CDEX extends Component {
                 if(p['extension'][0].hasOwnProperty('valueString')){
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
-                    var Url  = this.state.config.provider.fhir_url + "/"+valueString;
+                    var Url  = this.state.config.provider.fhir_url + "/"+valueString+'&subject='+this.state.patient.id;
+                    var extensionUrl =p['extension'][0].url
+                    console.log(p['extension'][0].url,'teeee')
                     const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
                     let headers = {
                         "Content-Type": "application/json",
@@ -268,11 +281,11 @@ class CDEX extends Component {
                     if(this.state.config.provider.authorized_fhir){
                         headers['Authorization'] = 'Bearer ' + token
                     }
-                    let observations = await fetch(Url, {
+                    let dataResult = await fetch(Url, {
                         method: "GET",
                         headers: headers
                     }).then(response => {
-                        console.log(response)
+                        console.log(response,'the reposnse')
                         return response.json();
                     }).then((response) => {
                         // console.log("----------response", response);
@@ -283,52 +296,37 @@ class CDEX extends Component {
                     }).catch(reason =>
                         console.log("No response recieved from the server", reason)
                     );
-                    console.log(observations, 'observations')
-                    let observationList = this.state.observationList
-                    if(observations !== undefined ){
-                        if ("entry" in observations) {
-                            observations.entry.map((observation) => {
-                                    // observation['valueString']=valueString
-                                // if (observationList.indexOf(observation.resource) == -1) {
-                                //     observationList.push(observation.resource)
-                                // }
-                                observationList.push({
-                                    "extension":p['extension'],
-                                    "observation":observation.resource
+                    console.log(dataResult, 'dataResult')
+                    let objJsonStr = JSON.stringify(dataResult);
+                    let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
+                    console.log(objJsonB64,'base64')
+                    let communicationPayload = this.state.communicationPayload
+                    communicationPayload.push({
+                                    "extension": p['extension'],
+                                    "contentAttachment":{
+                                        "contentType":"application/json",
+                                        "data":objJsonB64
+                                    }
                                 })
-                            })
-                        }
-                    }
-                    console.log(observationList,'observationList')
+                    // console.log(observationList,'observationList')
                     // observationList.push(observations)
-                    this.setState({observationList:observationList})
+                    this.setState({communicationPayload:communicationPayload})
                 }
                 else{
                     console.log('no observations found')
-                }   
-            }
-            // console.log(observationList,'ooo')
-        })
-    }
-
-    async getClinicalNoteDetails() {
-        // let searchParameter = this.state.searchParameter;
-        // console.log(searchParameter,'search')
-        let communicationRequest = this.state.communicationRequest
-        let payload=communicationRequest.payload
-        let patientId = communicationRequest.subject.reference
-        let dateParameter;
-        payload.map(async (p)=>{
-            if(p.hasOwnProperty('extension')){
+                }
                 if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
+                    console.log(p['extension'][0]['url'],'urlle')
+                    var extensionUrl=p['extension'][0]['url']
                     var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
                     console.log(code,'vallll')
-                    console.log(p['contentString'],'yo whts goin on ')
-                    var string = p['contentString'].split('during ')
-                    console.log(string,'string')
-                    var dates = string[1].split(" - ")
-                    console.log(dates,'dates')
-                    var searchString = "?type="+code+"&patient.identifier="+this.state.patient.identifier[0].value+"&period=gt"+dates[0]+"&period=lt"+dates[1]
+                    // console.log(p['contentString'],'yo whts goin on ')
+                    // var string = p['contentString'].split('during ')
+                    // console.log(string,'string')
+                    // var dates = string[1].split(" - ")
+                    // console.log(dates,'dates')
+                    //"&period=gt"+dates[0]+"&period=lt"+dates[1]
+                    var searchString = "?type="+code+"&patient="+this.state.patient.id
                     console.log(searchString,'searchstring')
                     var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
                     // var Url=''
@@ -356,7 +354,20 @@ class CDEX extends Component {
                     );
                     console.log(documents, 'documents')
 
-                    let documentList = this.state.documentList
+                    // let objJsonStr = JSON.stringify(documents);
+                    // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
+                    // console.log(objJsonB64,'base64')
+                    // let dataValueList = this.state.dataValueList
+                    // dataValueList.push({
+                    //                 "extension": p['extension'],
+                    //                 "contentAttachment":{
+                    //                     "contentType":"application/json",
+                    //                     "data":objJsonB64
+                    //                 }
+                    //             })
+
+                    let communicationPayload = this.state.communicationPayload
+
                     if(documents !== undefined ){
                         if ("entry" in documents) {
                             documents.entry.map((document) => {
@@ -364,34 +375,126 @@ class CDEX extends Component {
                                 // if (observationList.indexOf(observation.resource) == -1) {
                                 //     observationList.push(observation.resource)
                                 // }
-                                documentList.push({
+                                communicationPayload.push({
                                     "extension":p['extension'],
-                                    "document":document.resource
+                                    "contentAttachment":{
+                                        'contentType':document.resource.content[0].attachment.contentType,
+                                        'data':document.resource.content[0].attachment.data
+                                    }
                                 })
                             })
                         }
                     }
-                    console.log(documentList,'documentList')
+                    else{
+                        this.setState({error : true});
+                        this.setState({errorMsg : "No Documents Found!!"})
+                    }
+                    console.log(communicationPayload,'documentList')
                     // // observationList.push(observations)
-                    this.setState({documentList:documentList})
+                    this.setState({communicationPayload:communicationPayload})
+                    // this.setState({extensionUrl:extensionUrl})
+                    // this.setState({extValueCodableConcept:code})
+                    
+
                     // this.setState({valueString:valueString})
+                    // this.setState()
                 }
                 else{
                     console.log('no Documents found')
-                }   
+                }      
             }
             // console.log(observationList,'ooo')
         })
     }
 
+    // async getClinicalNoteDetails() {
+    //     // let searchParameter = this.state.searchParameter;
+    //     // console.log(searchParameter,'search')
+    //     let communicationRequest = this.state.communicationRequest
+    //     let payload=communicationRequest.payload
+    //     let patientId = communicationRequest.subject.reference
+    //     let dateParameter;
+    //     payload.map(async (p)=>{
+    //         if(p.hasOwnProperty('extension')){
+    //             if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
+    //                 console.log(p['extension'][0]['url'],'urlle')
+    //                 var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
+    //                 console.log(code,'vallll')
+    //                 console.log(p['contentString'],'yo whts goin on ')
+    //                 var string = p['contentString'].split('during ')
+    //                 console.log(string,'string')
+    //                 var dates = string[1].split(" - ")
+    //                 console.log(dates,'dates')
+    //                 var searchString = "?type="+code+"&patient.identifier="+this.state.patient.identifier[0].value+"&period=gt"+dates[0]+"&period=lt"+dates[1]
+    //                 console.log(searchString,'searchstring')
+    //                 var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
+    //                 // var Url=''
+    //                 const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    //                 let headers = {
+    //                     "Content-Type": "application/json",
+    //                 }
+    //                 if(this.props.config.provider.authorized_fhir){
+    //                     headers['Authorization'] = 'Bearer ' + token
+    //                 }
+    //                 let documents = await fetch(Url, {
+    //                     method: "GET",
+    //                     headers: headers
+    //                 }).then(response => {
+    //                     console.log(response)
+    //                     return response.json();
+    //                 }).then((response) => {
+    //                     // console.log("----------response", response);
+    //                     if (response.hasOwnProperty('entry')) {
+    //                         return response
+    //                     }
+    //                     // console.log(response,'res')
+    //                 }).catch(reason =>
+    //                     console.log("No response recieved from the server", reason)
+    //                 );
+    //                 console.log(documents, 'documents')
+
+    //                 let documentList = this.state.documentList
+    //                 if(documents !== undefined ){
+    //                     if ("entry" in documents) {
+    //                         documents.entry.map((document) => {
+    //                                 // observation['valueString']=valueString
+    //                             // if (observationList.indexOf(observation.resource) == -1) {
+    //                             //     observationList.push(observation.resource)
+    //                             // }
+    //                             documentList.push({
+    //                                 "extension":p['extension'],
+    //                                 "document":document.resource
+    //                             })
+    //                         })
+    //                     }
+    //                 }
+    //                 console.log(documentList,'documentList')
+    //                 // // observationList.push(observations)
+    //                 this.setState({documentList:documentList})
+    //                 // this.setState({valueString:valueString})
+    //                 // this.setState()
+    //             }
+    //             else{
+    //                 console.log('no Documents found')
+    //             }   
+    //         }
+    //         // console.log(observationList,'ooo')
+    //     })
+    // }
+
     startLoading() {
         this.setState({ loading: true }, () => {
+            if(!this.state.error){
             this.submit_info();
+
+            }
+            
         })
     }
 
     async submit_info() {
         let randomString = this.randomString()
+        let fullUrl = this.randomString()
         let communicationRequest = this.state.communicationRequest;
         console.log(this.state.communicationRequest, 'submitted', communicationRequest.sender.reference)
         // let communicationRequestJson = {};
@@ -401,89 +504,113 @@ class CDEX extends Component {
         var date = new Date()
         var authoredOn=date.toISOString()
         // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
-        var fileInputData = {
-            "resourceType": "Communication",
-            "status": "completed",
-            "subject": {
-                "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
+        var commJson = {
+            "resourceType": "Bundle",
+            "type": "transaction",
+            "entry": [{
+                "fullUrl": "urn:uuid:"+fullUrl,
+              "resource":{
+                "resourceType": "Communication",
+                "status": "completed",
+                "subject": {
+                    // "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
+                    'reference': "Patient?given="+this.state.patient.name[0].given[0]+"&family="+this.state.patient.name[0].family+"&address-postalcode="+this.state.patient.address[0].postalCode+"&birthdate="+this.state.patient.birthDate
+                },
+                "recipient": [
+                    {
+                        "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
+                    }
+                ],
+                "sender": {
+                    "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
+                },
+                "occurrencePeriod": communicationRequest.occurrencePeriod,
+                "authoredOn": authoredOn,
+                "category": communicationRequest.category,
+                // "contained": communicationRequest.contained,
+                "basedOn": [
+                    {
+                        'reference': this.state.communicationRequest.resourceType+"?identifier="+this.state.communicationRequest.identifier[0].value
+                    }
+                ],
+                "identifier": [
+                    {
+                        "system": "http://www.providerco.com/communication",
+                        "value": randomString
+                    }
+                ],
+                "payload": [this.state.communicationPayload]
             },
-            "recipient": [
-                {
-                    "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
-                }
-            ],
-            "sender": {
-                "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
-            },
-            "occurrencePeriod": communicationRequest.occurrencePeriod,
-            "authoredOn": authoredOn,
-            "category": communicationRequest.category,
-            // "contained": communicationRequest.contained,
-            "basedOn": [
-                {
-                    'reference': this.state.communicationRequest.resourceType+"?identifier="+this.state.communicationRequest.identifier[0].value
-                }
-            ],
-            "identifier": [
-                {
-                    "system": "http://www.providerco.com/communication",
-                    "value": randomString
-                }
-            ],
-            "payload": []
+            "request":{
+                'method' :"POST",
+                "url" :"Communication"
+            }
         }
+        
+            ]
+        }       
 
         console.log(this.state.patient.id, 'iddd',communicationRequest)
         // let content = this.state.content;
+        // let objJsonStr = JSON.stringify(this.state.observationList);
+        // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
+        // console.log(objJsonB64)
+        // fileInputData.payload.push({
+        //                 'extension': {'url':this.state.extensionUrl,'valueString':content.extension[0].valueString},
+        //                 'cdex-payload-query-string': {'url':this.state.extensionUrl,'extension':content.extension,'valueString':content.extension[0].valueString},
+        //                 "contentAttachment":{
+        //                     "contentType":"application/json",
+        //                     "data":objJsonB64
+        //                 }})
+        // commJson.entry[0].
+        // for (var j = 0; j < this.state.content.length; j++) {
+        //     (function (content) {
+        //         // let url = observationList[j];
+        //         console.log(content,'content',content.extension)
+        //         fileInputData.payload.push({
+        //             'extension': content.extension,
+        //             'cdex-payload-query-string': {'url':content.extension[0].url,'extension':content.extension,'valueString':content.extension[0].valueString},
+        //             "contentString":content.contentString})
+        //     })(this.state.content[j])
+        // }
         
-        for (var j = 0; j < this.state.content.length; j++) {
-            (function (content) {
-                // let url = observationList[j];
-                console.log(content,'content',content.extension)
-                fileInputData.payload.push({
-                    'extension': content.extension,
-                    'cdex-payload-query-string': {'url':content.extension[0].url,'extension':content.extension,'valueString':content.extension[0].valueString},
-                    "contentString":content.contentString})
-            })(this.state.content[j])
-        }
+        console.log(commJson,'data-0newwwww')
         
-        console.log(fileInputData,'data')
-        
-        for (var j = 0; j < this.state.documentContent.length; j++) {
-            (function (content) {
-                // let url = observationList[j];
-                console.log(content,'content',content)
-                fileInputData.payload.push({
-                    'extension': content.extension,
-                    'cdex-payload-clinical-string': {'url':content.extension[0].url,'extension':content.extension,'valueCodeableConcept':content.extension[0].valueCodeableConcept},
-                    "contentAttachment":content.contentAttachment})
-            })(this.state.documentContent[j])
-        }
+        // for (var j = 0; j < this.state.documentContent.length; j++) {
+        //     (function (content) {
+        //         // let url = observationList[j];
+        //         console.log(content,'content',content)
+        //         fileInputData.payload.push({
+        //             'extension': content.extension,
+        //             'cdex-payload-clinical-string': {'url':content.extension[0].url,'extension':content.extension,'valueCodeableConcept':content.extension[0].valueCodeableConcept},
+        //             "contentAttachment":content.contentAttachment})
+        //     })(this.state.documentContent[j])
+        // }
         
 
-        if (this.state.files != null) {
-            for (var i = 0; i < this.state.files.length; i++) {
-                (function (file) {
-                    let content_type = file.type;
-                    let file_name = file.name;
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        // get file content  
-                        fileInputData.payload.push({
-                            // "cdex-payload-query-string":"",
-                            //  "cdex-payload-clinical-note-type":[],
-                            "content": {
-                                "data": reader.result,
-                                "contentType": content_type,
-                                "title": file_name
-                            }
-                        })
-                    }
-                    reader.readAsBinaryString(file);
-                })(this.state.files[i])
-            }
-        }
-        console.log("Resource Json before communication--", fileInputData);
+        // if (this.state.files != null) {
+        //     for (var i = 0; i < this.state.files.length; i++) {
+        //         (function (file) {
+        //             let content_type = file.type;
+        //             let file_name = file.name;
+        //             var reader = new FileReader();
+        //             reader.onload = function (e) {
+        //                 // get file content  
+        //                 fileInputData.payload.push({
+        //                     // "cdex-payload-query-string":"",
+        //                     //  "cdex-payload-clinical-note-type":[],
+        //                     "content": {
+        //                         "data": reader.result,
+        //                         "contentType": content_type,
+        //                         "title": file_name
+        //                     }
+        //                 })
+        //             }
+        //             reader.readAsBinaryString(file);
+        //         })(this.state.files[i])
+        //     }
+        // }
+        // console.log("Resource Json before communication--", fileInputData);
         let headers={
             "Content-Type": "application/json",
         }
@@ -492,27 +619,33 @@ class CDEX extends Component {
             headers['Authorization'] = 'Bearer ' + token
         }
         // var communicationUrl = '';
-        var communicationUrl = this.state.config.payer.fhir_url + "/Communication";
+        var communicationUrl = this.state.config.payer.fhir_url;
 
         let Communication = await fetch(communicationUrl, {
             method: "POST",
             headers: headers,
-            body: JSON.stringify(fileInputData)
+            body: JSON.stringify(commJson)
         }).then(response => {
             return response.json();
         }).then((response) => {
-            console.log("----------response", response);
+            console.log("----------response123", response);
+            
             if (response.hasOwnProperty('entry')) {
+                let communicaationId = response.entry[0].response.location.split('/')[1]
+
+                this.setState({success: true})
+                this.setState({successMsg:'Communication has been posted to payer successfully with id - '+communicaationId})
+                // NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
                 return response
             }
-            NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
+            
             // this.setState({response})
             console.log(response, 'res')
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
         // this.props.saveDocuments(this.props.files,fileInputData)
-        this.setState({communicationJson:fileInputData})
+        this.setState({communicationJson:commJson})
         this.setState({ loading: false });
     }
     onChangeSearchParameter(event) {
@@ -731,14 +864,22 @@ class CDEX extends Component {
         // console.log( this.state.comm_req,'how may')
         let content = data.map((d, i) => {
             // console.log(d, i);
-            let startDate = d["occurrencePeriod"]['start']
+            let startDate
             let endDate;
-            if(d['occurrencePeriod'].hasOwnProperty("end")){
-            endDate = d["occurrencePeriod"]['end']
+            // console.log(d['occurrencePeriod'])
+            if(d['occurrencePeriod'] != undefined){
+                if(d['occurrencePeriod'].hasOwnProperty("start")){
+                    startDate = d["occurrencePeriod"]['start']
+                    }
+                if(d['occurrencePeriod'].hasOwnProperty("end")){
+                    endDate = d["occurrencePeriod"]['end']
+                    }
+                    else{
+                        endDate="No End Date"
+                    }
             }
-            else{
-                endDate="No End Date"
-            }
+            
+            
             let recievedDate = d["authoredOn"]
             // console.log(startDate.substring(0,10),'stdate')
             if (d.hasOwnProperty("subject") ) {
@@ -769,54 +910,54 @@ class CDEX extends Component {
 
             }
         });
-        let observations = this.state.observationList.map((observation, key) => {
-            if (observation) {
-                return (
-                    <div key={key}>
-                        <div className='data-label1'>
-                        {observation.observation.code.coding[0].display+" : "}<span className="data2">{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</span>
-                            <span>
-                                <input 
-                                    className='ui checkbox'
-                                    name = {key}
-                                    type="checkbox"
-                                    defaultChecked={this.state.check}
-                                    value={this.state.check}
-                                    onChange={(e)=>this.handleChange(observation,e)}
-                                />
-                            </span>
-                        </div>
-                        {/* <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label> */}
+        // let observations = this.state.observationList.map((observation, key) => {
+        //     if (observation) {
+        //         return (
+        //             <div key={key}>
+        //                 <div className='data-label1'>
+        //                 {observation.observation.code.coding[0].display+" : "}<span className="data2">{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</span>
+        //                     <span>
+        //                         <input 
+        //                             className='ui checkbox'
+        //                             name = {key}
+        //                             type="checkbox"
+        //                             defaultChecked={this.state.check}
+        //                             value={this.state.check}
+        //                             onChange={(e)=>this.handleChange(observation,e)}
+        //                         />
+        //                     </span>
+        //                 </div>
+        //                 {/* <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label> */}
                         
-                    </div>
-                )
+        //             </div>
+        //         )
 
-            }
-        });
-        let documents = this.state.documentList.map((document, key) => {
-            if (document) {
-                console.log('document,doc',document.document)
-                var label =  document.document.type.coding[0].display+" : "
-                var value = document.document.description+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)
-                return (
-                    <div key={key}>
-                        <div className="data-label1">
-                            {document.document.type.coding[0].display+" : "}<span className="data2">{document.document.description+","+"  Status - "+document.document.status+","+"  Time Period - "+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</span>
-                            <span><input 
-                            className='ui checkbox'
-                            name = {key}
-                            type="checkbox"
-                            defaultChecked={this.state.documentCheck}
-                            value={this.state.documentCheck}
-                            onChange={(e)=>this.handleDocumentChange(document,e)}
+        //     }
+        // });
+        // let documents = this.state.documentList.map((document, key) => {
+        //     if (document) {
+        //         console.log('document,doc',document.document)
+        //         var label =  document.document.type.coding[0].display+" : "
+        //         var value = document.document.description+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)
+        //         return (
+        //             <div key={key}>
+        //                 <div className="data-label1">
+        //                     {document.document.type.coding[0].display+" : "}<span className="data2">{document.document.description+","+"  Status - "+document.document.status+","+"  Time Period - "+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</span>
+        //                     <span><input 
+        //                     className='ui checkbox'
+        //                     name = {key}
+        //                     type="checkbox"
+        //                     defaultChecked={this.state.documentCheck}
+        //                     value={this.state.documentCheck}
+        //                     onChange={(e)=>this.handleDocumentChange(document,e)}
 
-                        /></span></div>
+        //                 /></span></div>
                         
-                    </div>
-                )
+        //             </div>
+        //         )
 
-            }
-        });
+        //     }
+        // });
         return (
             <React.Fragment>
                 <div>
@@ -857,16 +998,16 @@ class CDEX extends Component {
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
-                                {this.state.observationList.length >0 &&
+                                {/* {this.state.observationList.length >0 &&
                                     <div className="data-label">
                                         Obsersvation : <span className="data1">{observations}</span>
                                     </div>
-                                }
-                                {this.state.documentList.length >0 &&
+                                } */}
+                                {/* {this.state.documentList.length >0 &&
                                     <div className="data-label">
                                         Documents : <span className="data1">{documents}</span>
                                     </div>  
-                                }
+                                } */}
                                 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
@@ -888,15 +1029,24 @@ class CDEX extends Component {
                                         <div className="data1">When no observations found. Please upload requested documents.</div>
                                     }
                                 </div> */}
-                                {(this.state.documentList.length<= 0 && this.state.observationList.length<=0 ) &&
+                                {/* {(this.state.documentList.length<= 0 && this.state.observationList.length<=0 ) &&
                                     <div>
                                     <DocumentInput
                                         updateCallback={this.updateDocuments}
                                     />
                                     </div>
                                 
+                                } */}
+                                {this.state.error &&
+                                    <div className= "decision-card alert-error">
+                                        {this.state.errorMsg}
+                                    </div>
                                 }
-                                
+                                {this.state.success &&
+                                    <div className= "decision-card alert-success">
+                                        {this.state.successMsg}
+                                    </div>
+                                }
                                 <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                                         <Loader
