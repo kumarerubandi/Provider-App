@@ -9,6 +9,7 @@ import { DateInput } from 'semantic-ui-calendar-react';
 import { withRouter } from 'react-router-dom';
 import orderReview from "../Order-Review.json";
 import liverTransplant from "../liver-transplant.json";
+import homveHealthService from "../HomeHealthServices.json";
 import homeOxygen from "../home-oxygen.json";
 import Client from 'fhir-kit-client';
 import 'font-awesome/css/font-awesome.min.css';
@@ -154,6 +155,17 @@ class ProviderRequest extends Component {
             this.setState({ device_code: key, device_text: homeOxygen[key] });
             text = "home-oxygen-therapy";
             this.setState({ [elementName]: text });
+          }
+          else{
+            for (const key in homveHealthService) {
+              if (key === text) {
+                this.setState({ device_code: key, device_text: homeHealthService[key] });
+                text = "home-health-service";
+                this.setState({ [elementName]: text });
+              }
+            }
+            
+          
           }
         }
       }
