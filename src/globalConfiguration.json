@@ -12,26 +12,26 @@
         }
       ],
       "dtr":{
-         "dtr_fhir": "http://auth.mettles.com:8280/ehr-server/stu3"
+         "dtr_fhir": "http://cdex.mettles.com:8280/ehr-server/stu3"
       },
       "crd":{
-        "crd_url":"http://auth.mettles.com:8090/",
+        "crd_url":"http://cdex.mettles.com:8090/",
         "coverage_decision_path": "cds-services/coverage_decision",
         "coverage_requirement_path": "cds-services/coverage_requirement",
         "patient_view_path":"cds-services/patient_view"
       },
       "payer":{
-        "fhir_url": "http://auth.mettles.com:8180/hapi-fhir-jpaserver/fhir",
-        "client_secret": "48bf2c3e-2bd6-4f8d-a5ce-2f94adcb7492",
-        "client_id": "app-login",
-        "grant_type":"password",
+        "fhir_url": "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir",
+        "client_secret": "b11c46c4-84c5-4138-9460-1824ecc68217",
+        "client_id": "2dfc4e1473a2fcfb7b84e66f34404c38",
+        "grant_type":"client_credentials",
         "authorizedPayerFhir": true
       },
       "provider":{
-        "fhir_url": "http://auth.mettles.com:8080/hapi-fhir-jpaserver/fhir",
-        "client_secret": "48bf2c3e-2bd6-4f8d-a5ce-2f94adcb7492",
-        "client_id": "app-login",
-        "grant_type":"password",
+        "fhir_url": "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir",
+        "client_secret": "8e2cbdf6-b680-4e4d-b10b-2b10fb3b065a",
+        "client_id": "64a0acf8e17a2c8734499c813a01fe73",
+        "grant_type":"client_credentials",
         "authorized_fhir": true
       },
       "authorization_service":{
@@ -46,7 +46,7 @@
         "vsac_user":"prathyanusha",
         "vsac_password":"Anusha56"
       },
-      "xmlx12_url":"http://auth.mettles.com:5000/",
+      "xmlx12_url":"http://54.227.218.17:5000/",
       "requirements": [
     {
        "rule": "The treating physician examined the patient and determined that he or she has a severe lung disease (some examples: chronic obstructive pulmonary disease, diffuse interstitial lung disease, cystic fibrosis, bronchiectasis, and widespread pulmonary neoplasm)",

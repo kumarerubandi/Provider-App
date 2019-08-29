@@ -663,13 +663,13 @@ class Review extends Component {
             console.log(this.props.config.provider,'please tell me it works')
             if (this.props.config.provider.authorized_fhir) {
                 var { authorizeUrl, tokenUrl } = await fhirClient.smartAuthMetadata();
-                if (settings.api_server_uri.search('auth.mettles.com') > 0) {
+                if (settings.api_server_uri.search('54.227.218.17') > 0) {
                     authorizeUrl = { protocol: "https://", host: "auth.mettles.com:8443/", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/auth" }
                     tokenUrl = { protocol: "https:", host: "auth.mettles.com:8443", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/token" }
                 }
                 // ///////
-                // authorizeUrl = { protocol: "https://", host: "auth.mettles.com:8443/", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/auth" }
-                // tokenUrl = { protocol: "https:", host: "auth.mettles.com:8443", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/token" }
+                // authorizeUrl = { protocol: "https://", host: "54.227.218.17:8443/", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/auth" }
+                // tokenUrl = { protocol: "https:", host: "54.227.218.17:8443", pathname: "auth/realms/ProviderCredentials/protocol/openid-connect/token" }
                 // ////////
 
                 const oauth2 = simpleOauthModule.create({

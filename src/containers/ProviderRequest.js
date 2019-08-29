@@ -38,7 +38,7 @@ class ProviderRequest extends Component {
       patient: null,
       fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
-      dtr_fhir:(this.props.config.dtr!== undefined) ? this.props.config.dtr.dtr_fhir : "http://auth.mettles.com:8280/ehr-server/stu3",
+      dtr_fhir:(this.props.config.dtr!== undefined) ? this.props.config.dtr.dtr_fhir : "http://54.227.218.17:8280/ehr-server/stu3",
       scope: '',
       payer: '',
       patientId: '',
