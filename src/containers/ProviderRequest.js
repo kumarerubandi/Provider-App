@@ -157,7 +157,7 @@ class ProviderRequest extends Component {
             this.setState({ [elementName]: text });
           }
           else{
-            for (const key in homveHealthService) {
+            for (const key in homeHealthService) {
               if (key === text) {
                 this.setState({ device_code: key, device_text: homeHealthService[key] });
                 text = "home-health-service";
