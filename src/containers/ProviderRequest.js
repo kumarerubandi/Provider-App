@@ -585,7 +585,7 @@ class ProviderRequest extends Component {
                         </div>
                           <div className="dropdown">
                             <DropdownHealthcareCodes
-                              elementName="healthcareCode"
+                              elementName="hook"
                               updateCB={this.updateStateElement}
                             />
                           </div>
