@@ -600,7 +600,7 @@ class ProviderRequest extends Component {
                          Quantity
                         </div>
                       <div className="dropdown">
-                        <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onPatientChange}></Input>
+                        <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onQuantityChange}></Input>
                       </div>
                   </div>
                       }
