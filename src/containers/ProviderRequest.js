@@ -63,6 +63,7 @@ class ProviderRequest extends Component {
       medicationStartDate: '',
       medicationEndDate: '',
       hook: null,
+      healthcareCode:null,
       resource_records: {},
       keypair: KEYUTIL.generateKeypair('RSA', 2048),
       prior_auth: false,
@@ -584,7 +585,7 @@ class ProviderRequest extends Component {
                         </div>
                           <div className="dropdown">
                             <DropdownHealthcareCodes
-                              elementName="hook"
+                              elementName="healthcareCode"
                               updateCB={this.updateStateElement}
                             />
                           </div>
@@ -599,7 +600,7 @@ class ProviderRequest extends Component {
                          Quantity
                         </div>
                       <div className="dropdown">
-                        <Input className='ui fluid   input' type="text" name="patient" fluid value={this.state.patientId} onChange={this.onPatientChange}></Input>
+                        <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onPatientChange}></Input>
                       </div>
                   </div>
                       }
