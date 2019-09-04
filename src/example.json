@@ -1,6 +1,4 @@
 {
-     
-     
     "E1390": "Oxygen concentrator, single delivery port",
      "E1391": "Oxygen concentrator, dual delivery port",
      "E0424": "Stationary compressed gaseous oxygen system, rental; includes container, contents, regulator, flowmeter,humidifier, nebulizer, cannula or mask,and tubing",
@@ -15,6 +13,5 @@
      "E0441": "Stationary oxygen contents, gaseous,1 month’s supply = 1 unit",
      "E0442": "Stationary oxygen contents, liquid,1 month’s supply = 1 unit",
      "E0443": "Portable oxygen contents, gaseous,1 month’s supply = 1 unit",
-     "E0444": "Portable oxygen contents, liquid,1 month’s supply = 1 unit",
-     "385781007":"Home health aide service (regime/therapy)"
+     "E0444": "Portable oxygen contents, liquid,1 month’s supply = 1 unit"
 }

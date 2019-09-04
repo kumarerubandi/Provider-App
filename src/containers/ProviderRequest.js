@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import DropdownCDSHook from '../components/DropdownCDSHook';
+import DropdownHealthcareCodes from '../components/DropdownHealthcareCodes';
 import DropdownFrequency from '../components/DropdownFrequency';
 import DropdownTreating from '../components/DropdownTreating';
 import DropdownPayer from '../components/DropdownPayer';
@@ -82,6 +83,7 @@ class ProviderRequest extends Component {
       category_name: "",
       device_code: "",
       device_text: "",
+      quantity:'',
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -110,6 +112,7 @@ class ProviderRequest extends Component {
     this.onScopeChange = this.onScopeChange.bind(this);
     this.onEncounterChange = this.onEncounterChange.bind(this);
     this.onPatientChange = this.onPatientChange.bind(this);
+    this.onQuantityChange = this.onQuantityChange.bind(this);
     this.onPractitionerChange = this.onPractitionerChange.bind(this);
     this.changeDosageAmount = this.changeDosageAmount.bind(this);
     this.changeMedicationInput = this.changeMedicationInput.bind(this);
@@ -316,6 +319,9 @@ class ProviderRequest extends Component {
   onPatientChange(event) {
     this.setState({ patientId: event.target.value });
     this.setState({ validatePatient: false });
+  }
+  onQuantityChange(event) {
+    this.setState({ quantity: event.target.value });
   }
   onPractitionerChange(event) {
     this.setState({ practitionerId: event.target.value });
@@ -555,22 +561,48 @@ class ProviderRequest extends Component {
 
               {this.state.auth_active !== 'active' &&
                 <div>
-                  {(this.state.category_name === 'Durable Medical Equipment' || this.state.category_name === 'Healthcare' )&&
+                  {this.state.category_name === 'Durable Medical Equipment'&&
                     <div>
                       <div className="header">
                         ICD 10 / HCPCS Codes*
-                    </div>
-                      <div className="dropdown">
-                        <DropdownCDSHook
-                          elementName="hook"
-                          updateCB={this.updateStateElement}
-                        />
-                      </div>
-                      {this.state.validateIcdCode === true &&
-                        <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                        </div>
+                          <div className="dropdown">
+                            <DropdownCDSHook
+                              elementName="hook"
+                              updateCB={this.updateStateElement}
+                            />
+                          </div>
+                          {this.state.validateIcdCode === true &&
+                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                          }
+                        </div>
                       }
-                    </div>
-                  }
+                      { this.state.category_name === 'Healthcare' &&
+                        <div>
+                          <div className="header">
+                            ICD 10 / HCPCS Codes*
+                        </div>
+                          <div className="dropdown">
+                            <DropdownHealthcareCodes
+                              elementName="hook"
+                              updateCB={this.updateStateElement}
+                            />
+                          </div>
+                          {this.state.validateIcdCode === true &&
+                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                          }
+                        </div>
+                      }
+                  {( this.state.category_name === 'Healthcare' || this.state.category_name === 'Durable Medical Equipment') &&
+                        <div>
+                        <div className="header">
+                         Quantity
+                        </div>
+                      <div className="dropdown">
+                        <Input className='ui fluid   input' type="text" name="patient" fluid value={this.state.patientId} onChange={this.onPatientChange}></Input>
+                      </div>
+                  </div>
+                      }
                   <div>
                     <div className="header">
                       NPI

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Dropdown} from 'semantic-ui-react';
-import jsonData from "../example.json";
+import jsonData from "../healthcareCodes.json";
 
 
 let allCdsOptions=[];
@@ -13,7 +13,7 @@ function icd10Map(object) {
 export const cdsOptions = icd10Map(jsonData);
 let blackBorder = "blackBorder";
 
-export default class DropdownResourceType extends Component {
+export default class DropdownHealthcareCodes extends Component {
   constructor(props){
     super(props);
     this.state = { currentValue: ""}
