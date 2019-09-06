@@ -1,22 +1,22 @@
 import React, {Component} from 'react';
 import {Dropdown} from 'semantic-ui-react';
-import rxnorm from '../medicationShortList'
+import jsonData from '../ucum.json'
 
 
-let allMedicationOptions=[];
-function medicationMap(object) {
+let allUnitsOptions=[]
+function unitsMap(object) {
     console.log('i medications')
     for(const key in object){
-        allMedicationOptions.push({'key':key,'value':key,'text':object[key]})
+        allUnitsOptions.push({'key':key,'value':key,'text':object[key]})
     }
-    return allMedicationOptions;
-   }
-   console.log(rxnorm,'rxnorm',)
-export const medicationOptions = medicationMap(rxnorm)
+    return allUnitsOptions;
+   }    
+export const unitsOptions = unitsMap(jsonData)
+
 
 let blackBorder = "blackBorder";
 
-export default class DropdownMedicationList extends Component {
+export default class DropdownUnits extends Component {
   constructor(props){
     super(props);
     this.state = { currentValue: ""}
@@ -40,8 +40,8 @@ export default class DropdownMedicationList extends Component {
     return (
       <Dropdown
       className={blackBorder}
-        options={medicationOptions}
-        placeholder='Diagnosis or Nature of illness or Injury'
+        options={allUnitsOptions}
+        placeholder='Units'
         search
         selection
         fluid

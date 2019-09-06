@@ -4,8 +4,11 @@ import DropdownHealthcareCodes from '../components/DropdownHealthcareCodes';
 import DropdownFrequency from '../components/DropdownFrequency';
 import DropdownTreating from '../components/DropdownTreating';
 import DropdownPayer from '../components/DropdownPayer';
+import DropdownMedicationList from '../components/DropdownMedicationList';
+import DropdownUnits from '../components/DropdownUnits';
 import DropdownServiceCode from '../components/DropdownServiceCode';
 import { Input } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react'
 import { DateInput } from 'semantic-ui-calendar-react';
 import { withRouter } from 'react-router-dom';
 import orderReview from "../Order-Review.json";
@@ -32,6 +35,7 @@ const types = {
   debug: "debugClass",
   warning: "warningClass"
 }
+
 
 class ProviderRequest extends Component {
   constructor(props) {
@@ -63,6 +67,7 @@ class ProviderRequest extends Component {
       medicationStartDate: '',
       medicationEndDate: '',
       hook: null,
+      hookName:'order-review',
       healthcareCode:null,
       resource_records: {},
       keypair: KEYUTIL.generateKeypair('RSA', 2048),
@@ -85,6 +90,7 @@ class ProviderRequest extends Component {
       device_code: "",
       device_text: "",
       quantity:'',
+      unit:null,
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -113,6 +119,8 @@ class ProviderRequest extends Component {
     this.onScopeChange = this.onScopeChange.bind(this);
     this.onEncounterChange = this.onEncounterChange.bind(this);
     this.onPatientChange = this.onPatientChange.bind(this);
+    this.orderReviewButton = this.orderReviewButton.bind(this);
+    this.medicationButton = this.medicationButton.bind(this);
     this.onQuantityChange = this.onQuantityChange.bind(this);
     this.onPractitionerChange = this.onPractitionerChange.bind(this);
     this.changeDosageAmount = this.changeDosageAmount.bind(this);
@@ -272,6 +280,28 @@ class ProviderRequest extends Component {
       this.setState({ prefetchData: response });
     })
   }
+  orderReviewButton(){
+    console.log('order Reiqew')
+    this.setState({hookName:'order-review'})
+    this.setState({treating: null})
+    this.setState({medication: null})
+    this.setState({dosageAmount: null})
+    this.setState({unit: null})
+    this.setState({frequency: null})
+    this.setState({medicationStartDate:''})
+    this.setState({medicationEndDate:''})
+  }
+  medicationButton(){
+    console.log('Medication')
+    this.setState({hookName:'medication-prescribe'})
+    this.setState({validateIcdCode : false})
+    // this.setState({patientId : ''})
+    this.setState({hook : null})
+    this.setState({quantity : ''})
+    this.setState({ service_code: ""})
+    // this.setState({quantity : ''})
+
+  }
 
   setRequestType(req) {
     this.setState({ request: req });
@@ -342,6 +372,7 @@ class ProviderRequest extends Component {
   changeMedicationEndDate = (event, { name, value }) => {
     if (this.state.hasOwnProperty(name))
       this.setState({ [name]: value });
+
   }
   changeDosageAmount(event) {
     if (event.target.value !== undefined) {
@@ -511,6 +542,14 @@ class ProviderRequest extends Component {
           </div>
           <div className="content">
             <div className="left-form">
+              <div className="header">
+                 <Button.Group color='blue'>
+                  <Button onClick={this.orderReviewButton}>Order Review</Button>
+                  <Button onClick={this.medicationButton}>Medication Prescribe</Button>
+                </Button.Group>
+            </div>
+             {(this.state.hookName === 'order-review' || this.state.hookName === 'medication-prescribe') &&
+             <div>
               <div>
                 <div>
                   <div className="header">
@@ -556,11 +595,14 @@ class ProviderRequest extends Component {
                 }
               </div>
 
-              <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
+              {/* <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
+              /> */}
+              </div>}
+              {this.state.hookName === 'order-review' &&
+              <div>
+                <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
               />
-
-
-              {this.state.auth_active !== 'active' &&
+               {this.state.auth_active !== 'active' &&
                 <div>
                   {this.state.category_name === 'Durable Medical Equipment'&&
                     <div>
@@ -614,7 +656,12 @@ class ProviderRequest extends Component {
                   </div>
                 </div>
               }
-              {this.state.hook === 'medication-prescribe' &&
+             </div>}
+              
+
+
+        
+              {this.state.hookName === 'medication-prescribe' &&
                 <div>
                   <div className="header">
                     Treating
@@ -625,7 +672,7 @@ class ProviderRequest extends Component {
                       updateCB={this.updateStateElement}
                     />
                   </div>
-                  {/* <div>
+                  <div>
                   <div className="header">
                           Medication Input
                       </div>
@@ -635,20 +682,31 @@ class ProviderRequest extends Component {
                       updateCB={this.updateStateElement}
                     />
                   </div>
-                  </div> */}
-                  <div>
-                    <div className='leftStateInput'>
+                  </div>
+                  <div className='stateInputRow'>
+                    <div className='stateInputColumn'>
                       <div className='header' >
-                        Number
+                        Value
                     </div>
                       <div>
                         <Input
                           type="number"
                           value={this.state.dosageAmount}
                           onChange={this.changeDosageAmount}
-                          placeholder="Number" /></div>
+                          placeholder="Value" /></div>
                     </div>
-                    <div className='rightStateInput'>
+                    <div className='stateInputColumn'>
+                      <div className="header" >
+                        Unit
+                      </div>
+                      <div >
+                        <DropdownUnits
+                          elementName='unit'
+                          updateCB={this.updateStateElement}
+                        />
+                      </div>
+                    </div>
+                    <div className='stateInputColumn'>
                       <div className="header" >
                         Frequency
                       </div>
@@ -918,6 +976,7 @@ class ProviderRequest extends Component {
           }
         }
       ],
+
       medicationCodeableConcept: {
         text: "Pimozide 2 MG Oral Tablet [Orap]",
         coding: [
@@ -976,13 +1035,13 @@ class ProviderRequest extends Component {
         }
       }
     };
-    if (this.state.hook === 'order-review') {
-      request.context.encounterId = this.state.encounterId
-      request.context.orders.entry.push(coverage);
-    }
-    if (this.state.hook === 'medication-prescribe') {
-      request.context.orders.entry.push(medicationJson);
-    }
+    // if (this.state.hook === 'order-review') {
+    //   request.context.encounterId = this.state.encounterId
+    //   request.context.orders.entry.push(coverage);
+    // }
+    // if (this.state.hook === 'medication-prescribe') {
+    //   request.context.orders.entry.push(medicationJson);
+    // }
     if (this.state.prefetch) {
       var prefetchData = await this.getPrefetchData()
       this.setState({ prefetchData: prefetchData })
