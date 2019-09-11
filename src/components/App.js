@@ -3,6 +3,7 @@ import {Switch} from 'react-router';
 import {BrowserRouter, Redirect, Route} from 'react-router-dom';
 //import PrivateRoute from './privateRoute';
 import X12Converter from '../containers/x12converter';
+import ReportingScenario from '../containers/ReportingScenario';
 import CoverageDetermination from '../containers/CoverageDetermination';
 //import PriorAuthorization from '../containers/PriorAuthorization';
 import ProviderRequest from '../containers/ProviderRequest';
@@ -25,6 +26,7 @@ export default class App extends Component {
                     <Route exact path="/" component={() => { return <Redirect to="/login" />}} />
                     <Route path={"/login"} component={LoginPage} />                    
                     <Route path={"/x12converter"} component={X12Converter} />
+                    <Route path={"/reportingScenario"} component={ReportingScenario} />
                     <Route path={"/cdex"} component={CDEX} />
                     <Route path={"/cd"} component={CoverageDetermination} />
                     {/* <Route path={"/prior_auth"} component={PriorAuthorization} /> */}

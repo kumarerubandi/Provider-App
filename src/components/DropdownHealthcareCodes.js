@@ -22,7 +22,6 @@ export default class DropdownHealthcareCodes extends Component {
   };
 
   handleChange = (e, { value }) => {
-    console.log(this.props,value,'police');
     this.props.updateCB(this.props.elementName, value)
     this.setState({ currentValue: value })
   }

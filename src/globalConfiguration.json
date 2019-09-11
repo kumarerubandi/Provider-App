@@ -14,6 +14,9 @@
       "dtr":{
          "dtr_fhir": "http://cdex.mettles.com:8280/ehr-server/stu3"
       },
+      "measure":{
+         "fhir_url": "http://cdex.mettles.com:8181/cqf-ruler/baseDstu3"
+      },
       "crd":{
         "crd_url":"http://cdex.mettles.com:8090/",
         "coverage_decision_path": "cds-services/coverage_decision",

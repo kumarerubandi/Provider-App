@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Dropdown} from 'semantic-ui-react';
 
-export const treatingOptions = [
+export const diagnosisOptions = [
   { key: 'alzheimers-disease', value: 'alzheimers-disease', text: 'Alzheimer\'s disease' },
   { key: 'benign-essential-hypertension', value: 'benign-essential-hypertension', text: 'Benign essential hypertension' },
   {key:'dementia-associated-with-another-disease',value:'dementia-associated-with-another-disease',text:'Dementia associated with another disease'},
@@ -17,7 +17,7 @@ export const treatingOptions = [
 
 let blackBorder = "blackBorder";
 
-export default class DropdownTreating extends Component {
+export default class DropdownDiagnosis extends Component {
   constructor(props){
     super(props);
     this.state = { currentValue: ""}
@@ -38,8 +38,8 @@ export default class DropdownTreating extends Component {
     return (
       <Dropdown
       className={blackBorder}
-        options={treatingOptions}
-        placeholder='Treating'
+        options={diagnosisOptions}
+        placeholder='Diagnosis'
         search
         selection
         fluid

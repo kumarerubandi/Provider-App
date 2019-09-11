@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import DropdownCDSHook from '../components/DropdownCDSHook';
 import DropdownHealthcareCodes from '../components/DropdownHealthcareCodes';
+import DropdownAmbulanceCodes from '../components/DropdownAmbulanceCodes';
 import DropdownFrequency from '../components/DropdownFrequency';
-import DropdownTreating from '../components/DropdownTreating';
+import DropdownDiagnosis from '../components/DropdownDiagnosis';
 import DropdownPayer from '../components/DropdownPayer';
 import DropdownMedicationList from '../components/DropdownMedicationList';
 import DropdownUnits from '../components/DropdownUnits';
@@ -15,6 +16,7 @@ import orderReview from "../Order-Review.json";
 import liverTransplant from "../liver-transplant.json";
 import homeHealthService from "../HomeHealthServices.json";
 import homeOxygen from "../home-oxygen.json";
+import ambulatoryTransport from "../ambulatory-transport.json";
 import Client from 'fhir-kit-client';
 import 'font-awesome/css/font-awesome.min.css';
 import "react-datepicker/dist/react-datepicker.css";
@@ -58,7 +60,7 @@ class ProviderRequest extends Component {
       response: null,
       token: null,
       oauth: false,
-      treating: null,
+      diagnosis: null,
       loading: false,
       logs: [],
       cards: [],
@@ -124,6 +126,7 @@ class ProviderRequest extends Component {
     this.onQuantityChange = this.onQuantityChange.bind(this);
     this.onPractitionerChange = this.onPractitionerChange.bind(this);
     this.changeDosageAmount = this.changeDosageAmount.bind(this);
+    this.changefrequency = this.changefrequency.bind(this);
     this.changeMedicationInput = this.changeMedicationInput.bind(this);
     this.onCoverageChange = this.onCoverageChange.bind(this);
     this.changeMedicationStDate = this.changeMedicationStDate.bind(this);
@@ -176,13 +179,21 @@ class ProviderRequest extends Component {
                 this.setState({ [elementName]: text });
               }
             }
-            
-          
+          }
+        }
+        for (const key in ambulatoryTransport) {
+          if (key === text) {
+            this.setState({ device_code: key, device_text: ambulatoryTransport[key] });
+            text = "ambulatory-transport";
+            this.setState({ [elementName]: text });
           }
         }
       }
     }
     else {
+      if(elementName === 'unit'){
+        console.log(text,elementName,'tread')
+      }
       this.setState({ [elementName]: text });
       this.setState({ validateIcdCode: false })
     }
@@ -241,7 +252,7 @@ class ProviderRequest extends Component {
         "Practitioner": this.state.practitionerId,
         "Coverage": this.state.coverageId
       };
-    } else if (this.state.hook === "medication-prescribe") {
+    } else if (this.state.hook === "order-select") {
       prefectInput = {
         "Patient": this.state.patientId,
         "Practitioner": this.state.practitionerId
@@ -283,7 +294,7 @@ class ProviderRequest extends Component {
   orderReviewButton(){
     console.log('order Reiqew')
     this.setState({hookName:'order-review'})
-    this.setState({treating: null})
+    this.setState({diagnosis: null})
     this.setState({medication: null})
     this.setState({dosageAmount: null})
     this.setState({unit: null})
@@ -293,7 +304,7 @@ class ProviderRequest extends Component {
   }
   medicationButton(){
     console.log('Medication')
-    this.setState({hookName:'medication-prescribe'})
+    this.setState({hookName:'order-select'})
     this.setState({validateIcdCode : false})
     // this.setState({patientId : ''})
     this.setState({hook : null})
@@ -321,6 +332,9 @@ class ProviderRequest extends Component {
     }
     if (req === "x12-converter") {
       window.location = `${window.location.protocol}//${window.location.host}/x12converter`;
+    }
+    if (req === "reporting-scenario") {
+      window.location = `${window.location.protocol}//${window.location.host}/reportingScenario`;
     }
     if (req === "cdex-view") {
       window.location = `${window.location.protocol}//${window.location.host}/cdex`;
@@ -371,6 +385,7 @@ class ProviderRequest extends Component {
   }
   changeMedicationEndDate = (event, { name, value }) => {
     if (this.state.hasOwnProperty(name))
+    console.log(value,'hat')
       this.setState({ [name]: value });
 
   }
@@ -380,6 +395,15 @@ class ProviderRequest extends Component {
       if (transformedNumber > 5) { transformedNumber = 5; }
       if (transformedNumber < 1) { transformedNumber = 1; }
       this.setState({ dosageAmount: transformedNumber });
+    }
+
+  }
+  changefrequency(event) {
+    if (event.target.value !== undefined) {
+      let transformedNumber = Number(event.target.value) || 1;
+      // if (transformedNumber > 5) { transformedNumber = 5; }
+      if (transformedNumber < 1) { transformedNumber = 1; }
+      this.setState({ frequency: transformedNumber });
     }
 
   }
@@ -472,11 +496,11 @@ class ProviderRequest extends Component {
         headers: myHeaders,
         body: JSON.stringify(json_request)
       })
-      // console.log("fhir-----------",fhirResponse);
+      console.log("fhir-----------",fhirResponse);
       const res_json = await fhirResponse.json();
-      // console.log("------response json",res_json);
       this.setState({ response: res_json });
-
+      // console.log("------response json",res_json);
+      
       if (fhirResponse && fhirResponse.status) {
         this.consoleLog("Server returned status "
           + fhirResponse.status + ": "
@@ -539,6 +563,9 @@ class ProviderRequest extends Component {
             <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
+            <div className="menu_conf" onClick={() => this.setRequestType('reporting-scenario')}>
+              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
+              Reporting Scenario</div>
           </div>
           <div className="content">
             <div className="left-form">
@@ -548,7 +575,7 @@ class ProviderRequest extends Component {
                   <Button onClick={this.medicationButton}>Medication Prescribe</Button>
                 </Button.Group>
             </div>
-             {(this.state.hookName === 'order-review' || this.state.hookName === 'medication-prescribe') &&
+             {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
              <div>
               <div>
                 <div>
@@ -636,6 +663,22 @@ class ProviderRequest extends Component {
                           }
                         </div>
                       }
+                      { this.state.category_name === 'Emergency Medical Services' &&
+                        <div>
+                          <div className="header">
+                            ICD 10 / HCPCS Codes*
+                        </div>
+                          <div className="dropdown">
+                            <DropdownAmbulanceCodes
+                              elementName="hook"
+                              updateCB={this.updateStateElement}
+                            />
+                          </div>
+                          {this.state.validateIcdCode === true &&
+                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                          }
+                        </div>
+                      }
                   {( this.state.category_name === 'Healthcare' || this.state.category_name === 'Durable Medical Equipment') &&
                         <div>
                         <div className="header">
@@ -661,14 +704,14 @@ class ProviderRequest extends Component {
 
 
         
-              {this.state.hookName === 'medication-prescribe' &&
+              {this.state.hookName === 'order-select' &&
                 <div>
                   <div className="header">
-                    Treating
+                    Diagnosis
                       </div>
                   <div className="dropdown">
-                    <DropdownTreating
-                      elementName='treating'
+                    <DropdownDiagnosis
+                      elementName='diagnosis'
                       updateCB={this.updateStateElement}
                     />
                   </div>
@@ -711,10 +754,15 @@ class ProviderRequest extends Component {
                         Frequency
                       </div>
                       <div >
-                        <DropdownFrequency
+                        {/* <DropdownFrequency
                           elementName='frequency'
                           updateCB={this.updateStateElement}
-                        />
+                        /> */}
+                        <Input
+                          type="number"
+                          value={this.state.frequency}
+                          onChange={this.changefrequency}
+                          placeholder="Frequency" />
                       </div>
                     </div>
                   </div>
@@ -725,8 +773,10 @@ class ProviderRequest extends Component {
                     </div>
                       <div >
                         <DateInput
+                        localization='es'
                           name="medicationStartDate"
                           placeholder="Start Date"
+                          dateFormat = "MM/DD/YYYY"
                           value={this.state.medicationStartDate}
                           iconPosition="left"
                           onChange={this.changeMedicationStDate}
@@ -741,6 +791,7 @@ class ProviderRequest extends Component {
                         <DateInput
                           name="medicationEndDate"
                           placeholder="End Date"
+                          dateFormat = "MM/DD/YYYY"
                           value={this.state.medicationEndDate}
                           iconPosition="left"
                           onChange={this.changeMedicationEndDate}
@@ -956,54 +1007,120 @@ class ProviderRequest extends Component {
         "reference": "Practitioner?identifier=" + this.state.practitionerId
       }
     }
-    let medicationJson = {
-      resourceType: "MedicationOrder",
-      dosageInstruction: [
-        {
-          doseQuantity: {
-            value: this.state.dosageAmount,
-            system: "http://unitsofmeasure.org",
-            code: "{pill}"
-          },
-          timing: {
-            repeat: {
-              frequency: this.state.frequency,
-              boundsPeriod: {
-                start: this.state.medicationStartDate,
-                end: this.state.medicationEndDate,
-              }
+    // let medicationJson = {
+    //   resourceType: "MedicationOrder",
+    //   dosageInstruction: [
+    //     {
+    //       doseQuantity: {
+    //         value: this.state.dosageAmount,
+    //         system: "http://unitsofmeasure.org",
+    //         code: "{pill}"
+    //       },
+    //       timing: {
+    //         repeat: {
+    //           frequency: this.state.frequency,
+    //           boundsPeriod: {
+    //             start: this.state.medicationStartDate,
+    //             end: this.state.medicationEndDate,
+    //           }
+    //         }
+    //       }
+    //     }
+    //   ],
+
+    //   medicationCodeableConcept: {
+    //     text: "Pimozide 2 MG Oral Tablet [Orap]",
+    //     coding: [
+    //       {
+    //         display: "Pimozide 2 MG Oral Tablet [Orap]",
+    //         system: "http://www.nlm.nih.gov/research/umls/rxnorm",
+    //         code: this.state.medication,
+    //       }
+    //     ]
+    //   },
+    //   reasonCodeableConcept: {
+    //     coding: [
+    //       {
+    //         system: "http://snomed.info/sct",
+    //         code: this.state.diagnosis,
+    //       }
+    //     ],
+    //     text: "Alzheimer's disease"
+    //   }
+
+    // };
+    var date1 = new Date(this.state.medicationStartDate); 
+    var date2 = new Date(this.state.medicationEndDate); 
+    var Difference_In_Time = Math.abs(date2.getTime() - date1.getTime()); 
+    var days      = Math.ceil( Difference_In_Time / (1000 * 60 * 60 * 24))
+    var dosageInstructionText = this.state.dosageAmount+" "+this.state.unit+" bid x "+days+" days"
+    let key;
+    let text;
+    if(this.state.medication!==null){
+      key = this.state.medication.key
+      text = this.state.medication.text
+    }
+    let medicationRequestJson ={
+      "resource":{
+         "resourceType":"MedicationRequest",
+         "id":"smart-MedicationRequest-103",
+         "status":"draft",
+         "intent":"order",
+         "medicationCodeableConcept":{
+            "coding":[
+               {
+                  "system":"http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code":key,
+                  "display":text
+               }
+            ],
+            "text":text
+         },
+         "subject":{
+            "reference":"Patient/"+this.state.patientId
+         },
+         "dosageInstruction":[
+            {
+               "text":dosageInstructionText,
+               "timing":{
+                  
+                     "frequency":this.state.frequency,
+                    
+                  },
+               
+               "doseAndRate":{
+                  "doseQuantity":{
+                     "value":this.state.dosageAmount,
+                     "unit":this.state.unit,
+                     "system":"http://unitsofmeasure.org",
+                     "code":this.state.unit
+                  }
+               }
             }
-          }
-        }
-      ],
-
-      medicationCodeableConcept: {
-        text: "Pimozide 2 MG Oral Tablet [Orap]",
-        coding: [
-          {
-            display: "Pimozide 2 MG Oral Tablet [Orap]",
-            system: "http://www.nlm.nih.gov/research/umls/rxnorm",
-            code: this.state.medication,
-          }
-        ]
-      },
-      reasonCodeableConcept: {
-        coding: [
-          {
-            system: "http://snomed.info/sct",
-            code: this.state.treating,
-          }
-        ],
-        text: "Alzheimer's disease"
+         ],
+         "dispenseRequest":{
+            "numberOfRepeatsAllowed":1,
+            "quantity":{
+               "value":1,
+               "unit":"mL",
+               "system":"http://unitsofmeasure.org",
+               "code":"mL"
+            },
+            "expectedSupplyDuration":{
+               "value":days,
+               "unit":"days",
+               "system":"http://unitsofmeasure.org",
+               "code":"d"
+            }
+         }
       }
-
-    };
+   }
     // "99183": "Physician attendance and supervision of hyperbaric oxygen therapy, per session",
     // console.log("------------final device request", deviceRequest)
+    console.log(this.state.dtr_fhir,'wedding')
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
       fhirServer: this.state.dtr_fhir,
-      hook: this.state.hook,
       payerName: this.state.payer,
       service_code: this.state.service_code,
       fhirAuthorization: {
@@ -1020,34 +1137,52 @@ class ProviderRequest extends Component {
         patientId: patientId,
         coverageId: this.state.coverageId,
         encounterId: this.state.encounterId,
-        orders: {
-          resourceType: "Bundle",
-          entry: [{
-            resource: {
-              resourceType: "Patient",
-              id: patientId,
-            }
-          },
-          {
-            resource: deviceRequest
-          }
-          ]
-        }
       }
     };
+    if(this.state.hookName === 'order-review')
+    {
+      request.hook = this.state.hook
+      request.context.orders={
+        resourceType: "Bundle",
+        entry: [{
+          resource: {
+            resourceType: "Patient",
+            id: patientId,
+          }
+        },
+        {
+          resource: deviceRequest
+        }
+        ]
+      }
+    }
+    else if(this.state.hookName === 'order-select'){
+      request.hook = this.state.hookName
+      request.context.orders={
+        resourceType: "Bundle",
+        entry: [
+        {
+          resource: medicationRequestJson
+        }
+        ]
+      }
+    }
     // if (this.state.hook === 'order-review') {
     //   request.context.encounterId = this.state.encounterId
     //   request.context.orders.entry.push(coverage);
     // }
-    // if (this.state.hook === 'medication-prescribe') {
+    // if (this.state.hook === 'order-select') {
     //   request.context.orders.entry.push(medicationJson);
     // }
+
+
     if (this.state.prefetch) {
       var prefetchData = await this.getPrefetchData()
       this.setState({ prefetchData: prefetchData })
       request.prefetch = this.state.prefetchData;
     }
     return request;
+    
   }
   render() {
     return (

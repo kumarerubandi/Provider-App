@@ -213,6 +213,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
       let messageJson = this.state.messageJson;
       messageJson['description'] = encodeURIComponent(description);
+      console.log(this.props.config.dtr,'point')
       const fhirClient = new Client({ baseUrl: this.props.config.dtr.dtr_fhir  });
       // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       // console.log('The token is : ', accessToken,messageJson);

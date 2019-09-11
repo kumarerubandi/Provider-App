@@ -11,7 +11,6 @@ function medicationMap(object) {
     }
     return allMedicationOptions;
    }
-   console.log(rxnorm,'rxnorm',)
 export const medicationOptions = medicationMap(rxnorm)
 
 let blackBorder = "blackBorder";
@@ -25,8 +24,10 @@ export default class DropdownMedicationList extends Component {
   };
 
   handleChange = (e, { value }) => {
-    console.log(this.props);
-    this.props.updateCB(this.props.elementName, value)
+    // console.log(this.props);
+    // for(var key in allMedicationOptions)
+    let index = medicationOptions.findIndex(x => x.value ===value);
+    this.props.updateCB(this.props.elementName,medicationOptions[index])
     this.setState({ currentValue: value })
   }
 
