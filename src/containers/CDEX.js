@@ -58,6 +58,7 @@ class CDEX extends Component {
             success:false,
             successMsg: '',
             documentList:[],
+            selectedDocs:[]
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -71,6 +72,9 @@ class CDEX extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleDocumentChange = this.handleDocumentChange.bind(this);
         this.showError = this.showError.bind(this);
+        this.onDocSelect = this.onDocSelect.bind(this);
+        this.renderDocs = this.renderDocs.bind(this);
+
 
     }
 
@@ -424,13 +428,21 @@ class CDEX extends Component {
                     }).catch(reason =>
                         console.log("No response recieved from the server", reason) 
                     );
+
                     if(documents !== undefined ){
                         if ("entry" in documents) {
-                            documents.entry.map((document) => {
+                            documents.entry.map((documentObj) => {
                                 // let documentList = this.state.documentList
                                 // documentList.push(document)
+                                documentObj.payload_value = {
+                                    "extension":p['extension'],
+                                    "contentAttachment":{
+                                        'contentType':documentObj.resource.content[0].attachment.contentType,
+                                        'data':documentObj.resource.content[0].attachment.data
+                                    }
+                                }
                                 this.setState(prevState => ({
-                                    documentList: [...prevState.documentList, document]
+                                    documentList: [...prevState.documentList, documentObj]
                                 }))
                                 // communicationPayload.push({
                                 //     "extension":p['extension'],
@@ -458,6 +470,40 @@ class CDEX extends Component {
         // await this.showError()
     }
 
+
+    onDocSelect(event){
+
+        console.log("event --",event, event.target,this.state.selectedDocs);
+        let val = event.target.name;
+        let selectedDocs = [...this.state.selectedDocs]
+        let valueIndex = this.state.selectedDocs.indexOf(val)
+        if (valueIndex == -1){
+            
+            selectedDocs.push(val);
+            
+        }
+        else{
+            selectedDocs.splice(valueIndex,1)
+        }
+        this.setState({selectedDocs:selectedDocs})
+        
+    }
+
+     renderDocs(item, key) {
+        let resource = item.resource
+        return (<div key={key}>
+            <div key={key} style={{ padding:"15px" ,paddingTop:"0px",paddingBottom:"0px"}}>
+                <label>
+                    <input type="checkbox" name={resource.id} 
+                        onChange={this.onDocSelect}  />
+                </label>
+
+                <span style={{ lineHeight: "0.1px" }}>{resource.type.coding[0].code+" - "+resource.type.coding[0].display}</span>
+                    
+            </div>
+        </div>
+        )
+    }
     // async getClinicalNoteDetails() {
     //     // let searchParameter = this.state.searchParameter;
     //     // console.log(searchParameter,'search')
@@ -557,7 +603,13 @@ class CDEX extends Component {
         var authoredOn=date.toISOString()
         // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
         let communicationPayload = this.state.communicationPayload
-
+        this.state.documentList.forEach((doc)=>{
+            let docIndex = this.state.selectedDocs.indexOf(doc.resource.id)
+            if(docIndex > -1 ){
+                communicationPayload.push(doc.payload_value)
+            }
+        })
+        // console.log("Commm PAYYYLOADDd !!!",communicationPayload);
         if (this.state.files != null) {
             for (var i = 0; i < this.state.files.length; i++) {
                 (function (file) {
@@ -1084,6 +1136,7 @@ class CDEX extends Component {
                                 <div className="data-label">
                                    Recieved Date : <span className="data1">{moment(this.state.recievedDate).format(" YYYY-MM-DD, hh:mm a")}</span>
                                 </div>
+                                
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
                                 </div>
@@ -1097,7 +1150,19 @@ class CDEX extends Component {
                                         Documents : <span className="data1">{documents}</span>
                                     </div>  
                                 } */}
+                                <div className="data-label" style={{ paddingTop:"0px"}}>
+                                    Select documents : 
+                                    
+                                </div>
+                                <div>
+                                    {this.state.documentList.map((item, key) => {
+                                        return this.renderDocs(item, key);
+                                    })}
+                                </div>
 
+                                <div className="header">
+                                Upload Required/Additional Documentation
+                                </div>
                                 <div className="drop-box">
                                     <section>
                                         <Dropzone
@@ -1118,6 +1183,7 @@ class CDEX extends Component {
                                     </section>
                                     <div  >{files}</div>
                                 </div>
+
                                 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
