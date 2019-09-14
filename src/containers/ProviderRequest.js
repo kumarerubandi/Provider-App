@@ -608,7 +608,7 @@ class ProviderRequest extends Component {
               X12 Converter</div>
             */}
             <div className="menu">
-              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }}  aria-hidden="true"></i>
+              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-list"  aria-hidden="true"></i>
                 Clinical Reasoning<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
               </button>
               <div className="menu-content submenu">
