@@ -19,7 +19,6 @@ export class DropdownMeasure extends Component {
     };
 
     async componentDidMount() {
-
         try {
             let measures = await this.getResources();
             let list = [];
@@ -28,13 +27,17 @@ export class DropdownMeasure extends Component {
                 i = i + 1;
                 let res = item.resource;
                 let measure_state = { key: '', value: '', text: '' };
+                let id ;
                 Object.keys(res).map((k, v) => {
                     if (k == 'id') {
-                        measure_state.text = res[k];
+                        measure_state.value = res[k];
+                        id = res[k];
+                        measure_state.key = res[k];
                     }
-                    if (k == 'identifier') {
-                        measure_state.value = res[k][0]['value'];
+                    if (k == 'title') {
+                        measure_state.text = res[k] + "-"+ id;
                     }
+                    
                 });
                 list.push(measure_state);
             });

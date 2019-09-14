@@ -286,7 +286,7 @@ class CDEX extends Component {
                 if(p['extension'][0].hasOwnProperty('valueString')){
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
-                    var Url  = this.state.config.provider.fhir_url + "/"+valueString+'&subject='+this.state.patient.id;
+                    var Url  = this.state.config.provider.fhir_url + "/"+valueString;
                     var extensionUrl =p['extension'][0].url
                     console.log(p['extension'][0].url,'teeee')
                     const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -312,15 +312,17 @@ class CDEX extends Component {
                         console.log("No response recieved from the server", reason)
                     );
                     console.log(dataResult, 'dataResult')
-                    let objJsonStr = JSON.stringify(dataResult);
-                    let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
-                    console.log(objJsonB64,'base64')
+                    var encoded = btoa(JSON.stringify(dataResult))
+
+                    // let objJsonStr = JSON.stringify(dataResult);
+                    // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
+                    console.log(encoded,'base64')
                     let communicationPayload = this.state.communicationPayload
                     communicationPayload.push({
                                     "extension": p['extension'],
                                     "contentAttachment":{
                                         "contentType":"application/json",
-                                        "data":objJsonB64
+                                        "data":encoded
                                     }
                                 })
                     // console.log(observationList,'observationList')
@@ -329,10 +331,7 @@ class CDEX extends Component {
                         this.showError();
                     })
                 }
-                else{
-                    console.log('no observations found')
-                }
-                if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
+                else if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
                     console.log(p['extension'][0]['url'],'urlle')
                     var extensionUrl=p['extension'][0]['url']
                     var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
@@ -384,7 +383,7 @@ class CDEX extends Component {
                     //             })
 
                     let communicationPayload = this.state.communicationPayload
-
+                    console.log(communicationPayload,'pp')
                     if(documents !== undefined ){
                         if ("entry" in documents) {
                             documents.entry.map((document) => {
@@ -417,14 +416,12 @@ class CDEX extends Component {
                     // this.setState({valueString:valueString})
                     // this.setState()
                 }
-                else{
-                    console.log('no Documents found')
-                }      
+            
             }
 
             // console.log(observationList,'ooo')
         })
-        console.log(this.state.communicationPayload.length,'police')
+        console.log(this.state.communicationPayload,'police station')
         // await this.showError()
     }
 
@@ -561,7 +558,7 @@ class CDEX extends Component {
                         "value": randomString
                     }
                 ],
-                "payload": [this.state.communicationPayload]
+                "payload": this.state.communicationPayload
             },
             "request":{
                 'method' :"POST",
@@ -641,7 +638,7 @@ class CDEX extends Component {
             headers['Authorization'] = 'Bearer ' + token
         }
         // var communicationUrl = '';
-        var communicationUrl = this.state.config.payer.fhir_url;
+        var communicationUrl = this.state.config.provider.fhir_url;
 
         let Communication = await fetch(communicationUrl, {
             method: "POST",

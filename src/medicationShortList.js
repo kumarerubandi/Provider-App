@@ -1,4 +1,6 @@
 const rxnorm = {
+    891881: 'Morphine Sulfate 15 MG Extended Release Oral Tablet',
+    1049233: 'Acetaminophen 500 MG / Oxycodone Hydrochloride 7.5 MG Oral Tablet',
     616568: 'calcium phosphate 112 MG / Melatonin 3 MG Oral Tablet',
     199390: 'Etodolac 500 MG Oral Tablet',
     332249: 'Naproxen 750 MG',

@@ -191,9 +191,7 @@ class ProviderRequest extends Component {
       }
     }
     else {
-      if(elementName === 'unit'){
-        console.log(text,elementName,'tread')
-      }
+      
       this.setState({ [elementName]: text });
       this.setState({ validateIcdCode: false })
     }
@@ -1007,6 +1005,22 @@ class ProviderRequest extends Component {
         "reference": "Practitioner?identifier=" + this.state.practitionerId
       }
     }
+
+    token = "Bearer " + token;
+    var myHeaders = new Headers({
+      "Content-Type": "application/json",
+      "authorization": token,
+    });
+    var url = this.props.config.provider.fhir_url +'/Encounter&subject='+patientId+'&peroid'
+      // const fhirResponse = await fetch(url, {
+      //   method: "GET",
+      //   headers: myHeaders,
+      //   body: JSON.stringify(json_request)
+      // })
+      // console.log("fhir-----------",fhirResponse);
+      // const res_json = await fhirResponse.json();
+      // this.setState({ response: res_json });
+    
     // let medicationJson = {
     //   resourceType: "MedicationOrder",
     //   dosageInstruction: [
