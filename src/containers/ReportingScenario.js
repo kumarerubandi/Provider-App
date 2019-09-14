@@ -280,7 +280,7 @@ class ReportingScenario extends Component {
                 <div>
                     <div>
                         <div className="main_heading">
-                            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Reporting Scenario</span>
+                            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Measure Reporting</span>
                             <div className="menu_conf" onClick={() => this.goHome()}>
                                 <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
                                 Home</div>
