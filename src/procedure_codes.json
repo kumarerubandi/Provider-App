@@ -1,4 +1,8 @@
 {
+    "Ambulate or other medical transport services":{
+        "56":   "Medically Related Transportation",
+        "59":   "Licensed Ambulance"
+    },
     "Anesthesiology":{
         "7":    "Anesthesia",
         "97":   "Anesthesiologist"
@@ -46,10 +50,10 @@
         "18":   "Durable Medical Equipment Rental"
     },
     "Emergency Medical Services":{
-        "56":   "Medically Related Transportation",
+        
         "57":   "Air Transportation",
         "58":   "Cabulance",
-        "59":   "Licensed Ambulance",
+        
         "86":   "Emergency Services"
     },
     "Health professional":{
@@ -240,4 +244,6 @@
         "19":   "Pneumonia Vaccine",
         "CO":   "Flu Vaccination"
     }
+    
+
 }

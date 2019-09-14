@@ -542,7 +542,7 @@ class ProviderRequest extends Component {
       <React.Fragment>
         <div>
           <div className="main_heading">
-            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Coverage Requirements</span>
+            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR </span>
             <div className="menu">
               <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-user-circle" aria-hidden="true"></i>
                 {sessionStorage.getItem('name')}<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
@@ -555,24 +555,31 @@ class ProviderRequest extends Component {
             <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
               Configuration</div>
+             {/*
             <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               X12 Converter</div>
+            */}
             <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
+              {/*
             <div className="menu_conf" onClick={() => this.setRequestType('reporting-scenario')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               Reporting Scenario</div>
+            */}
           </div>
           <div className="content">
-            <div className="left-form">
-              <div className="header">
-                 <Button.Group color='blue'>
-                  <Button onClick={this.orderReviewButton}>Order Review</Button>
-                  <Button onClick={this.medicationButton}>Medication Prescribe</Button>
-                </Button.Group>
-            </div>
+           
+           <div className="left-form">
+             {/*
+                <div className="header">
+                   <Button.Group color='blue'>
+                    <Button onClick={this.orderReviewButton}>Order Review</Button>
+                    <Button onClick={this.medicationButton}>Medication Prescribe</Button>
+                  </Button.Group>
+                </div>
+              */}
              {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
              <div>
               <div>
@@ -661,7 +668,7 @@ class ProviderRequest extends Component {
                           }
                         </div>
                       }
-                      { this.state.category_name === 'Emergency Medical Services' &&
+                      { this.state.category_name === 'Ambulate or other medical transport services' &&
                         <div>
                           <div className="header">
                             ICD 10 / HCPCS Codes*
