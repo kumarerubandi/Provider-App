@@ -567,7 +567,8 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 .logout{
   float:right;
 }
-.logout-btn{
+
+.logout-btn,.submenu-item{
   background: #3FB1CF;
   width: 100%;
   padding: 15px;
@@ -682,6 +683,16 @@ color: green;
   cursor: pointer;
   padding: 5px;
 }
+
+.submenu{
+  width:16%;
+}
+
+.submenu-item:nth-child(2){
+  margin-top:2px; 
+
+}
+
 .menu-content {
     display: none;
     position: fixed;

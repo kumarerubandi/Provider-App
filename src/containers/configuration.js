@@ -196,12 +196,15 @@ class Configuration extends Component {
                         <div className="menu_conf" onClick={() => this.goTo('cdex')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             CDEX</div>
+                        {/*
                         <div className="menu_conf" onClick={() => this.goTo('x12converter')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             X12 Converter</div>
+                        
                         <div className="menu_conf" onClick={() => this.goTo('reportingScenario')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             Reporting Scenario</div>
+                        */}
                     </div>
                     <div className="content">
                         <div className="left-form">

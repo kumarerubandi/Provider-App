@@ -114,6 +114,7 @@ class ProviderRequest extends Component {
       status: (foo => { return foo !== "draft" && foo !== "open" }),
       code: (foo => { return !foo.match(/^[a-z0-9]+$/i) })
     };
+    this.medication_prescribe = false;
     this.startLoading = this.startLoading.bind(this);
     this.submit_info = this.submit_info.bind(this);
     this.onFhirUrlChange = this.onFhirUrlChange.bind(this);
@@ -132,10 +133,35 @@ class ProviderRequest extends Component {
     this.changeMedicationStDate = this.changeMedicationStDate.bind(this);
     this.changeMedicationEndDate = this.changeMedicationEndDate.bind(this);
     this.onClickLogout = this.onClickLogout.bind(this);
+    this.redirectByType =this.redirectByType.bind(this,);
     this.consoleLog = this.consoleLog.bind(this);
     this.getPrefetchData = this.getPrefetchData.bind(this);
     this.readFHIR = this.readFHIR.bind(this);
     this.onClickMenu = this.onClickMenu.bind(this);
+    this.getUrlParameter = this.getUrlParameter.bind(this);
+  }
+
+  getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split("&");
+    for (var i = 0; i < sURLVariables.length; i++) {
+      var sParameterName = sURLVariables[i].split("=");
+      if (sParameterName[0] === sParam) {
+        var res = sParameterName[1].replace(/\+/g, "%20");
+        return decodeURIComponent(res);
+      }
+    }
+  }
+
+
+  componentDidMount(){
+    console.log("reqtype:",this.getUrlParameter("req_type") , this.getUrlParameter("req_ssstype"))
+    let reqType = this.getUrlParameter("req_type");
+    if(reqType == "medication_prescribe"){
+      this.medication_prescribe = true
+      this.medicationButton();
+    }
+    
   }
   consoleLog(content, type) {
     let jsonContent = {
@@ -147,6 +173,7 @@ class ProviderRequest extends Component {
     }))
   }
 
+ 
   updateStateElement = (elementName, text) => {
     // console.log(elementName, 'elenAME', text);
     if (elementName === "hook") {
@@ -411,6 +438,20 @@ class ProviderRequest extends Component {
     this.props.history.push('/login');
   }
 
+  redirectByType(redirect_value){
+    console.log("Redirect by tyyoe",redirect_value)
+    if(redirect_value == "medication_prescribe"){
+      // this.props.history.push("/provider_request?req_type=medication_prescribe")
+      window.location.href = window.location.origin + "/provider_request?req_type=medication_prescribe"
+    }
+    else{
+      window.location.href = window.location.origin + "/provider_request"
+    }
+    // else if(redirect_value == "measure_report"){
+
+    // }
+  }
+
   setSteps(index) {
     var steps = this.requirementSteps;
     if (this.state.hook === "home-oxygen-theraphy") {
@@ -542,7 +583,12 @@ class ProviderRequest extends Component {
       <React.Fragment>
         <div>
           <div className="main_heading">
-            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Coverage Requirements</span>
+            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR </span>
+            { this.medication_prescribe &&
+            <div className="menu_conf" onClick={() => this.redirectByType("default")}>
+              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
+              Home</div>
+            }
             <div className="menu">
               <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-user-circle" aria-hidden="true"></i>
                 {sessionStorage.getItem('name')}<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
@@ -552,27 +598,47 @@ class ProviderRequest extends Component {
                   <i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-sign-out" aria-hidden="true"></i>Logout</button>
               </div>
             </div>
+
             <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
               Configuration</div>
+             {/*
             <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               X12 Converter</div>
+            */}
+            <div className="menu">
+              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-list"  aria-hidden="true"></i>
+                Clinical Reasoning<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
+              </button>
+              <div className="menu-content submenu">
+
+                <button className="submenu-item" onClick={() => this.redirectByType("medication_prescribe")}>
+                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }}  aria-hidden="true"></i>Medication Prescribe</button>
+                <button className="submenu-item"  onClick={() => this.setRequestType('reporting-scenario')}>
+                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }}  aria-hidden="true"></i>Measure Report </button>
+              </div>
+            </div>
             <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
+              {/*
             <div className="menu_conf" onClick={() => this.setRequestType('reporting-scenario')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               Reporting Scenario</div>
+            */}
           </div>
           <div className="content">
-            <div className="left-form">
-              <div className="header">
-                 <Button.Group color='blue'>
-                  <Button onClick={this.orderReviewButton}>Order Review</Button>
-                  <Button onClick={this.medicationButton}>Medication Prescribe</Button>
-                </Button.Group>
-            </div>
+           
+           <div className="left-form">
+             {/*
+                <div className="header">
+                   <Button.Group color='blue'>
+                    <Button onClick={this.orderReviewButton}>Order Review</Button>
+                    <Button onClick={this.medicationButton}>Medication Prescribe</Button>
+                  </Button.Group>
+                </div>
+              */}
              {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
              <div>
               <div>
@@ -661,7 +727,7 @@ class ProviderRequest extends Component {
                           }
                         </div>
                       }
-                      { this.state.category_name === 'Emergency Medical Services' &&
+                      { this.state.category_name === 'Ambulate or other medical transport services' &&
                         <div>
                           <div className="header">
                             ICD 10 / HCPCS Codes*
@@ -677,7 +743,7 @@ class ProviderRequest extends Component {
                           }
                         </div>
                       }
-                  {( this.state.category_name === 'Healthcare' || this.state.category_name === 'Durable Medical Equipment') &&
+                  {/*( this.state.category_name === 'Healthcare' || this.state.category_name === 'Durable Medical Equipment') &&
                         <div>
                         <div className="header">
                          Quantity
@@ -686,7 +752,7 @@ class ProviderRequest extends Component {
                         <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onQuantityChange}></Input>
                       </div>
                   </div>
-                      }
+                      */}
                   <div>
                     <div className="header">
                       NPI
