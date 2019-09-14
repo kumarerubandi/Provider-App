@@ -283,10 +283,13 @@ class CDEX extends Component {
         let valueString;
         payload.map(async (p)=>{
             if(p.hasOwnProperty('extension')){
+                let communicationPayload = this.state.communicationPayload
                 if(p['extension'][0].hasOwnProperty('valueString')){
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
-                    var Url  = this.state.config.provider.fhir_url + "/"+valueString;
+                    var Url  = this.state.config.provider.fhir_url + "/"+valueString+"&patient="+this.state.patient.id;
+                    console.log(Url,'url')
+
                     var extensionUrl =p['extension'][0].url
                     console.log(p['extension'][0].url,'teeee')
                     const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -313,11 +316,9 @@ class CDEX extends Component {
                     );
                     console.log(dataResult, 'dataResult')
                     var encoded = btoa(JSON.stringify(dataResult))
-
-                    // let objJsonStr = JSON.stringify(dataResult);
-                    // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
                     console.log(encoded,'base64')
-                    let communicationPayload = this.state.communicationPayload
+                    // let communicationPayload = this.state.communicationPayload
+
                     communicationPayload.push({
                                     "extension": p['extension'],
                                     "contentAttachment":{
@@ -325,25 +326,13 @@ class CDEX extends Component {
                                         "data":encoded
                                     }
                                 })
-                    // console.log(observationList,'observationList')
-                    // observationList.push(observations)
-                    this.setState({communicationPayload:communicationPayload},() => { 
-                        this.showError();
-                    })
+                    
+                    
                 }
                 else if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
-                    console.log(p['extension'][0]['url'],'urlle')
                     var extensionUrl=p['extension'][0]['url']
                     var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
-                    console.log(code,'vallll')
-                    // console.log(p['contentString'],'yo whts goin on ')
-                    // var string = p['contentString'].split('during ')
-                    // console.log(string,'string')
-                    // var dates = string[1].split(" - ")
-                    // console.log(dates,'dates')
-                    //"&period=gt"+dates[0]+"&period=lt"+dates[1]
                     var searchString = "?type="+code+"&patient="+this.state.patient.id
-                    console.log(searchString,'searchstring')
                     var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
                     // var Url=''
                     const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -360,37 +349,16 @@ class CDEX extends Component {
                         console.log(response)
                         return response.json();
                     }).then((response) => {
-                        // console.log("----------response", response);
                         if (response.hasOwnProperty('entry')) {
                             return response
                         }
-                        // console.log(response,'res')
                     }).catch(reason =>
                         console.log("No response recieved from the server", reason)
                     );
-                    console.log(documents, 'documents')
-
-                    // let objJsonStr = JSON.stringify(documents);
-                    // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
-                    // console.log(objJsonB64,'base64')
-                    // let dataValueList = this.state.dataValueList
-                    // dataValueList.push({
-                    //                 "extension": p['extension'],
-                    //                 "contentAttachment":{
-                    //                     "contentType":"application/json",
-                    //                     "data":objJsonB64
-                    //                 }
-                    //             })
-
-                    let communicationPayload = this.state.communicationPayload
-                    console.log(communicationPayload,'pp')
                     if(documents !== undefined ){
                         if ("entry" in documents) {
                             documents.entry.map((document) => {
-                                    // observation['valueString']=valueString
-                                // if (observationList.indexOf(observation.resource) == -1) {
-                                //     observationList.push(observation.resource)
-                                // }
+                        
                                 communicationPayload.push({
                                     "extension":p['extension'],
                                     "contentAttachment":{
@@ -402,26 +370,16 @@ class CDEX extends Component {
                         }
                     }
 
-                    // // observationList.push(observations)
-                    this.setState({communicationPayload:communicationPayload},() => { 
-                        this.showError();
-                    })
-                    console.log(this.state.communicationPayload,'documentList')
-
-                    // console.log()
-                    // this.setState({extensionUrl:extensionUrl})
-                    // this.setState({extValueCodableConcept:code})
-                    
-
-                    // this.setState({valueString:valueString})
-                    // this.setState()
                 }
+                console.log(communicationPayload,'police station')
+
+                this.setState({communicationPayload:communicationPayload},() => { 
+                    this.showError();
+                })
+
             
             }
-
-            // console.log(observationList,'ooo')
         })
-        console.log(this.state.communicationPayload,'police station')
         // await this.showError()
     }
 
@@ -523,6 +481,7 @@ class CDEX extends Component {
         var date = new Date()
         var authoredOn=date.toISOString()
         // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
+        
         var commJson = {
             "resourceType": "Bundle",
             "type": "transaction",
