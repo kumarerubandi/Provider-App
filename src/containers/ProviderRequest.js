@@ -1006,12 +1006,12 @@ class ProviderRequest extends Component {
       }
     }
 
-    token = "Bearer " + token;
-    var myHeaders = new Headers({
-      "Content-Type": "application/json",
-      "authorization": token,
-    });
-    var url = this.props.config.provider.fhir_url +'/Encounter&subject='+patientId+'&peroid'
+    // token = "Bearer " + token;
+    // var myHeaders = new Headers({
+    //   "Content-Type": "application/json",
+    //   "authorization": token,
+    // });
+    // var url = this.props.config.provider.fhir_url +'/Encounter&subject='+patientId+'&peroid'
       // const fhirResponse = await fetch(url, {
       //   method: "GET",
       //   headers: myHeaders,

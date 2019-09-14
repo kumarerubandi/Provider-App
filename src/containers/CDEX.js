@@ -287,7 +287,6 @@ class CDEX extends Component {
                 if(p['extension'][0].hasOwnProperty('valueString')){
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
-                    if(valueString.split)
                     var Url  = this.state.config.provider.fhir_url + "/"+valueString+"&patient="+this.state.patient.id;
                     console.log(Url,'url')
 
