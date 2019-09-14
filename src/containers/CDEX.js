@@ -327,7 +327,7 @@ class CDEX extends Component {
 
     }
     async showError(){
-        if(this.state.communicationPayload.length ==0){
+        if(this.state.documentList.length ==0){
             this.setState({error : true});
             this.setState({errorMsg : "No Documents Found!!"})
         }   
@@ -1162,6 +1162,7 @@ class CDEX extends Component {
                                         Documents : <span className="data1">{documents}</span>
                                     </div>  
                                 } */}
+				
                                 <div className="data-label" style={{ paddingTop:"0px"}}>
                                     Select documents : 
                                     
@@ -1171,7 +1172,7 @@ class CDEX extends Component {
                                         return this.renderDocs(item, key);
                                     })}
                                 </div>
-
+				
                                 <div className="header">
                                 Upload Required/Additional Documentation
                                 </div>
