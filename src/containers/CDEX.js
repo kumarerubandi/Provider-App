@@ -12,7 +12,12 @@ import { Input , Checkbox, IconGroup } from 'semantic-ui-react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { faCommentDollar } from '@fortawesome/free-solid-svg-icons';
 import Moment from 'react-moment';
-import moment from "moment"
+import moment from "moment";
+import Dropzone from 'react-dropzone';
+import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+
 
 
 
@@ -52,6 +57,7 @@ class CDEX extends Component {
             errorMsg: '',
             success:false,
             successMsg: '',
+            documentList:[],
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -76,6 +82,59 @@ class CDEX extends Component {
         this.displayCommunicataionRequests();
     }
 
+    indexOfFile(file) {
+        for (var i = 0; i < this.state.files.length; i++) {
+            console.log(this.state.files[i].name, file.name, 'lets check')
+            if (this.state.files[i].name === file.name) {
+                return i;
+            }
+
+        }
+        return -1;
+
+    }
+
+    onDrop(files) {
+
+        let new_files = [];
+
+        new_files = this.state.files;
+        // new_files.concat(this.state.files);
+        // let old_files= this.state.files;
+        for (var i = 0; i < files.length; i++) {
+            console.log(files[i], 'what file', JSON.stringify(this.state.files).indexOf(JSON.stringify(files[i])), this.state.files)
+            if (this.indexOfFile(files[i]) === - 1) {
+                console.log(this.indexOfFile(files[i]), i)
+                new_files = this.state.files.concat(files);
+            }
+        }
+        // if( this.state.files.every((value, index) => value !== files[index])){
+        //     new_files= this.state.files.concat(files);
+        //     console.log('includes')
+        // }
+        this.setState({ files: new_files });
+
+    }
+    onCancel(file) {
+        let new_files = this.state.files;
+        for (var i = 0; i < new_files.length; i++) {
+            if (new_files[i] === file) {
+                new_files.splice(i, 1);
+            }
+        }
+        this.setState({
+            files: new_files
+        });
+    }
+    onRemove(file) {
+        var new_files = this.state.files;
+        for (var i = 0; i < new_files.length; i++) {
+            if (new_files[i] === file) {
+                new_files.splice(i, 1);
+            }
+        }
+        this.setState({ files: new_files })
+    }
     async getCommunicationRequests() {
         var tempUrl = this.state.config.provider.fhir_url;
         let headers = {
@@ -137,11 +196,13 @@ class CDEX extends Component {
         this.setState({extValueCodableConcept:''})
         this.setState({error:false})
         this.setState({success:false})
+        this.setState({documentList:[]})
+        this.setState({files:[]})
 
-        let f = this.state.files;
-        f = null;
-        this.setState({ files: f });
-        console.log(this.state.files)
+        // let f = this.state.files;
+        // f = null;
+        // this.setState({ files: f });
+        // console.log(this.state.files)
         var tempUrl = this.state.config.provider.fhir_url + "/"+patient_id;
         const token= await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers={
@@ -287,7 +348,15 @@ class CDEX extends Component {
                 if(p['extension'][0].hasOwnProperty('valueString')){
                     valueString = p['extension'][0]['valueString'];
                     console.log(valueString,'vallll')
-                    var Url  = this.state.config.provider.fhir_url + "/"+valueString+"&patient="+this.state.patient.id;
+                    var Url;
+                    if((valueString === 'Practitioner')||(valueString === 'Organization')||(valueString === 'SupplyRequest')){
+                        Url  = this.state.config.provider.fhir_url + "/"+valueString;
+                    }
+                    else {
+                        Url  = this.state.config.provider.fhir_url + "/"+valueString+"&patient="+this.state.patient.id;
+                    }
+                    // Url  = this.state.config.provider.fhir_url + "/"+valueString;
+                    // if(valueString)
                     console.log(Url,'url')
 
                     var extensionUrl =p['extension'][0].url
@@ -353,24 +422,30 @@ class CDEX extends Component {
                             return response
                         }
                     }).catch(reason =>
-                        console.log("No response recieved from the server", reason)
+                        console.log("No response recieved from the server", reason) 
                     );
                     if(documents !== undefined ){
                         if ("entry" in documents) {
                             documents.entry.map((document) => {
-                        
-                                communicationPayload.push({
-                                    "extension":p['extension'],
-                                    "contentAttachment":{
-                                        'contentType':document.resource.content[0].attachment.contentType,
-                                        'data':document.resource.content[0].attachment.data
-                                    }
-                                })
+                                // let documentList = this.state.documentList
+                                // documentList.push(document)
+                                this.setState(prevState => ({
+                                    documentList: [...prevState.documentList, document]
+                                }))
+                                // communicationPayload.push({
+                                //     "extension":p['extension'],
+                                //     "contentAttachment":{
+                                //         'contentType':document.resource.content[0].attachment.contentType,
+                                //         'data':document.resource.content[0].attachment.data
+                                //     }
+                                // })
                             })
                         }
                     }
 
+
                 }
+                console.log('doclist',this.state.documentList)
                 console.log(communicationPayload,'police station')
 
                 this.setState({communicationPayload:communicationPayload},() => { 
@@ -481,7 +556,29 @@ class CDEX extends Component {
         var date = new Date()
         var authoredOn=date.toISOString()
         // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
-        
+        let communicationPayload = this.state.communicationPayload
+
+        if (this.state.files != null) {
+            for (var i = 0; i < this.state.files.length; i++) {
+                (function (file) {
+                    let content_type = file.type;
+                    let file_name = file.name;
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        // get file content  
+                        communicationPayload.push({
+                                    "extension":'',
+                                    "contentAttachment":{
+                                        'contentType':content_type,
+                                        'data':reader.result
+                                    }
+                            })
+                    }
+                    reader.readAsBinaryString(file);
+                })(this.state.files[i])
+            }
+        }
+        this.setState({communicationPayload:communicationPayload})
         var commJson = {
             "resourceType": "Bundle",
             "type": "transaction",
@@ -839,6 +936,12 @@ class CDEX extends Component {
 
     render() {
         let data = this.state.comm_req;
+        const files = this.state.files.map(file => (
+            <div className='file-block' key={file.name}>
+                <a onClick={() => this.onRemove(file)} className="close-thik" />
+                {file.name}
+            </div>
+        ))
         // console.log( this.state.comm_req,'how may')
         let content = data.map((d, i) => {
             // console.log(d, i);
@@ -944,6 +1047,7 @@ class CDEX extends Component {
         //     }
         // });
         return (
+            
             <React.Fragment>
                 <div>
                     <div>
@@ -993,6 +1097,27 @@ class CDEX extends Component {
                                         Documents : <span className="data1">{documents}</span>
                                     </div>  
                                 } */}
+
+                                <div className="drop-box">
+                                    <section>
+                                        <Dropzone
+                                            onDrop={this.onDrop.bind(this)}
+                                            onFileDialogCancel={this.onCancel.bind(this)
+                                            }
+                                        >
+                                            {({ getRootProps, getInputProps }) => (
+                                                <div    >
+                                                    <div className='drag-drop-box' {...getRootProps()}>
+                                                        <input {...getInputProps()} />
+                                                        <div className="file-upload-icon"><FontAwesomeIcon icon={faCloudUploadAlt} /></div>
+                                                        <div>Drop files here, or click to select files </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </Dropzone>
+                                    </section>
+                                    <div  >{files}</div>
+                                </div>
                                 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
