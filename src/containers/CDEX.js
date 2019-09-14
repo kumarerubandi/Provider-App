@@ -619,7 +619,19 @@ class CDEX extends Component {
                     reader.onload = function (e) {
                         // get file content  
                         communicationPayload.push({
-                                    "extension":'',
+                            "extension": [
+                                {
+                                  "url": "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-payload-clinical-note-type",
+                                  "valueCodeableConcept": {
+                                    "coding": [
+                                      {
+                                        "system": "http://loinc.org",
+                                        "code": "11503-0"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
                                     "contentAttachment":{
                                         'contentType':content_type,
                                         'data':reader.result
