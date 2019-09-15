@@ -338,12 +338,18 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                     linksSection = card.links.map((link, ind) => (
                      <div key={ind}>
                      <div className="div-prior-auth">
-                        {link.appContext.prior_auth==true &&
-                              <span>Prior Authorization necessary</span>
-                          }
-                          {link.appContext.prior_auth== false &&
-                                <span>No Prior Authorization is Needed</span>
-                          }
+                       {link.hasOwnProperty('appContext') &&
+                       <div>
+                          {link.appContext.prior_auth==true &&
+                            <span>Prior Authorization necessary</span>
+                        }
+                        {link.appContext.prior_auth== false &&
+                              <span>No Prior Authorization is Needed</span>
+                        }
+                        </div>
+                      
+                      }
+                        
                       </div>
                       <button class="ui primary button"
                         
