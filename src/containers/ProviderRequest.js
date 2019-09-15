@@ -743,7 +743,6 @@ class ProviderRequest extends Component {
                           }
                         </div>
                       }
-                  {/*( this.state.category_name === 'Healthcare' || this.state.category_name === 'Durable Medical Equipment') &&
                         <div>
                         <div className="header">
                          Quantity
@@ -752,7 +751,7 @@ class ProviderRequest extends Component {
                         <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onQuantityChange}></Input>
                       </div>
                   </div>
-                      */}
+                     
                   <div>
                     <div className="header">
                       NPI
@@ -1050,6 +1049,7 @@ class ProviderRequest extends Component {
       "status": "active",
       "intent": "instance-order",
       "priority": "routine",
+
       "codeCodeableConcept": {
         "coding": [
           {
@@ -1059,6 +1059,27 @@ class ProviderRequest extends Component {
         ],
         "text": this.state.device_text
       },
+
+      "parameter": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": this.state.device_code,
+                "display": this.state.device_text
+              }
+            ],
+            "text": this.state.device_text
+          },
+          "valueQuantity": {
+            "value": this.state.quantity,
+            "unit": "Number",
+            "system": "http://unitsofmeasure.org",
+            "code": "{Number}"
+          }
+        }
+      ],
       "subject": {
         "reference": "Patient?identifier=" + patientId
       },
