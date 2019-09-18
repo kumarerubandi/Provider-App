@@ -27,6 +27,9 @@ class Configuration extends Component {
                         npi: props.config.user_profiles[1].npi
                     }
                 ],
+                dtr:{
+                dtr_fhir: props.config.dtr.dtr_fhir
+                },
                 crd: {
                     crd_url: props.config.crd.crd_url,
                     coverage_decision_path: props.config.crd.coverage_decision_path,
