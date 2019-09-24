@@ -41,6 +41,7 @@ export default class DropdownHealthcareCodes extends Component {
         search
         selection
         fluid
+        multiple
         onChange={this.handleChange}
       />
     )

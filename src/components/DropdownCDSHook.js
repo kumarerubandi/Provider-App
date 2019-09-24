@@ -41,6 +41,7 @@ export default class DropdownResourceType extends Component {
         search
         selection
         fluid
+        multiple
         onChange={this.handleChange}
       />
     )
