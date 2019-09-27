@@ -30,7 +30,7 @@ import Loader from 'react-loader-spinner';
 import { KEYUTIL } from 'jsrsasign';
 import { createToken } from '../components/Authentication';
 import { connect } from 'react-redux';
-import {Dropdown} from 'semantic-ui-react';
+import { Dropdown } from 'semantic-ui-react';
 import stateOptions from '../stateOptions'
 
 
@@ -45,15 +45,16 @@ const types = {
 class ProviderRequest extends Component {
   constructor(props) {
     super(props);
+    console.log("practitioner id--",sessionStorage.getItem('npi'));
     this.state = {
       patient: null,
       fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
-      dtr_fhir:(this.props.config.dtr!== undefined) ? this.props.config.dtr.dtr_fhir : "http://54.227.218.17:8280/ehr-server/stu3",
+      dtr_fhir: (this.props.config.dtr !== undefined) ? this.props.config.dtr.dtr_fhir : "http://54.227.218.17:8280/ehr-server/stu3",
       scope: '',
       payer: '',
       patientId: '',
-      practitionerId: sessionStorage.getItem('npi'),
+      practitionerId: (sessionStorage.getItem('npi') !== null) ? sessionStorage.getItem('npi') : "",
       resourceType: null,
       resourceTypeLT: null,
       encounterId: '',
@@ -72,9 +73,9 @@ class ProviderRequest extends Component {
       medicationStartDate: '',
       medicationEndDate: '',
       hook: null,
-      icdCode:[],
-      hookName:'order-review',
-      healthcareCode:null,
+      icdCode: [],
+      hookName: 'order-review',
+      healthcareCode: null,
       resource_records: {},
       keypair: KEYUTIL.generateKeypair('RSA', 2048),
       prior_auth: false,
@@ -95,23 +96,24 @@ class ProviderRequest extends Component {
       category_name: "",
       device_code: "",
       device_text: "",
-      deviceArr:[],
+      deviceArr: [],
       // quantity:'',
-      unit:null,
-      birthDate:'',
-      patientState:'',
-      patientPostalCode:'',
-      prefetch:false,
-      patientResource:'',
-      gender:'',
-      firstName:'',
-      lastName:'',
-      genderOptions:[{ key: 'male', text: 'Male', value: 'male' },
+      unit: null,
+      birthDate: '',
+      patientState: '',
+      patientPostalCode: '',
+      prefetch: false,
+      patientResource: '',
+      gender: '',
+      firstName: '',
+      lastName: '',
+      prefetchloading:false,
+      genderOptions: [{ key: 'male', text: 'Male', value: 'male' },
       { key: 'female', text: 'Female', value: 'female' },
-      { key: 'other', text: 'Other', value: 'other'},
-      { key: 'unknown', text: 'Unknown', value: 'unknown'},
-    ],
-    stateOptions:stateOptions,
+      { key: 'other', text: 'Other', value: 'other' },
+      { key: 'unknown', text: 'Unknown', value: 'unknown' },
+      ],
+      stateOptions: stateOptions,
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -154,7 +156,7 @@ class ProviderRequest extends Component {
     this.changeMedicationStDate = this.changeMedicationStDate.bind(this);
     this.changeMedicationEndDate = this.changeMedicationEndDate.bind(this);
     this.onClickLogout = this.onClickLogout.bind(this);
-    this.redirectByType =this.redirectByType.bind(this,);
+    this.redirectByType = this.redirectByType.bind(this);
     this.consoleLog = this.consoleLog.bind(this);
     this.getPrefetchData = this.getPrefetchData.bind(this);
     this.readFHIR = this.readFHIR.bind(this);
@@ -179,14 +181,14 @@ class ProviderRequest extends Component {
   }
 
 
-  componentDidMount(){
-    console.log("reqtype:",this.getUrlParameter("req_type") , this.getUrlParameter("req_ssstype"))
+  componentDidMount() {
+    console.log("reqtype:", this.getUrlParameter("req_type"), this.getUrlParameter("req_ssstype"))
     let reqType = this.getUrlParameter("req_type");
-    if(reqType == "medication_prescribe"){
+    if (reqType == "medication_prescribe") {
       this.medication_prescribe = true
       this.medicationButton();
     }
-    
+
   }
   consoleLog(content, type) {
     let jsonContent = {
@@ -200,14 +202,15 @@ class ProviderRequest extends Component {
   handleGenderChange = (event) => {
     this.setState({ gender: event.target.value })
   }
-  handlePatientStateChange = (event,data) => {
+  handlePatientStateChange = (event, data) => {
     this.setState({ patientState: data.value })
   }
   handlePrefetch = async () => {
-    console.log(this.state.prefetch,'here kya')
-    
-    if(this.state.prefetch === false){
-      let token = await createToken('password','provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
+    console.log(this.state.prefetch, 'here kya')
+
+    if (this.state.prefetch === false) {
+      this.setState({prefetchloading: true});
+      let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       token = "Bearer " + token;
       var myHeaders = new Headers({
         "Content-Type": "application/json",
@@ -222,112 +225,127 @@ class ProviderRequest extends Component {
         return response.json();
       }).then((response) => {
         // console.log("----------response", response);
+        this.setState({prefetchloading: false});
         return response;
       }).catch(reason =>
         console.log("No response recieved from the server", reason)
       );
-      console.log(sender,'sender')
-      if(sender.resourceType === 'Patient'){
+      console.log(sender, 'sender')
+      if (sender.resourceType === 'Patient') {
         this.setState((prevState) => ({ prefetch: !prevState.prefetch }))
-        this.setState({patientResource:sender})
+        this.setState({ patientResource: sender })
         this.setState({ firstName: sender.name[0].given })
         this.setState({ lastName: sender.name[0].family })
         this.setState({ gender: sender.gender })
         this.setState({ birthDate: sender.birthDate })
         this.setState({ patientState: sender.address[0].state })
         this.setState({ patientPostalCode: sender.address[0].postalCode })
-        console.log(sender.address[0].state,'patientState')
+        console.log(sender.address[0].state, 'patientState')
       }
-      else{
+      else {
         this.setState({ gender: '' })
         this.setState({ birthDate: '' })
         this.setState({ patientState: '' })
         this.setState({ patientPostalCode: '' })
         this.setState({ firstName: '' })
-          this.setState({ lastName: '' })
+        this.setState({ lastName: '' })
       }
     }
-   
-    
-  }
- 
-  updateStateElement = (elementName, text) => {
-    // console.log(elementName, 'elenAME', text);
-    if (elementName === "icdCode") {
-      this.setState({ validateIcdCode: false })
 
+
+  }
+
+  updateStateElement = (elementName, text) => {
+    if (elementName === "icdCode") {
+      let selectedCodes = [];
+      this.setState({ deviceArr: [] })
+      this.setState({ validateIcdCode: false })
+      let selectedCode = text[0];
       for (const key in orderReview) {
-        if (key === text) {
-          text = "order-review";
-          this.setState({ [elementName]: text });
-        }
-        else {
-          for (const key in liverTransplant) {
-            if (key === text) {
-              text = "liver-transplant";
-              this.setState({ [elementName]: text });
-            }
-          }
-        }
-        
-        for (const key in homeOxygen) {
-          let obj = {
-            "device_code":'',
-            "device_text":''
-          }
-          if (key === text[0]) {
-            obj.device_code =key
-            obj.device_text = homeOxygen[key]
-            this.setState(prevState => ({
-              deviceArr: [...prevState.deviceArr, obj]
-            }))
-            // this.setState({ device_code: key, device_text: homeOxygen[key] });
-            text = "home-oxygen-therapy";
-            this.setState({ hook: text });
-          }
-          else{
-            for (const key in homeHealthService) {
-              let obj = {
-                "device_code":'',
-                "device_text":''
-              }
-              if (text.includes(key)) {
-                obj.device_code =key
-                obj.device_text = homeHealthService[key]
-                this.setState(prevState => ({
-                  deviceArr: [...prevState.deviceArr, obj]
-                }))
-                // this.setState({ device_code: key, device_text: homeHealthService[key] });
-                text = "home-health-service";
-                this.setState({ hook: text });
-              }
-            }
-          }
-        }
-        for (const key in ambulatoryTransport) {
-          console.log('reddy',text,key,text.includes(key))
-          let obj = {
-            "device_code":'',
-            "device_text":''
-          }
-          if (text.includes(key)) {
-            obj.device_code =key
-            obj.device_text = ambulatoryTransport[key]
-            this.setState(prevState => ({
-              deviceArr: [...prevState.deviceArr, obj]
-            }))
-            // this.setState(prevState => ({
-            //   device_text: [...prevState.device_text, ambulatoryTransport[key]]
-            // }))
-            // this.setState({ device_code: key, device_text: ambulatoryTransport[key] });
-            text = "ambulatory-transport";
-            this.setState({ hook: text });
-          }
+        console.log(elementName, '--value--', selectedCode, "--keyfrom json---", key);
+        if (key === selectedCode) {
+          this.setState({ [elementName]: "order-review" });
         }
       }
+      for (const key in liverTransplant) {
+        console.log(elementName, '--value--', selectedCode, "--keyfrom json---", key);
+        if (key === selectedCode) {
+          this.setState({ [elementName]: "liver-transplant" });
+        }
+      }
+
+
+      for (const key in homeOxygen) {
+        if (key === selectedCode) {
+          this.setState({ hook: "home-oxygen-therapy" });
+        }
+        text.forEach(code => {
+          let obj = {
+            "device_code": '',
+            "device_text": ''
+          }
+          if (code === key) {
+            console.log("Inside if -- ", key);
+            obj.device_code = key
+            obj.device_text = homeOxygen[key]
+            selectedCodes.push(obj);
+            const deviceArr = {
+              deviceArr: selectedCodes,
+            };
+            console.log(selectedCodes);
+            this.setState(deviceArr);
+          }
+        });
+      }
+      for (const key in homeHealthService) {
+        if (key === selectedCode) {
+          this.setState({ hook: "home-health-service" });
+        }
+        text.forEach(code => {
+          let obj = {
+            "device_code": '',
+            "device_text": ''
+          }
+          if (code === key) {
+            console.log("Inside if -- ", key);
+            obj.device_code = key
+            obj.device_text = homeHealthService[key]
+            selectedCodes.push(obj);
+            const deviceArr = {
+              deviceArr: selectedCodes,
+            };
+            console.log(selectedCodes);
+            this.setState(deviceArr);
+          }
+        });
+      }
+      for (const key in ambulatoryTransport) {
+        if (key === selectedCode) {
+          this.setState({ hook: "ambulatory-transport" });
+        }
+        console.log("Inside codes ----", key, text)
+        text.forEach(code => {
+          let obj = {
+            "device_code": '',
+            "device_text": ''
+          }
+          console.log("code---", code);
+          if (code === key) {
+            console.log("Inside if -- ", key);
+            obj.device_code = key
+            obj.device_text = ambulatoryTransport[key]
+            selectedCodes.push(obj);
+            const deviceArr = {
+              deviceArr: selectedCodes,
+            };
+            console.log(selectedCodes);
+            this.setState(deviceArr);
+          }
+        })
+      }
+      console.log("Selected codes--", this.state.deviceArr);
     }
     else {
-      
       this.setState({ [elementName]: text });
       this.setState({ validateIcdCode: false })
     }
@@ -411,7 +429,7 @@ class ProviderRequest extends Component {
   async getResourceData(token, prefectInput) {
     let headers = {
       "Content-Type": "application/json",
-      'Authorization': "Bearer " + token   
+      'Authorization': "Bearer " + token
     }
     // console.log("Prefetch input--", JSON.stringify(prefectInput));
     const url = this.props.config.crd.crd_url + "prefetch";
@@ -425,25 +443,25 @@ class ProviderRequest extends Component {
       this.setState({ prefetchData: response });
     })
   }
-  orderReviewButton(){
+  orderReviewButton() {
     console.log('order Reiqew')
-    this.setState({hookName:'order-review'})
-    this.setState({diagnosis: null})
-    this.setState({medication: null})
-    this.setState({dosageAmount: null})
-    this.setState({unit: null})
-    this.setState({frequency: null})
-    this.setState({medicationStartDate:''})
-    this.setState({medicationEndDate:''})
+    this.setState({ hookName: 'order-review' })
+    this.setState({ diagnosis: null })
+    this.setState({ medication: null })
+    this.setState({ dosageAmount: null })
+    this.setState({ unit: null })
+    this.setState({ frequency: null })
+    this.setState({ medicationStartDate: '' })
+    this.setState({ medicationEndDate: '' })
   }
-  medicationButton(){
+  medicationButton() {
     console.log('Medication')
-    this.setState({hookName:'order-select'})
-    this.setState({validateIcdCode : false})
+    this.setState({ hookName: 'order-select' })
+    this.setState({ validateIcdCode: false })
     // this.setState({patientId : ''})
-    this.setState({hook : null})
+    this.setState({ hook: null })
     // this.setState({quantity : ''})
-    this.setState({ service_code: ""})
+    this.setState({ service_code: "" })
     // this.setState({quantity : ''})
 
   }
@@ -534,8 +552,8 @@ class ProviderRequest extends Component {
     }
   }
 
-  onPatientPostalChange(event){
-    this.setState({patientPostalCode: event.target.value})
+  onPatientPostalChange(event) {
+    this.setState({ patientPostalCode: event.target.value })
   }
 
   changeDosageAmount(event) {
@@ -562,13 +580,13 @@ class ProviderRequest extends Component {
     this.props.history.push('/login');
   }
 
-  redirectByType(redirect_value){
-    console.log("Redirect by tyyoe",redirect_value)
-    if(redirect_value == "medication_prescribe"){
+  redirectByType(redirect_value) {
+    console.log("Redirect by tyyoe", redirect_value)
+    if (redirect_value == "medication_prescribe") {
       // this.props.history.push("/provider_request?req_type=medication_prescribe")
       window.location.href = window.location.origin + "/provider_request?req_type=medication_prescribe"
     }
-    else{
+    else {
       window.location.href = window.location.origin + "/provider_request"
     }
     // else if(redirect_value == "measure_report"){
@@ -633,7 +651,7 @@ class ProviderRequest extends Component {
   async submit_info() {
     // this.setState({ loadingSteps: false, stepsErrorString: undefined });
     // this.resetSteps();
-    let token = await createToken('password','provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
+    let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
     token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
@@ -641,10 +659,10 @@ class ProviderRequest extends Component {
     });
     let accessToken = this.state.accessToken;
     accessToken = token;
-    console.log(accessToken,'accesstoken')
+    console.log(accessToken, 'accesstoken')
     this.setState({ accessToken });
     let json_request = await this.getJson();
-    
+
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.coverage_requirement_path;
@@ -653,38 +671,38 @@ class ProviderRequest extends Component {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
 
-    let dtr_url =this.props.config.dtr.dtr_fhir+"/Patient"
+    let dtr_url = this.props.config.dtr.dtr_fhir + "/Patient"
     // console.log("Fetching response from " + url + ",types.info")
-    console.log("json_request",json_request)
+    console.log("json_request", json_request)
     let patientId;
     try {
-      
-      if(this.state.prefetch ===false){
+
+      if (this.state.prefetch === false) {
         let patientResource = this.state.patientResource
-        console.log(patientResource,JSON.stringify(patientResource))
+        console.log(patientResource, JSON.stringify(patientResource))
         const patientResponse = await fetch(dtr_url, {
           method: "POST",
           headers: myHeaders,
           body: JSON.stringify(patientResource)
         })
-        console.log("fhir-----------",patientResponse);
+        console.log("fhir-----------", patientResponse);
         const patientResoponseJson = await patientResponse.json();
         // this.setState({ response: res_json });
         // patientId=patientResoponseJson.id
         // json_request.entry[0].resource.id = patientId
         // json_request.context.patientId = patientId
-        console.log(patientResoponseJson,'yes its working')
+        console.log(patientResoponseJson, 'yes its working')
       }
       const fhirResponse = await fetch(url, {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(json_request)
       })
-      console.log("fhir-----------",fhirResponse);
+      console.log("fhir-----------", fhirResponse);
       const res_json = await fhirResponse.json();
       this.setState({ response: res_json });
       // console.log("------response json",res_json);
-      
+
       if (fhirResponse && fhirResponse.status) {
         this.consoleLog("Server returned status "
           + fhirResponse.status + ": "
@@ -728,12 +746,12 @@ class ProviderRequest extends Component {
     return (
       <React.Fragment>
         <div>
-          <div className="main_heading">
+          {/*<div className="main_heading">
             <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR </span>
-            { this.medication_prescribe &&
-            <div className="menu_conf" onClick={() => this.redirectByType("default")}>
-              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
-              Home</div>
+            {this.medication_prescribe &&
+              <div className="menu_conf" onClick={() => this.redirectByType("default")}>
+                <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
+                Home</div>
             }
             <div className="menu">
               <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-user-circle" aria-hidden="true"></i>
@@ -748,58 +766,55 @@ class ProviderRequest extends Component {
             <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
               Configuration</div>
-             {/*
             <div className="menu_conf" onClick={() => this.setRequestType('x12-converter')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               X12 Converter</div>
-            */}
             <div className="menu">
-              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-list"  aria-hidden="true"></i>
+              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-list" aria-hidden="true"></i>
                 Clinical Reasoning<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
               </button>
               <div className="menu-content submenu">
 
                 <button className="submenu-item" onClick={() => this.redirectByType("medication_prescribe")}>
-                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }}  aria-hidden="true"></i>Medication Prescribe</button>
-                <button className="submenu-item"  onClick={() => this.setRequestType('reporting-scenario')}>
-                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }}  aria-hidden="true"></i>Measure Report </button>
+                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }} aria-hidden="true"></i>Medication Prescribe</button>
+                <button className="submenu-item" onClick={() => this.setRequestType('reporting-scenario')}>
+                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }} aria-hidden="true"></i>Measure Report </button>
               </div>
             </div>
             <div className="menu_conf" onClick={() => this.setRequestType('cdex-view')}>
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
-              {/*
-            <div className="menu_conf" onClick={() => this.setRequestType('reporting-scenario')}>
-              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
-              Reporting Scenario</div>
-            */}
-          </div>
-          <div className="content">
-           
-           <div className="left-form">
-             {/*
-                <div className="header">
-                   <Button.Group color='blue'>
-                    <Button onClick={this.orderReviewButton}>Order Review</Button>
-                    <Button onClick={this.medicationButton}>Medication Prescribe</Button>
-                  </Button.Group>
-                </div>
-              */}
-             {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
-             <div>
-              <div>
-                <div>
-                  <div className="header">
-                    Payer
-                      </div>
-                  <div className="dropdown">
-                    <DropdownPayer
-                      elementName='payer'
-                      updateCB={this.updateStateElement}
-                    />
-                  </div>
-                </div>
-                {/* <div>
+          </div>*/}
+          <header id="header">
+            <div className="container-fluid">
+
+              <div id="logo" className="pull-left">
+                <h1><a href="#intro" className="scrollto">PilotIncubator</a></h1>
+                {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
+              </div>
+
+              <nav id="nav-menu-container">
+                <ul className="nav-menu">
+                  <li><a href={window.location.protocol + "//" + window.location.host + "/home"}>Home</a></li>
+                  <li className="menu-active menu-has-children"><a href="">Services</a>
+                    <ul>
+                      <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
+                      <li><a href="#">MIPS Score</a></li>
+                    </ul>
+                  </li>
+                  <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
+                </ul>
+              </nav>
+            </div>
+          </header>
+
+          <main id="main" style={{ marginTop: "92px" }}>
+
+            <div className="form">
+              <div className="container">
+                {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
+                  <div>
+                    {/* <div>
                       <div className="header">
                             Your Fhir URL*
                     </div>
@@ -820,386 +835,380 @@ class ProviderRequest extends Component {
                     {this.state.validateAccessToken === true  &&
                       <div className='errorMsg dropdown'>{config.errorMsg}</div>
                     }
-                  </div> */}
-                  {/* <button class="ui compact toggle button " aria-pressed="false" active={active} onClick={this.handlePrefetch}>Prefetch</button> */}
-                <div className="header">
-                  Beneficiary ID* <span><Button compact toggle active={prefetch} onClick={this.handlePrefetch}>Prefetch</Button> </span>
-                  </div>
-                <div className="dropdown">
-                  <Input className='ui fluid   input' type="text" name="patient" fluid value={this.state.patientId} onChange={this.onPatientChange}></Input>
-                </div>
-                {this.state.validatePatient === true &&
-                  <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                }
-              </div>
-              <div className='stateInputRow'>
-                    <div className='stateInputColumn'>
-                    <div className="header">
-                        First Name
-                        </div>  
-                        <div className="dropdown">
-                          <Input className='ui  input' id='textbox'  type="text" name="firstName"  value={this.state.firstName} onChange={this.onChangeFirstName}></Input>
-                        </div>         
+                  </div>*/}
+
+                    <div className="form-row">
+                      <div className="form-group col-md-2">
+                        <h4 className="title">Payer</h4>
+                      </div>
+                      <div className="form-group col-md-6">
+                        <DropdownPayer
+                          elementName='payer'
+                          updateCB={this.updateStateElement}
+                        />
+                      </div>
                     </div>
-                    <div className='stateInputColumn'>
-                    <div className="header" >
-                        Last Name
-                    </div>
-                    <div className="dropdown">
-                          <Input className='ui  input' id='textbox'  type="text" name="lastName"  value={this.state.lastName} onChange={this.onChangeLastName}></Input>
-                        </div>
-                    </div>
-              </div>
-              <div className='stateInputRow'>
-                    <div className='stateInputColumn'>
-                    <div className="header">
-                        Gender
-                        </div>  
-                        <div>
-                        <Dropdown
-                            className={"blackBorder"}
-                              options={this.state.genderOptions}
-                              placeholder='Gender'
-                              search
-                              selection
-                              value={this.state.gender}
-                              onChange={this.handleGenderChange}
+
+                    <div className="form-row">
+                      <div className="form-group col-md-2">
+                        <h4 className="title">Beneficiary Id*</h4>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <input type="text" name="patient" className="form-control" id="name" placeholder="Beneficiary Id"
+                          value={this.state.patientId} onChange={this.onPatientChange}
+                          data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                        <div className="validation"></div>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <button type="button" onClick={this.handlePrefetch}>Prefetch
+                        <div id="fse" className={"spinner " + (this.state.prefetchloading ? "visible" : "invisible")}>
+                            <Loader
+                              type="Oval"
+                              color="#fff"
+                              height="15"
+                              width="15"
                             />
-                          </div>                 
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                    <div className='stateInputColumn'>
-                    <div className="header" >
-                        Birth Date
+                    <div className="form-row">
+                      <div className="form-group col-md-2">
+                        <h4 className="title">Patient Info</h4>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <input type="text" name="firstName" className="form-control" id="name" placeholder="First Name"
+                          value={this.state.firstName} onChange={this.onChangeFirstName}
+                          data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                        <div className="validation"></div>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <input type="text" name="lastName" className="form-control" id="name" placeholder="Last Name"
+                          value={this.state.lastName} onChange={this.onChangeLastName}
+                          data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                        <div className="validation"></div>
+                      </div>
                     </div>
-                      <div >
+                    <div className="form-row">
+                      <div className="form-group col-md-2">
+                        <h4 className="title"></h4>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <Dropdown
+                          className={"blackBorder"}
+                          options={this.state.genderOptions}
+                          placeholder='Gender'
+                          search
+                          selection
+                          fluid
+                          value={this.state.gender}
+                          onChange={this.handleGenderChange}
+                        />
+                      </div>
+                      <div className="form-group col-md-3">
                         <DateInput
                           name="birthDate"
                           placeholder="Birth Date"
-                          dateFormat = "MM/DD/YYYY"
+                          dateFormat="MM/DD/YYYY"
+                          fluid
                           value={this.state.birthDate}
                           iconPosition="left"
                           onChange={this.changebirthDate}
                         />
                       </div>
                     </div>
-              </div>
-              <div className='stateInputRow'>
-
-                  <div className='stateInputColumn'>
-                    <div className="header">
-                        State
-                        </div>  
-                        <div>
-                      
-                          <Dropdown
-                            className={"blackBorder"}
-                              options={this.state.stateOptions}
-                              placeholder='State'
-                              search
-                              selection
-                              value={this.state.patientState}
-                              onChange={this.handlePatientStateChange}
-                            />
-                          </div>                 
-                    </div>
-                    <div className='stateInputColumn'>
-                    <div className="header" >
-                        Postal Code
-                    </div>
-                      <div >
-                      <div className="dropdown">
-                          <Input className='ui input' id='textbox'  type="text" name="patientPostalCode"  value={this.state.patientPostalCode} onChange={this.onPatientPostalChange}></Input>
-                        </div>
+                    <div className="form-row">
+                      <div className="form-group col-md-2">
+                        <h4 className="title"></h4>
+                      </div>
+                      <div className="form-group col-md-3">
+                        <Dropdown
+                          className={"blackBorder"}
+                          options={this.state.stateOptions}
+                          placeholder='State'
+                          search
+                          selection
+                          fluid
+                          value={this.state.patientState}
+                          onChange={this.handlePatientStateChange}
+                        />
+                      </div>
+                      <div className="form-group col-md-3">
+                        <input type="text" name="patientPostalCoade" className="form-control" id="name" placeholder="Postal Code"
+                          value={this.state.patientPostalCode} onChange={this.onPatientPostalChange}
+                          data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                        <div className="validation"></div>
                       </div>
                     </div>
-                </div>
-              
-                
-              {/* <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
-              /> */}
-              </div>}
-              {this.state.hookName === 'order-review' &&
-              <div>
-                <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement}
-              />
-               {this.state.auth_active !== 'active' &&
-                <div>
-                  {this.state.category_name === 'Durable Medical Equipment'&&
+
+                    {this.state.validatePatient === true &&
+                      <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                    }
+                  </div>}
+                {this.state.hookName === 'order-review' &&
+                  <div>
+                    <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement} />
+                  </div>}
+                {this.state.auth_active !== 'active' &&
+                  <div>
+                    {this.state.category_name === 'Durable Medical Equipment' &&
+                      <div className="form-row">
+                        <div className="form-group col-md-2">
+                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
+                        </div>
+                        <div className="form-group col-md-6">
+                          <DropdownCDSHook
+                            elementName="icdCode"
+                            updateCB={this.updateStateElement}
+                          />
+                        </div>
+                      </div>
+                    }
+                    {this.state.category_name === 'Healthcare' &&
+                      <div className="form-row">
+                        <div className="form-group col-md-2">
+                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
+                        </div>
+                        <div className="form-group col-md-6">
+                          <DropdownHealthcareCodes
+                            elementName="icdCode"
+                            updateCB={this.updateStateElement}
+                          />
+                        </div>
+                      </div>
+                    }
+                    {this.state.category_name === 'Ambulate or other medical transport services' &&
+                      <div className="form-row">
+                        <div className="form-group col-md-2">
+                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
+                        </div>
+                        <div className="form-group col-md-6">
+                          <DropdownAmbulanceCodes
+                            elementName="icdCode"
+                            updateCB={this.updateStateElement}
+                          />
+                        </div>
+                      </div>
+                    }
+
+                    {this.state.validateIcdCode === true &&
+                      <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
+                    }
+                  </div>}
+
+                {this.state.hookName === 'order-select' &&
+                  <div>
+                    <div className="header">
+                      Diagnosis
+                      </div>
+                    <div className="dropdown">
+                      <DropdownDiagnosis
+                        elementName='diagnosis'
+                        updateCB={this.updateStateElement}
+                      />
+                    </div>
                     <div>
                       <div className="header">
-                        ICD 10 / HCPCS Codes*
-                        </div>
-                          <div className="dropdown">
-                            <DropdownCDSHook
-                              elementName="icdCode"
-                              updateCB={this.updateStateElement}
-                            />
-                          </div>
-                          {this.state.validateIcdCode === true &&
-                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                          }
-                        </div>
-                      }
-                      { this.state.category_name === 'Healthcare' &&
-                        <div>
-                          <div className="header">
-                            ICD 10 / HCPCS Codes*
-                        </div>
-                          <div className="dropdown">
-                            <DropdownHealthcareCodes
-                              elementName="icdCode"
-                              updateCB={this.updateStateElement}
-                            />
-                          </div>
-                          {this.state.validateIcdCode === true &&
-                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                          }
-                        </div>
-                      }
-                      { this.state.category_name === 'Ambulate or other medical transport services' &&
-                        <div>
-                          <div className="header">
-                            ICD 10 / HCPCS Codes*
-                        </div>
-                          <div className="dropdown">
-                            <DropdownAmbulanceCodes
-                              elementName="icdCode"
-                              updateCB={this.updateStateElement}
-                            />
-                          </div>
-                          {this.state.validateIcdCode === true &&
-                            <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                          }
-                        </div>
-                      }
-                        {/* <div>
-                        <div className="header">
-                         Quantity
-                        </div>
+                        Medication Input
+                      </div>
                       <div className="dropdown">
-                        <Input className='ui fluid   input' type="text" name="quantity" fluid value={this.state.quantity} onChange={this.onQuantityChange}></Input>
-                      </div>
-                  </div> */}
-                     
-                  <div>
-                    <div className="header">
-                      NPI
-                    </div>
-                    <div className="dropdown">
-                      <Input className='ui  fluid input' type="text" name="practitioner" fluid value={this.state.practitionerId} onChange={this.onPractitionerChange}></Input>
-                    </div>
-                  </div>
-                </div>
-              }
-             </div>}
-              
-
-
-        
-              {this.state.hookName === 'order-select' &&
-                <div>
-                  <div className="header">
-                    Diagnosis
-                      </div>
-                  <div className="dropdown">
-                    <DropdownDiagnosis
-                      elementName='diagnosis'
-                      updateCB={this.updateStateElement}
-                    />
-                  </div>
-                  <div>
-                  <div className="header">
-                          Medication Input
-                      </div>
-                  <div className="dropdown">
-                  <DropdownMedicationList
-                      elementName="medication"
-                      updateCB={this.updateStateElement}
-                    />
-                  </div>
-                  </div>
-                  <div className='stateInputRow'>
-                    <div className='stateInputColumn'>
-                      <div className='header' >
-                        Value
-                    </div>
-                      <div>
-                        <Input
-                          type="number"
-                          value={this.state.dosageAmount}
-                          onChange={this.changeDosageAmount}
-                          placeholder="Value" /></div>
-                    </div>
-                    <div className='stateInputColumn'>
-                      <div className="header" >
-                        Unit
-                      </div>
-                      <div >
-                        <DropdownUnits
-                          elementName='unit'
+                        <DropdownMedicationList
+                          elementName="medication"
                           updateCB={this.updateStateElement}
                         />
                       </div>
                     </div>
-                    <div className='stateInputColumn'>
-                      <div className="header" >
-                        Frequency
+                    <div className='stateInputRow'>
+                      <div className='stateInputColumn'>
+                        <div className='header' >
+                          Value
+                    </div>
+                        <div>
+                          <Input
+                            type="number"
+                            value={this.state.dosageAmount}
+                            onChange={this.changeDosageAmount}
+                            placeholder="Value" /></div>
                       </div>
-                      <div >
-                        {/* <DropdownFrequency
+                      <div className='stateInputColumn'>
+                        <div className="header" >
+                          Unit
+                      </div>
+                        <div >
+                          <DropdownUnits
+                            elementName='unit'
+                            updateCB={this.updateStateElement}
+                          />
+                        </div>
+                      </div>
+                      <div className='stateInputColumn'>
+                        <div className="header" >
+                          Frequency
+                      </div>
+                        <div >
+                          {/* <DropdownFrequency
                           elementName='frequency'
                           updateCB={this.updateStateElement}
                         /> */}
-                        <Input
-                          type="number"
-                          value={this.state.frequency}
-                          onChange={this.changefrequency}
-                          placeholder="Frequency" />
+                          <Input
+                            type="number"
+                            value={this.state.frequency}
+                            onChange={this.changefrequency}
+                            placeholder="Frequency" />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className='leftStateInput'>
+                        <div className="header" >
+                          Start Date
+                    </div>
+                        <div >
+                          <DateInput
+                            localization='es'
+                            name="medicationStartDate"
+                            placeholder="Start Date"
+                            dateFormat="MM/DD/YYYY"
+                            value={this.state.medicationStartDate}
+                            iconPosition="left"
+                            onChange={this.changeMedicationStDate}
+                          />
+                        </div>
+                      </div>
+                      <div className='rightStateInput'>
+                        <div className="header" >
+                          End Date
+                    </div>
+                        <div >
+                          <DateInput
+                            name="medicationEndDate"
+                            placeholder="End Date"
+                            dateFormat="MM/DD/YYYY"
+                            value={this.state.medicationEndDate}
+                            iconPosition="left"
+                            onChange={this.changeMedicationEndDate}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <div className='leftStateInput'>
-                      <div className="header" >
-                        Start Date
-                    </div>
-                      <div >
-                        <DateInput
-                        localization='es'
-                          name="medicationStartDate"
-                          placeholder="Start Date"
-                          dateFormat = "MM/DD/YYYY"
-                          value={this.state.medicationStartDate}
-                          iconPosition="left"
-                          onChange={this.changeMedicationStDate}
-                        />
-                      </div>
-                    </div>
-                    <div className='rightStateInput'>
-                      <div className="header" >
-                        End Date
-                    </div>
-                      <div >
-                        <DateInput
-                          name="medicationEndDate"
-                          placeholder="End Date"
-                          dateFormat = "MM/DD/YYYY"
-                          value={this.state.medicationEndDate}
-                          iconPosition="left"
-                          onChange={this.changeMedicationEndDate}
-                        />
-                      </div>
-                    </div>
+                }
+                <div className="form-row">
+                  <div className="form-group col-md-2">
+                    <h4 className="title">NPI</h4>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <input type="text" name="practitioner" className="form-control" id="name" placeholder="Practitioner NPI"
+                      value={this.state.practitionerId} onChange={this.onPractitionerChange}
+                      data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                    <div className="validation"></div>
                   </div>
                 </div>
-              }
-              {/* {this.state.request === 'coverage-requirement' && this.state.auth_active !== 'active' &&
-                      <CheckBox elementName="prefetch" displayName="Include Prefetch" updateCB={this.updateStateElement}/>
-                      } */}
-              <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
+                <button type="button" onClick={this.startLoading}>Submit
                     <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                  <Loader
-                    type="Oval"
-                    color="#fff"
-                    height="15"
-                    width="15"
-                  />
-                </div>
-              </button>
-            </div>
-            {this.state.loadingSteps &&
-              <div className="right-form" style={{ paddingLeft: "2%", listStyle: "none", paddingTop: "3%" }} >
-                <ol style={{ listStyle: "none" }}>
-                  {this.state.requirementSteps.map((key, i) => {
-                    return (
-                      <li key={i}>
-                        <div>
-                          {this.state.requirementSteps[i].step_status === 'step_done' &&
+                    <Loader
+                      type="Oval"
+                      color="#fff"
+                      height="15"
+                      width="15"
+                    />
+                  </div>
+                </button>
+                {this.state.loadingSteps &&
+                  <div className="right-form" style={{ paddingLeft: "2%", listStyle: "none", paddingTop: "3%" }} >
+                    <ol style={{ listStyle: "none" }}>
+                      {this.state.requirementSteps.map((key, i) => {
+                        return (
+                          <li key={i}>
                             <div>
-                              <div style={{ color: "green" }} id="fse" className="visible">
-                                <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "} <i style={{ color: "green" }} className="fa fa-check" aria-hidden="true"></i></span>
-                              </div>
-                              <div style={{ paddingLeft: "25px" }} >
-                                {
-                                  this.state.requirementSteps[i].step_no === 2 &&
-                                  <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}  >Successfully fetched 4 FHIR resources.</span>
+                              {this.state.requirementSteps[i].step_status === 'step_done' &&
+                                <div>
+                                  <div style={{ color: "green" }} id="fse" className="visible">
+                                    <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "} <i style={{ color: "green" }} className="fa fa-check" aria-hidden="true"></i></span>
+                                  </div>
+                                  <div style={{ paddingLeft: "25px" }} >
+                                    {
+                                      this.state.requirementSteps[i].step_no === 2 &&
+                                      <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}  >Successfully fetched 4 FHIR resources.</span>
 
-                                }
-                                {
-                                  this.state.requirementSteps[i].step_no === 3 &&
-                                  <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}>Successfully executed <a target="_blank" href={this.state.requirementSteps[i].step_link}>{this.state.requirementSteps[i].cql_name}</a> on CDS.</span>
+                                    }
+                                    {
+                                      this.state.requirementSteps[i].step_no === 3 &&
+                                      <span style={{ float: "left", paddingBottom: "20px", color: "gray" }}>Successfully executed <a target="_blank" href={this.state.requirementSteps[i].step_link}>{this.state.requirementSteps[i].cql_name}</a> on CDS.</span>
 
-                                }
-                              </div>
-                            </div>
-                          }
-                          {this.state.requirementSteps[i].step_status === 'step_loading' &&
-                            <div style={{ color: "brown" }} id="fse" className="visible">
-                              <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "}</span>
-                              {
-                                (this.state.requirementSteps[i].hideLoader === false || this.state.requirementSteps[i].hideLoader === undefined) &&
-                                <div style={{ float: "right" }} >
-                                  <Loader
-                                    style={{ float: "right" }}
-                                    type="ThreeDots"
-                                    color="brown"
-                                    height="6"
-                                    width="30"
-                                  />
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              {this.state.requirementSteps[i].step_status === 'step_loading' &&
+                                <div style={{ color: "brown" }} id="fse" className="visible">
+                                  <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "}</span>
+                                  {
+                                    (this.state.requirementSteps[i].hideLoader === false || this.state.requirementSteps[i].hideLoader === undefined) &&
+                                    <div style={{ float: "right" }} >
+                                      <Loader
+                                        style={{ float: "right" }}
+                                        type="ThreeDots"
+                                        color="brown"
+                                        height="6"
+                                        width="30"
+                                      />
+                                    </div>
+                                  }
+                                </div>
+                              }
+                              {this.state.requirementSteps[i].step_status === 'step_not_started' &&
+                                <div id="fse" className="visible">
+                                  <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "}</span>
                                 </div>
                               }
                             </div>
-                          }
-                          {this.state.requirementSteps[i].step_status === 'step_not_started' &&
-                            <div id="fse" className="visible">
-                              <span style={{ float: "left" }}  >{this.state.requirementSteps[i].step_no + ". " + this.state.requirementSteps[i].step_str + "   "}</span>
-                            </div>
-                          }
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ol>
-                <div style={{ paddingLeft: "6%", }}>
-                  {this.state.stepsErrorString !== undefined &&
-                    <span style={{ color: "red", marginBottom: "20px" }}>{this.state.stepsErrorString}</span>
-                  }
-                </div>
-              </div>
-            }
+                          </li>
+                        )
+                      })}
+                    </ol>
+                    <div style={{ paddingLeft: "6%", }}>
+                      {this.state.stepsErrorString !== undefined &&
+                        <span style={{ color: "red", marginBottom: "20px" }}>{this.state.stepsErrorString}</span>
+                      }
+                    </div>
+                  </div>
+                }
 
-            {(this.state.loading === false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
-              <div className="right-form">
-                <DisplayBox
-                  response={this.state.response}
-                  req_type="coverage_requirement"
-                  userId={this.state.practitionerId}
-                  fhirAccessToken={this.state.accessToken}
-                  fhirServerUrl={this.props.config.provider.fhir_url}
-                  patientId={this.state.patientId} hook={this.state.hook} />
+                {(this.state.loading === false && this.state.loadCards && this.state.request === 'coverage-requirement') &&
+                  <div className="row">
+                    <DisplayBox
+                      response={this.state.response}
+                      req_type="coverage_requirement"
+                      userId={this.state.practitionerId}
+                      fhirAccessToken={this.state.accessToken}
+                      fhirServerUrl={this.props.config.provider.fhir_url}
+                      patientId={this.state.patientId} hook={this.state.hook} />
 
-              </div>
-            }
-            {/* {this.state.request === 'prior-authorization' &&
+                  </div>
+                }
+                {/* {this.state.request === 'prior-authorization' &&
                 <div className="right-form">
                 <DisplayBox
                 response = {this.state.response} req_type="prior-authorization"  userId={this.state.practitionerId}  patientId={this.state.patientId} hook={this.state.hook}  />
 
                 </div>
                 } */}
-            {this.state.loading === false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
-              <div className="right-form">
-                <DisplayBox
-                  response={this.state.response} req_type="coverage_determination"
-                  userId={this.state.practitionerId} patientId={this.state.patient}
-                  hook={this.state.hook}
-                  fhirAccessToken={this.state.accessToken}
-                  fhirServerUrl={this.props.config.provider.fhir_url} />
+                {this.state.loading === false && this.state.loadCards && this.state.request !== 'coverage-requirement' && this.state.request !== 'prior-authorization' &&
+                  <div className="right-form">
+                    <DisplayBox
+                      response={this.state.response} req_type="coverage_determination"
+                      userId={this.state.practitionerId} patientId={this.state.patient}
+                      hook={this.state.hook}
+                      fhirAccessToken={this.state.accessToken}
+                      fhirServerUrl={this.props.config.provider.fhir_url} />
+                  </div>
+                }
               </div>
-            }
-          </div>
+            </div>
+          </main>
         </div>
-      </React.Fragment>);
+      </React.Fragment >);
   };
 
   async getRequestID(token) {
@@ -1223,10 +1232,10 @@ class ProviderRequest extends Component {
   async getResources(token, resource, identifier) {
     var url = this.props.config.payer.fhir_url + '/' + resource + "?identifier=" + identifier;
     // console.log("url-------",url,token);
-    let headers={
+    let headers = {
       "Content-Type": "application/json",
     }
-    if(this.props.config.payer.authorizedPayerFhir){
+    if (this.props.config.payer.authorizedPayerFhir) {
       headers['Authorization'] = "Bearer " + token
     }
     let sender = await fetch(url, {
@@ -1249,15 +1258,15 @@ class ProviderRequest extends Component {
     var string_length = 8;
     var randomstring = '';
     for (var i = 0; i < string_length; i++) {
-        var rnum = Math.floor(Math.random() * chars.length);
-        randomstring += chars.substring(rnum, rnum + 1);
+      var rnum = Math.floor(Math.random() * chars.length);
+      randomstring += chars.substring(rnum, rnum + 1);
     }
     return randomstring
-}
+  }
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
-    const token = await createToken('password','provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
+    let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
     let coverage = {
       resource: {
         resourceType: "Coverage",
@@ -1288,19 +1297,7 @@ class ProviderRequest extends Component {
       "status": "active",
       "intent": "instance-order",
       "priority": "routine",
-
-      "codeCodeableConcept": {
-        "coding": [
-          {
-            "system": "http://loinc.org",
-            "code": this.state.device_code
-          }
-        ],
-        "text": this.state.device_text
-      },
-      "parameter":[],
-
-      
+      "parameter": [],
       "subject": {
         "reference": "Patient?identifier=" + patientId
       },
@@ -1314,9 +1311,9 @@ class ProviderRequest extends Component {
       }
     }
     let deviceArr = this.state.deviceArr
-    console.log(deviceArr,'deviceArr')
-    
-    for (var i=0;i<deviceArr.length;i++){
+    console.log(deviceArr, 'deviceArr')
+
+    for (var i = 0; i < deviceArr.length; i++) {
       let obj = {
         "code": {
           "coding": [
@@ -1327,15 +1324,16 @@ class ProviderRequest extends Component {
             }
           ],
           "text": deviceArr[i].device_text
-        }}
-      
+        }
+      }
+
       // obj.code.coding.code=deviceArr[i].device_code
       // obj.code.display=deviceArr[i].device_text
       // obj.code.text=deviceArr[i].device_text
 
       deviceRequest.parameter.push(obj)
     }
-     
+
 
     // token = "Bearer " + token;
     // var myHeaders = new Headers({
@@ -1343,15 +1341,15 @@ class ProviderRequest extends Component {
     //   "authorization": token,
     // });
     // var url = this.props.config.provider.fhir_url +'/Encounter&subject='+patientId+'&peroid'
-      // const fhirResponse = await fetch(url, {
-      //   method: "GET",
-      //   headers: myHeaders,
-      //   body: JSON.stringify(json_request)
-      // })
-      // console.log("fhir-----------",fhirResponse);
-      // const res_json = await fhirResponse.json();
-      // this.setState({ response: res_json });
-    
+    // const fhirResponse = await fetch(url, {
+    //   method: "GET",
+    //   headers: myHeaders,
+    //   body: JSON.stringify(json_request)
+    // })
+    // console.log("fhir-----------",fhirResponse);
+    // const res_json = await fhirResponse.json();
+    // this.setState({ response: res_json });
+
     // let medicationJson = {
     //   resourceType: "MedicationOrder",
     //   dosageInstruction: [
@@ -1394,75 +1392,75 @@ class ProviderRequest extends Component {
     //   }
 
     // };
-    var date1 = new Date(this.state.medicationStartDate); 
-    var date2 = new Date(this.state.medicationEndDate); 
-    var Difference_In_Time = Math.abs(date2.getTime() - date1.getTime()); 
-    var days      = Math.ceil( Difference_In_Time / (1000 * 60 * 60 * 24))
-    var dosageInstructionText = this.state.dosageAmount+" "+this.state.unit+" bid x "+days+" days"
+    var date1 = new Date(this.state.medicationStartDate);
+    var date2 = new Date(this.state.medicationEndDate);
+    var Difference_In_Time = Math.abs(date2.getTime() - date1.getTime());
+    var days = Math.ceil(Difference_In_Time / (1000 * 60 * 60 * 24))
+    var dosageInstructionText = this.state.dosageAmount + " " + this.state.unit + " bid x " + days + " days"
     let key;
     let text;
-    if(this.state.medication!==null){
+    if (this.state.medication !== null) {
       key = this.state.medication.key
       text = this.state.medication.text
     }
-    let medicationRequestJson ={
-      "resource":{
-         "resourceType":"MedicationRequest",
-         "id":"smart-MedicationRequest-103",
-         "status":"draft",
-         "intent":"order",
-         "medicationCodeableConcept":{
-            "coding":[
-               {
-                  "system":"http://www.nlm.nih.gov/research/umls/rxnorm",
-                  "code":key,
-                  "display":text
-               }
-            ],
-            "text":text
-         },
-         "subject":{
-            "reference":"Patient/"+this.state.patientId
-         },
-         "dosageInstruction":[
+    let medicationRequestJson = {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "smart-MedicationRequest-103",
+        "status": "draft",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
             {
-               "text":dosageInstructionText,
-               "timing":{
-                  
-                     "frequency":this.state.frequency,
-                    
-                  },
-               
-               "doseAndRate":{
-                  "doseQuantity":{
-                     "value":this.state.dosageAmount,
-                     "unit":this.state.unit,
-                     "system":"http://unitsofmeasure.org",
-                     "code":this.state.unit
-                  }
-               }
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": key,
+              "display": text
             }
-         ],
-         "dispenseRequest":{
-            "numberOfRepeatsAllowed":1,
-            "quantity":{
-               "value":1,
-               "unit":"mL",
-               "system":"http://unitsofmeasure.org",
-               "code":"mL"
+          ],
+          "text": text
+        },
+        "subject": {
+          "reference": "Patient/" + this.state.patientId
+        },
+        "dosageInstruction": [
+          {
+            "text": dosageInstructionText,
+            "timing": {
+
+              "frequency": this.state.frequency,
+
             },
-            "expectedSupplyDuration":{
-               "value":days,
-               "unit":"days",
-               "system":"http://unitsofmeasure.org",
-               "code":"d"
+
+            "doseAndRate": {
+              "doseQuantity": {
+                "value": this.state.dosageAmount,
+                "unit": this.state.unit,
+                "system": "http://unitsofmeasure.org",
+                "code": this.state.unit
+              }
             }
-         }
+          }
+        ],
+        "dispenseRequest": {
+          "numberOfRepeatsAllowed": 1,
+          "quantity": {
+            "value": 1,
+            "unit": "mL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mL"
+          },
+          "expectedSupplyDuration": {
+            "value": days,
+            "unit": "days",
+            "system": "http://unitsofmeasure.org",
+            "code": "d"
+          }
+        }
       }
-   }
+    }
     // "99183": "Physician attendance and supervision of hyperbaric oxygen therapy, per session",
     // console.log("------------final device request", deviceRequest)
-    console.log(this.state.dtr_fhir,'wedding')
+    console.log(this.state.dtr_fhir, 'wedding')
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
       fhirServer: this.state.dtr_fhir,
@@ -1482,82 +1480,81 @@ class ProviderRequest extends Component {
         patientId: '',
         coverageId: this.state.coverageId,
         encounterId: this.state.encounterId,
-        patient:''
+        patient: ''
       }
     };
     let patientResource;
-    if(this.state.prefetch === true){
-      
-      patientResource=this.state.patientResource
+    if (this.state.prefetch === true) {
+
+      patientResource = this.state.patientResource
       request.context.patientId = patientResource.id
       request.context.patient = patientResource
     }
-    else{
-    // var birthDate = new Date(this.state.birthDate); 
-      patientResource ={
+    else {
+      // var birthDate = new Date(this.state.birthDate); 
+      patientResource = {
         resourceType: "Patient",
-            id: patientId,
-            gender:this.state.gender,
-            "birthDate": this.state.birthDate,
-            "address": [
-              {
-                  "use": "home",
-                  "city": "Thornton",
-                  "state": this.state.patientState,
-                  "postalCode": this.state.patientPostalCode,
-                  "country": "USA"
-              }
-          ],
-          "active": true,
-          "name": [
-            {
-                "use": "official",
-                "family": this.state.lastName,
-                "given": [
-                   this.state.firstName
-                ]
-            }
+        id: patientId,
+        gender: this.state.gender,
+        "birthDate": this.state.birthDate,
+        "address": [
+          {
+            "use": "home",
+            "city": "Thornton",
+            "state": this.state.patientState,
+            "postalCode": this.state.patientPostalCode,
+            "country": "USA"
+          }
         ],
-          "identifier": [
-            {
-                "use": "usual",
-                "type": {
-                    "coding": [
-                        {
-                            "system": "http://hl7.org/fhir/v2/0203",
-                            "code": "MR",
-                            "display": "Medical record number"
-                        }
-                    ]
-                },
-                "system": "http://hospital.davinci.org",
-                "value": this.randomString()
-            }
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": this.state.lastName,
+            "given": [
+              this.state.firstName
+            ]
+          }
+        ],
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/v2/0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://hospital.davinci.org",
+            "value": this.randomString()
+          }
         ],
       }
-    this.setState({patientResource:patientResource})
+      this.setState({ patientResource: patientResource })
 
     }
-    if(this.state.hookName === 'order-review')
-    {
+    if (this.state.hookName === 'order-review') {
       request.hook = this.state.hook
-      request.context.orders={
+      request.context.orders = {
         resourceType: "Bundle",
         entry: [
-        {
-          resource: deviceRequest
-        }
+          {
+            resource: deviceRequest
+          }
         ]
       }
     }
-    else if(this.state.hookName === 'order-select'){
-      request.hook = this.state.hookName
-      request.context.orders={
+    else if (this.state.hookName === 'order-select') {
+      request.hook = this.state.hook
+      request.context.orders = {
         resourceType: "Bundle",
         entry: [
-        {
-          resource: medicationRequestJson
-        }
+          {
+            resource: medicationRequestJson
+          }
         ]
       }
     }
@@ -1576,7 +1573,7 @@ class ProviderRequest extends Component {
       request.prefetch = this.state.prefetchData;
     }
     return request;
-    
+
   }
   render() {
     return (

@@ -12,7 +12,7 @@ import { createToken } from '../components/Authentication';
 import ReactJson from 'react-json-view';
 import { Input } from 'semantic-ui-react';
 import DropdownProcedure from '../components/DropdownProcedure';
-import ReadMoreAndLess from 'react-read-more-less';
+// import ReadMoreAndLess from 'react-read-more-less';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -843,7 +843,7 @@ class Review extends Component {
             return (
                 <div key={index}>
                     <div className={requirement.status}>
-                        <ReadMoreAndLess
+                        {/* <ReadMoreAndLess
                             //  ref={this.ReadMore}
                             className="read-more-content"
                             charLimit={80}
@@ -851,7 +851,7 @@ class Review extends Component {
                             readLessText=" read less"
                         >
                             {(index + 1) + ". " + requirement.rule}
-                        </ReadMoreAndLess>
+                        </ReadMoreAndLess> */}
                         {requirement.status === 'loading' && <div id="fse" className="visible">
                             <Loader
                                 type="ThreeDots"

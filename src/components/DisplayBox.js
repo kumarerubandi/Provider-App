@@ -260,14 +260,14 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
         }
         if (!this.props.isDemoCard) {
           return (
-            <div className={styles['card-source']}>
+            <p>
               Source: <a className={styles['source-link']} href={source.url || '#'} target="_blank">{source.label}</a>
               {icon}
-            </div>
+            </p>
           );
         }
         return (
-          <div className={styles['card-source']}>
+          <p>
 
             Source:
             <a // eslint-disable-line jsx-a11y/anchor-is-valid
@@ -279,7 +279,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
             </a>
             
             {icon}
-          </div>
+          </p>
         );
       }
     render() {
@@ -308,7 +308,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                   const card = JSON.parse(JSON.stringify(c));
 
                   // -- Summary --
-                  const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
+                const summarySection = <h3>{card.summary}</h3>;
 
                   // -- Source --
                   const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
@@ -341,40 +341,61 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                        {link.hasOwnProperty('appContext') &&
                        <div>
                           {link.appContext.prior_auth==true &&
-                            <span>Prior Authorization necessary</span>
+                            <p>Prior Authorization necessary</p>
                         }
                         {link.appContext.prior_auth== false &&
-                              <span>No Prior Authorization is Needed</span>
+                              <p>No Prior Authorization is Needed</p>
                         }
                         </div>
                       
                       }
                         
                       </div>
-                      <button class="ui primary button"
+                      <a className="cta-btn" target="_blank" href={link.url}>{link.label}</a>
+                      {/* <button class="ui primary button"
                         
                         onClick={e => this.launchLink(e, link)}
                         text={link.label}
                         variant={Button.Opts.Variants['DE-EMPHASIS']}
-                      >{link.label}</button>
+                      >{link.label}</button> */}
                       </div>
                     ));
                   }
                   
 
                   const builtCard = (
-                    <TerraCard key={cardInd} className='decision-card alert-info'>
-                      {summarySection}
-                      {sourceSection}
-                      {detailSection}
-                      <div className={styles['suggestions-section']}>
-                        {suggestionsSection}
-                      </div>
+                    <section id="call-to-action" className="wow fadeIn"key={cardInd}>
+                        <div className="container text-center">
+                            {summarySection}
+                            {sourceSection}
+                            {detailSection}
+                            <div className={styles['suggestions-section']}>
+                              {suggestionsSection}
+                            </div>
+                          
+                            <div className={styles['links-section']}>
+                              {linksSection}
+                            </div>
+                            {/* <h3>Call To Action</h3>
+                            <p> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+                            <a className="cta-btn" href="#">Call To Action</a> */}
+                        </div>
+                    </section>
+                    // <TerraCard key={cardInd} className='decision-card alert-info'>
+                    //   {summarySection}
+                    //   {sourceSection}
+                    //   {detailSection}
+                    //   <div className={styles['suggestions-section']}>
+                    //     {suggestionsSection}
+                    //   </div>
                      
-                      <div className={styles['links-section']}>
-                        {linksSection}
-                      </div>
-                    </TerraCard>);
+                    //   <div className={styles['links-section']}>
+                    //     {linksSection}
+                    //   </div>
+                    // </TerraCard>
+                    );
 
                   renderedCards.push(builtCard);
                 });
@@ -402,7 +423,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           }
           else if (renderedCards.length === 0) { return <div><div className='decision-card alert-warning'>No Cards</div></div>; }
           else{
-            return <div>{renderedCards}</div>;
+            return <div className="col-8" style={{marginTop: "20px"}}>{renderedCards}</div>;
           }
 
         }

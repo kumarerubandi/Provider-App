@@ -16,6 +16,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 //import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faIgloo,faNotesMedical } from '@fortawesome/free-solid-svg-icons';
 import CDEX from '../containers/CDEX';
+import Home from '../containers/Home';
 
 library.add(faIgloo,faNotesMedical)
 export default class App extends Component {
@@ -23,7 +24,7 @@ export default class App extends Component {
         return (
             <BrowserRouter>
                 <Switch>
-                    <Route exact path="/" component={() => { return <Redirect to="/login" />}} />
+                    <Route exact path="/" component={() => { return <Redirect to="/home" />}} />
                     <Route path={"/login"} component={LoginPage} />                    
                     <Route path={"/x12converter"} component={X12Converter} />
                     <Route path={"/reportingScenario"} component={ReportingScenario} />
@@ -33,6 +34,7 @@ export default class App extends Component {
                     <Route path={"/provider_request"} component={ProviderRequest} />                    
                     {/* <Route path={"/review"} component={Review} /> */}
                     <Route exact path="/index" component={Main} />
+                    <Route exact path="/home" component={Home} />
                     <Route path={"/launch"} component={Launch} />
                     <Route path={"/configuration"} component={Configuration} />
                 </Switch>

@@ -101,7 +101,6 @@ async getResources() {
         search
         selection
         fluid
-        
         onChange={this.handleChange}
       />
     )
