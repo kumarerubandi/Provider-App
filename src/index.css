@@ -512,13 +512,14 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
     left: 55%;
 }
 .main{
+  /* background-image: url("call-to-action-bg.jpg"); */
   background-image: url("login-bg.jpg");
   background-color: #cccccc;
     background-repeat: round;
     height: -webkit-fill-available;
     background-size: cover;
     width: inherit;
-    background-blend-mode: luminosity;
+    /* background-blend-mode: luminosity; */
 }
 .addAttr {
   height: auto;

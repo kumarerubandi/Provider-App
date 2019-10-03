@@ -45,7 +45,7 @@ const types = {
 class ProviderRequest extends Component {
   constructor(props) {
     super(props);
-    console.log("practitioner id--",sessionStorage.getItem('npi'));
+    console.log("loggedin-", sessionStorage.getItem('isLoggedIn'));
     this.state = {
       patient: null,
       fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
@@ -107,7 +107,7 @@ class ProviderRequest extends Component {
       gender: '',
       firstName: '',
       lastName: '',
-      prefetchloading:false,
+      prefetchloading: false,
       genderOptions: [{ key: 'male', text: 'Male', value: 'male' },
       { key: 'female', text: 'Female', value: 'female' },
       { key: 'other', text: 'Other', value: 'other' },
@@ -182,6 +182,9 @@ class ProviderRequest extends Component {
 
 
   componentDidMount() {
+    if(!sessionStorage.getItem('isLoggedIn')){
+      this.props.history.push("/login");
+    }
     console.log("reqtype:", this.getUrlParameter("req_type"), this.getUrlParameter("req_ssstype"))
     let reqType = this.getUrlParameter("req_type");
     if (reqType == "medication_prescribe") {
@@ -209,7 +212,7 @@ class ProviderRequest extends Component {
     console.log(this.state.prefetch, 'here kya')
 
     if (this.state.prefetch === false) {
-      this.setState({prefetchloading: true});
+      this.setState({ prefetchloading: true });
       let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       token = "Bearer " + token;
       var myHeaders = new Headers({
@@ -225,7 +228,7 @@ class ProviderRequest extends Component {
         return response.json();
       }).then((response) => {
         // console.log("----------response", response);
-        this.setState({prefetchloading: false});
+        this.setState({ prefetchloading: false });
         return response;
       }).catch(reason =>
         console.log("No response recieved from the server", reason)
@@ -577,7 +580,7 @@ class ProviderRequest extends Component {
   onClickLogout() {
     sessionStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('fhir_url');
-    this.props.history.push('/login');
+    this.props.history.push('/home');
   }
 
   redirectByType(redirect_value) {
@@ -713,7 +716,7 @@ class ProviderRequest extends Component {
       }
       this.setState({ loading: false });
       this.setState({ "loadCards": true });
-      window.scrollTo(0, 0)
+      window.scrollTo(0, document.body.scrollHeight)
     } catch (error) {
       var res_json = {
         "cards": [{
@@ -785,8 +788,8 @@ class ProviderRequest extends Component {
               <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
               CDEX</div>
           </div>*/}
-          <header id="header">
-            <div className="container-fluid">
+          <header id="inpageheader">
+            <div className="container">
 
               <div id="logo" className="pull-left">
                 <h1><a href="#intro" className="scrollto">PilotIncubator</a></h1>
@@ -803,6 +806,11 @@ class ProviderRequest extends Component {
                     </ul>
                   </li>
                   <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
+                  <li className="menu-has-children"><a href="">{sessionStorage.getItem('name')}</a>
+                    <ul>
+                      <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
+                    </ul>
+                  </li>
                 </ul>
               </nav>
             </div>
@@ -812,6 +820,10 @@ class ProviderRequest extends Component {
 
             <div className="form">
               <div className="container">
+                <div className="section-header">
+                  <h3>Prior Authorization</h3>
+                  <p>Submit your request to check for prior authorization.</p>
+                </div>
                 {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
                   <div>
                     {/* <div>
@@ -838,7 +850,7 @@ class ProviderRequest extends Component {
                   </div>*/}
 
                     <div className="form-row">
-                      <div className="form-group col-md-2">
+                      <div className="form-group col-md-2 offset-2">
                         <h4 className="title">Payer</h4>
                       </div>
                       <div className="form-group col-md-6">
@@ -850,7 +862,7 @@ class ProviderRequest extends Component {
                     </div>
 
                     <div className="form-row">
-                      <div className="form-group col-md-2">
+                      <div className="form-group col-md-2 offset-2">
                         <h4 className="title">Beneficiary Id*</h4>
                       </div>
                       <div className="form-group col-md-3">
@@ -873,7 +885,7 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2">
+                      <div className="form-group col-md-2 offset-2">
                         <h4 className="title">Patient Info</h4>
                       </div>
                       <div className="form-group col-md-3">
@@ -890,7 +902,7 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2">
+                      <div className="form-group col-md-2 offset-2">
                         <h4 className="title"></h4>
                       </div>
                       <div className="form-group col-md-3">
@@ -918,7 +930,7 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2">
+                      <div className="form-group col-md-2 offset-2">
                         <h4 className="title"></h4>
                       </div>
                       <div className="form-group col-md-3">
@@ -953,7 +965,7 @@ class ProviderRequest extends Component {
                   <div>
                     {this.state.category_name === 'Durable Medical Equipment' &&
                       <div className="form-row">
-                        <div className="form-group col-md-2">
+                        <div className="form-group col-md-2 offset-2">
                           <h4 className="title">ICD 10 / HCPCS Codes*</h4>
                         </div>
                         <div className="form-group col-md-6">
@@ -966,7 +978,7 @@ class ProviderRequest extends Component {
                     }
                     {this.state.category_name === 'Healthcare' &&
                       <div className="form-row">
-                        <div className="form-group col-md-2">
+                        <div className="form-group col-md-2 offset-2">
                           <h4 className="title">ICD 10 / HCPCS Codes*</h4>
                         </div>
                         <div className="form-group col-md-6">
@@ -979,7 +991,7 @@ class ProviderRequest extends Component {
                     }
                     {this.state.category_name === 'Ambulate or other medical transport services' &&
                       <div className="form-row">
-                        <div className="form-group col-md-2">
+                        <div className="form-group col-md-2 offset-2">
                           <h4 className="title">ICD 10 / HCPCS Codes*</h4>
                         </div>
                         <div className="form-group col-md-6">
@@ -1094,7 +1106,7 @@ class ProviderRequest extends Component {
                   </div>
                 }
                 <div className="form-row">
-                  <div className="form-group col-md-2">
+                  <div className="form-group col-md-2 offset-2">
                     <h4 className="title">NPI</h4>
                   </div>
                   <div className="form-group col-md-6">
@@ -1104,16 +1116,18 @@ class ProviderRequest extends Component {
                     <div className="validation"></div>
                   </div>
                 </div>
-                <button type="button" onClick={this.startLoading}>Submit
+                <div className="text-center">
+                  <button type="button" onClick={this.startLoading}>Submit
                     <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height="15"
-                      width="15"
-                    />
-                  </div>
-                </button>
+                      <Loader
+                        type="Oval"
+                        color="#fff"
+                        height="15"
+                        width="15"
+                      />
+                    </div>
+                  </button>
+                </div>
                 {this.state.loadingSteps &&
                   <div className="right-form" style={{ paddingLeft: "2%", listStyle: "none", paddingTop: "3%" }} >
                     <ol style={{ listStyle: "none" }}>
@@ -1585,7 +1599,6 @@ class ProviderRequest extends Component {
 
 
 function mapStateToProps(state) {
-  console.log(state);
   return {
     config: state.config,
   };

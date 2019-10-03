@@ -5,7 +5,6 @@ import jsonData from '../ucum.json'
 
 let allUnitsOptions=[]
 function unitsMap(object) {
-    console.log('i medications')
     for(const key in object){
         allUnitsOptions.push({'key':key,'value':key,'text':key})
     }

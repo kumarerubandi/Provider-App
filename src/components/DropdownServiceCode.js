@@ -59,8 +59,8 @@ export default class DropdownServiceCode extends Component {
     }
     return (
         <div className="form-row">
-          <div className="form-group col-md-2">
-            <h4 className="title">Service type</h4>
+          <div className="form-group col-md-2 offset-2">
+            <h4 className="title">Service type*</h4>
           </div>
           <div className="form-group col-md-3">
           <Dropdown

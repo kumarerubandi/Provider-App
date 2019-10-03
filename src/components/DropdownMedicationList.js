@@ -5,7 +5,6 @@ import rxnorm from '../medicationShortList'
 
 let allMedicationOptions=[];
 function medicationMap(object) {
-    console.log('i medications')
     for(const key in object){
         allMedicationOptions.push({'key':key,'value':key,'text':object[key]})
     }

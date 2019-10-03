@@ -131,9 +131,8 @@ h6 {
 --------------------------------------------------------------*/
 
 #header {
-  background: rgba(0, 0, 0, 0.9);
-  padding: 20px 0;
-  height: 72px;
+  padding: 30px 0;
+  height: 92px;
   position: fixed;
   left: 0;
   top: 0;
@@ -175,6 +174,42 @@ h6 {
   margin: 0;
 }
 
+#inpageheader {
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px 0;
+  height: 72px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  transition: all 0.5s;
+  z-index: 997;
+}
+#inpageheader #logo {
+  float: left;
+}
+
+#inpageheader #logo h1 {
+  font-size: 34px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+#inpageheader #logo h1 a,
+#inpageheader #logo h1 a:hover {
+  color: #fff;
+  padding-left: 10px;
+  border-left: 4px solid #18d26e;
+}
+
+#inpageheader #logo img {
+  padding: 0;
+  margin: 0;
+}
 /*--------------------------------------------------------------
 # Intro Section
 --------------------------------------------------------------*/
@@ -1302,6 +1337,32 @@ body.mobile-nav-active #mobile-nav-toggle {
   margin-bottom: 20px;
 }
 
+#sendmessage {
+  color: #18d26e;
+  border: 1px solid #18d26e;
+  display: none;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+#errormessage {
+  color: red;
+  display: none;
+  border: 1px solid red;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+#sendmessage.show,
+#errormessage.show,
+.form .show {
+  display: block;
+}
+
 #contact .form #sendmessage {
   color: #18d26e;
   border: 1px solid #18d26e;
@@ -1606,4 +1667,15 @@ button:hover{
 .ui.multiple.dropdown>.label{
   color: white;
   background-color: dimgray;
+}
+button[type="reset"]{
+  background-color: #999;
+  border: 0;
+  padding: 7px 30px;
+  color: #fff;
+  transition: 0.4s;
+  cursor: pointer;
+}
+button[type="reset"]:hover{
+  background-color: #242323;
 }

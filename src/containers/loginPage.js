@@ -53,11 +53,11 @@ class LoginPage extends React.Component {
 
   async onClickLoginSubmit() {
     this.setState({ loading: true, login_error_msg: '' });
-    let tokenResponse = await createToken('password','app-login',this.state.name, this.state.password,true);
+    let tokenResponse = await createToken('password', 'app-login', this.state.name, this.state.password, true);
     if (tokenResponse !== null && tokenResponse !== undefined) {
       sessionStorage.setItem('username', this.state.name);
       sessionStorage.setItem('password', this.state.password);
-      console.log(this.props.config.user_profiles,'user profiles')
+      console.log(this.props.config.user_profiles, 'user profiles')
       for (var key in this.props.config.user_profiles) {
         if (this.state.name === this.props.config.user_profiles[key].username) {
           sessionStorage.setItem('npi', this.props.config.user_profiles[key].npi);
@@ -77,59 +77,64 @@ class LoginPage extends React.Component {
   render() {
     return (
       <div className="main">
-        <div className="row login-form" onKeyPress={this.handleKeyPress}>
-          <div className="col-12" style={{ 'textAlign': 'center' }}>
-          </div>
-          <div className="col-12 signin">
-            Provider Application
-          </div>
-          <div className="col-12 padding-top-10px">
-            <Input
-              icon='user' iconPosition='left'
-              placeholder='User'
-              // label="User name"
-              type='text'
-              className='ui fluid   input'
-              onChange={this.handleName.bind(this)}
-              defaultValue={this.state.name}
-              fluid
-              inputProps={{
-                maxLength: 50,
-              }}
-            />
-          </div>
-          <div className="col-12 padding-top-10px">
-            <Input
-              placeholder='Password'
-              icon='key' iconPosition='left'
-              // label="Password"
-              type="password"
-              className='ui fluid   input'
-              onChange={this.handlepassword.bind(this)}
-              defaultValue={this.state.password}
-              fluid
-              inputProps={{
-                maxLength: 50,
-              }}
-            />
-          </div>
-          <div className="col-12 padding-top-10px" style={{ 'paddingRight': '0px' }}>
-            <div className="col-8 errorMsg padding-top-10px">
-              {this.state.login_error_msg}
+        <div className="form">
+          <div className="container">
+            <div className="col-5 offset-7">
+              <div className="section-header">
+                <h3 style={{ paddingTop: "25%"}}>Login</h3>
+                <p>to the provider application</p>
+              </div>
             </div>
-            <div className="col-4" style={{ 'paddingRight': '0px', 'textAlign': 'right' }}>
-              <button className="submit-btn btn btn-class button-ready" onClick={this.onClickLoginSubmit}>
-                <span className="login-text">Login</span>
+            <div className="col-5 offset-7" id="errormessage">{this.state.login_error_msg}</div>
+            <div className="col-5 offset-7">
+              <div className="form-group">
+              <Input
+                icon='user' iconPosition='left'
+                placeholder='User'
+                // label="User name"
+                type='text'
+                className='ui fluid   input'
+                onChange={this.handleName.bind(this)}
+                defaultValue={this.state.name}
+                fluid
+                inputprops={{
+                  maxLength: 50,
+                }}
+              />
+              </div>
+            </div>
+            <div className="col-5 offset-7">
+            <div className="form-group">
+              <Input
+                placeholder='Password'
+                icon='key' iconPosition='left'
+                // label="Password"
+                type="password"
+                className='ui fluid   input'
+                onChange={this.handlepassword.bind(this)}
+                defaultValue={this.state.password}
+                fluid
+                inputprops={{
+                  maxLength: 50,
+                }}
+              />
+              </div>
+            </div>
+            <div className="col-5 offset-7">
+              <div className="text-center">
+                <button type="button" onClick={this.onClickLoginSubmit}>
+                  Login
                 <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                  <Loader
-                    type="Oval"
-                    color="#fff"
-                    height="15"
-                    width="15"
-                  />
+                    <Loader
+                      type="Oval"
+                      color="#fff"
+                      height="15"
+                      width="15"
+                    />
+                  </div>
+                </button>
+                <div style={{ 'minHeight': '30px' }}>
                 </div>
-              </button>
-              <div style={{ 'minHeight': '30px' }}>
               </div>
             </div>
           </div>
@@ -142,7 +147,7 @@ class LoginPage extends React.Component {
 function mapStateToProps(state) {
   console.log(state);
   return {
-      config: state.config,
+    config: state.config,
   };
 };
 export default withRouter(connect(mapStateToProps)(LoginPage));

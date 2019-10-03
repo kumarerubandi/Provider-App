@@ -56,7 +56,6 @@ export  class DropdownPayer extends Component {
 }
 async getResources() {
   var url = this.props.config.provider.fhir_url+'/Organization';
-  console.log(this.props.config.provider.fhir_url)
   let token;
   token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
   let headers = {
@@ -70,17 +69,14 @@ async getResources() {
   }).then(response => {
       return response.json();
   }).then((response) => {
-      // console.log("----------response", response);
       return response;
   }).catch(reason =>
       console.log("No response recieved from the server", reason)
   );
-  console.log(organizations, 'sender')
   return organizations;
 }
 
   handleChange = (e, { value }) => {
-    console.log(this.props);
     this.props.updateCB(this.props.elementName, value)
     this.setState({ currentValue: value })
   }
@@ -108,7 +104,6 @@ async getResources() {
 }
 
 function mapStateToProps(state) {
-  console.log(state);
   return {
     config: state.config,
   }

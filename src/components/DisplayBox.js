@@ -423,7 +423,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           }
           else if (renderedCards.length === 0) { return <div><div className='decision-card alert-warning'>No Cards</div></div>; }
           else{
-            return <div className="col-8" style={{marginTop: "20px"}}>{renderedCards}</div>;
+            return <div className="col-8 offset-2" style={{marginTop: "30px",marginBottom: "50px"}}>{renderedCards}</div>;
           }
 
         }

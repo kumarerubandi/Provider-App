@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { saveConfiguration } from '../actions/index';
 import 'react-notifications/lib/notifications.css';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
+import Loader from 'react-loader-spinner';
 
 // const NotificationContainer = window.ReactNotifications.NotificationContainer;
 // const NotificationManager = window.ReactNotifications.NotificationManager;
@@ -27,8 +28,8 @@ class Configuration extends Component {
                         npi: props.config.user_profiles[1].npi
                     }
                 ],
-                dtr:{
-                dtr_fhir: props.config.dtr.dtr_fhir
+                dtr: {
+                    dtr_fhir: props.config.dtr.dtr_fhir
                 },
                 crd: {
                     crd_url: props.config.crd.crd_url,
@@ -39,13 +40,13 @@ class Configuration extends Component {
                 payer: {
                     fhir_url: props.config.payer.fhir_url,
                     grant_type: props.config.payer.grant_type,
-                    client_id : props.config.payer.client_id,
+                    client_id: props.config.payer.client_id,
                     client_secret: props.config.payer.client_secret,
-                    authorizedPayerFhir:props.config.payer.authorizedPayerFhir
+                    authorizedPayerFhir: props.config.payer.authorizedPayerFhir
                 },
                 provider: {
                     fhir_url: props.config.provider.fhir_url,
-                    grant_type:props.config.provider.grant_type,
+                    grant_type: props.config.provider.grant_type,
                     client_secret: props.config.provider.client_secret,
                     client_id: props.config.provider.client_id,
                     authorized_fhir: props.config.provider.authorized_fhir
@@ -130,7 +131,7 @@ class Configuration extends Component {
     handleAPFChange(event) {
         let config = this.state.config;
         config.payer.authorizedPayerFhir = event.target.checked
-        console.log(event.target.checked,'check')
+        console.log(event.target.checked, 'check')
         this.setState({ config })
     }
     onChangeProviderFhirUrl(event) {
@@ -191,7 +192,32 @@ class Configuration extends Component {
         return (
             <React.Fragment>
                 <div>
-                    <div className="main_heading">
+                    <header id="inpageheader">
+                        <div className="container">
+                            <div id="logo" className="pull-left">
+                                <h1><a href="#intro" className="scrollto">PilotIncubator</a></h1>
+                                {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
+                            </div>
+                            <nav id="nav-menu-container">
+                                <ul className="nav-menu">
+                                    <li><a href={window.location.protocol + "//" + window.location.host + "/home"}>Home</a></li>
+                                    <li className="menu-has-children"><a href="">Services</a>
+                                        <ul>
+                                            <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
+                                            <li><a href="#">MIPS Score</a></li>
+                                        </ul>
+                                    </li>
+                                    <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
+                                    <li className="menu-has-children"><a href="">{sessionStorage.getItem('name')}</a>
+                                        <ul>
+                                            <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </header>
+                    {/* <div className="main_heading">
                         <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - Configuration</span>
                         <div className="menu_conf" onClick={() => this.goTo('provider_request')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
@@ -199,7 +225,7 @@ class Configuration extends Component {
                         <div className="menu_conf" onClick={() => this.goTo('cdex')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             CDEX</div>
-                        {/*
+                        
                         <div className="menu_conf" onClick={() => this.goTo('x12converter')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             X12 Converter</div>
@@ -207,12 +233,183 @@ class Configuration extends Component {
                         <div className="menu_conf" onClick={() => this.goTo('reportingScenario')}>
                             <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-exchange"></i>
                             Reporting Scenario</div>
-                        */}
-                    </div>
-                    <div className="content">
+                        
+                    </div> */}
+                    <main id="main" style={{ marginTop: "92px" }}>
+                        <div className="form">
+                            <div className="container">
+                                <div className="section-header">
+                                    <h3>Configuration</h3>
+                                    <p>Setup FHIR information and others</p>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title">Payer FHIR</h4>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <input type="text" name="payer_fhir_url" className="form-control" id="name" placeholder="URL"
+                                            onChange={this.onChangePayerFhirUrl} value={this.state.config.payer.fhir_url}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title"></h4>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="payer_grant_type" className="form-control" id="name" placeholder="Grant Type"
+                                            onChange={this.onChangePayerGrantType}
+                                            value={this.state.config.payer.grant_type}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <div className="form-control">Authorized<input
+                                            name="authorize_payer_fhir"
+                                            type="checkbox"
+                                            className="input-checkbox"
+                                            value={this.state.config.payer.authorizedPayerFhir}
+                                            checked={this.state.config.payer.authorizedPayerFhir}
+                                            onChange={this.handleAPFChange} /></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title"></h4>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="payer_client_id" className="form-control" id="name" placeholder="Client Id"
+                                            onChange={this.onChangePayerClientId}
+                                            value={this.state.config.payer.client_id}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="payer_client_secret" className="form-control" id="name" placeholder="Client Secret"
+                                            onChange={this.onChangePayerClientSecret} fluid
+                                            value={this.state.config.payer.client_secret}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title">Provider FHIR</h4>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <input type="text" name="provider_fhir_url" className="form-control" id="name" placeholder="URL"
+                                            onChange={this.onChangeProviderFhirUrl}
+                                            value={this.state.config.provider.fhir_url}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title"></h4>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="provider_grant_type" className="form-control" id="name" placeholder="Grant Type"
+                                            onChange={this.onChangeProviderGrantType} fluid
+                                            defaultValue={this.state.config.provider.grant_type}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                    <div className="form-control">Authorized <input
+                                            name="authorize_fhir"
+                                            className="input-checkbox"
+                                            type="checkbox"
+                                            value={this.state.config.provider.authorized_fhir}
+                                            checked={this.state.config.provider.authorized_fhir}
+                                            onChange={this.onChangeAuthorizedFhir} /></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title"></h4>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="provider_client_id" className="form-control"
+                                            id="name" placeholder="Client Id"
+                                            onChange={this.onChangeProviderClientId}
+                                            defaultValue={this.state.config.provider.client_id}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="provider_client_secret" className="form-control"
+                                            id="name" placeholder="Client Secret"
+                                            onChange={this.onChangeProviderClientSecret}
+                                            defaultValue={this.state.config.provider.client_secret}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title">CRD</h4>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="crd_url" className="form-control"
+                                            id="name" placeholder="URL"
+                                            onChange={this.onChangeCrdUrl}
+                                            value={this.state.config.crd.crd_url}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <input type="text" name="coverage_requirements_path" className="form-control"
+                                            id="name" placeholder="Requirements Path"
+                                            onChange={this.onChangeCoverageRequirementPath}
+                                            value={this.state.config.crd.coverage_requirement_path}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title">Authorization</h4>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <input type="text" name="auth_token_url" className="form-control"
+                                            id="name" placeholder="Token URL"
+                                            onChange={this.onChangeAuthTokenUrl}
+                                            defaultValue={this.state.config.authorization_service.auth_token_url}
+                                            data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                                        <div className="validation"></div>
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <button type="button" onClick={this.onSaveConfiguration}>Save
+                                        <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
+                                            <Loader
+                                                type="Oval"
+                                                color="#fff"
+                                                height="15"
+                                                width="15"
+                                            />
+                                        </div>
+                                    </button>
+                                    <button type="reset" className="btn2" onClick={this.restToDefaults}>Reset to defaults
+                                        <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
+                                            <Loader
+                                                type="Oval"
+                                                color="#fff"
+                                                height="15"
+                                                width="15"
+                                            />
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    {/* <div className="content">
                         <div className="left-form">
 
-                            {/* {config.user_profiles.map(function(user_profile, index){
+                            {config.user_profiles.map(function(user_profile, index){
                         if(user_profile.username=='john'){
                             return(<div>
                                 <div className='header'>User Profile {index+1}</div>
@@ -238,7 +435,7 @@ class Configuration extends Component {
                             )
                         }
                         
-                    })} */}
+                    })} 
                             <div className='header'>CRD</div>
                             <div className='header-child'>CRD URL</div>
                             <div className="dropdown">
@@ -263,48 +460,13 @@ class Configuration extends Component {
                                 </Input>
                             </div>
 
-                            <div className='header'>Payer FHIR URL</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" fluid name="payer_fhir_url"
-                                    onChange={this.onChangePayerFhirUrl}
-                                    defaultValue={this.state.config.payer.fhir_url}>
-                                </Input>
 
-                            </div>
-                            <div className='header-child'>Payer Grant Type</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="payer_grant_type"
-                                    onChange={this.onChangePayerGrantType} fluid
-                                    defaultValue={this.state.config.payer.grant_type}>
-                                </Input>
-                            </div>
-                            <div className='header-child'>Payer Client Secret</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="payer_client_secret"
-                                    onChange={this.onChangePayerClientSecret} fluid
-                                    defaultValue={this.state.config.payer.client_secret}>
-                                </Input>
-                            </div>
-                            <div className='header-child'> Payer Client ID</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="payer_client_id" fluid
-                                    onChange={this.onChangePayerClientId}
-                                    defaultValue={this.state.config.payer.client_id}>
-                                </Input>
-                            </div>
-                            <div className="header-child">Authorized Payer Fhir<input
-                                            name="authorize_payer_fhir"
-                                            type="checkbox"
-                                            className="input-checkbox"
-                                            value={this.state.config.payer.authorizedPayerFhir}
-                                            checked={this.state.config.payer.authorizedPayerFhir}
-                                            onChange={this.handleAPFChange} /></div>
 
-                            {/* <div className='header'>CDS Service</div>
+                            <div className='header'>CDS Service</div>
                     <div className="leftStateInput"><div className='header-child'>VSAC Username</div>
                     <div className="dropdown"><Input className='ui  input' type="text" name="vsac_user"  defaultValue={config.cds_service.vsac_user}></Input></div></div>
                     <div className="rightStateInput"><div className='header-child'>VSAC Password</div>
-                    <div className="dropdown"><Input className='ui  input' type="text" name="vsac_password"  defaultValue={config.cds_service.vsac_password}></Input></div></div> */}
+                    <div className="dropdown"><Input className='ui  input' type="text" name="vsac_password"  defaultValue={config.cds_service.vsac_password}></Input></div></div>
                             <div className='header'>Authorization Service</div>
                             <div className='header-child'>Authorization Token URL</div>
                             <div className="dropdown">
@@ -338,51 +500,12 @@ class Configuration extends Component {
                             </div>
                         </div>
                         <div className="right-form">
-                            <div className='header'>Provider</div>
-                            <div className='header-child'>Provider FHIR URL</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" fluid name="provider_fhir_url"
-                                    onChange={this.onChangeProviderFhirUrl}
-                                    defaultValue={this.state.config.provider.fhir_url}>
-                                </Input>
-                            </div>
-                            <div className='header-child'>Provider Grant Type</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="provider_grant_type"
-                                    onChange={this.onChangeProviderGrantType} fluid
-                                    defaultValue={this.state.config.provider.grant_type}>
-                                </Input>
-                            </div>
-                            <div className='header-child'>Provider Client Secret</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="provider_client_secret"
-                                    onChange={this.onChangeProviderClientSecret} fluid
-                                    defaultValue={this.state.config.provider.client_secret}>
-                                </Input>
-                            </div>
-                            <div className='header-child'> Provider Client ID</div>
-                            <div className="dropdown">
-                                <Input className='ui fluid input' type="text" name="provider_client_id" fluid
-                                    onChange={this.onChangeProviderClientId}
-                                    defaultValue={this.state.config.provider.client_id}>
-                                </Input>
-
-                               
-                            </div>
-                            <div className="header-child">Authorized Fhir<input
-                                            name="authorize_fhir"
-                                            className="input-checkbox"
-                                            type="checkbox"
-                                            value={this.state.config.provider.authorized_fhir}
-                                            checked={this.state.config.provider.authorized_fhir}
-                                            onChange={this.onChangeAuthorizedFhir} /></div>
-
                             <button className="submit-btn btn btn-class button-ready"
                                 onClick={this.onSaveConfiguration}>Save</button>
                             <button className="btn default-btn"
                                 onClick={this.restToDefaults}>Reset to defaults</button>
                         </div>
-                    </div>
+                    </div>*/}
                     <NotificationContainer />
                 </div>
             </React.Fragment>
