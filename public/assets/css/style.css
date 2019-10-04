@@ -1362,7 +1362,15 @@ body.mobile-nav-active #mobile-nav-toggle {
 .form .show {
   display: block;
 }
-
+.loginerrormessage {
+  color: red;
+  display: block;
+  border: 1px solid red;
+  text-align: center;
+  padding: 10px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
 #contact .form #sendmessage {
   color: #18d26e;
   border: 1px solid #18d26e;

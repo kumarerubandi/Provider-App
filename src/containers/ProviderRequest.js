@@ -10,7 +10,6 @@ import DropdownMedicationList from '../components/DropdownMedicationList';
 import DropdownUnits from '../components/DropdownUnits';
 import DropdownServiceCode from '../components/DropdownServiceCode';
 import { Input } from 'semantic-ui-react';
-import { Button } from 'semantic-ui-react'
 import { DateInput } from 'semantic-ui-calendar-react';
 import { withRouter } from 'react-router-dom';
 import orderReview from "../Order-Review.json";
@@ -26,7 +25,6 @@ import 'font-awesome/css/font-awesome.min.css';
 import '../index.css';
 import '../components/consoleBox.css';
 import Loader from 'react-loader-spinner';
-// import config from '../globalConfiguration.json';
 import { KEYUTIL } from 'jsrsasign';
 import { createToken } from '../components/Authentication';
 import { connect } from 'react-redux';
@@ -45,7 +43,6 @@ const types = {
 class ProviderRequest extends Component {
   constructor(props) {
     super(props);
-    console.log("loggedin-", sessionStorage.getItem('isLoggedIn'));
     this.state = {
       patient: null,
       fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
@@ -96,7 +93,6 @@ class ProviderRequest extends Component {
       category_name: "",
       device_code: "",
       device_text: "",
-      deviceArr: [],
       // quantity:'',
       unit: null,
       birthDate: '',
@@ -165,7 +161,9 @@ class ProviderRequest extends Component {
     this.handleGenderChange = this.handleGenderChange.bind(this);
     this.handlePatientStateChange = this.handlePatientStateChange.bind(this);
     this.changebirthDate = this.changebirthDate.bind(this);
-    this.onPatientPostalChange = this.onPatientPostalChange.bind(this)
+    this.onPatientPostalChange = this.onPatientPostalChange.bind(this);
+    this.getIcdDescription = this.getIcdDescription.bind(this);
+    this.getHookFromCategory = this.getHookFromCategory.bind(this);
   }
 
   getUrlParameter(sParam) {
@@ -179,13 +177,10 @@ class ProviderRequest extends Component {
       }
     }
   }
-
-
   componentDidMount() {
-    if(!sessionStorage.getItem('isLoggedIn')){
+    if (!sessionStorage.getItem('isLoggedIn')) {
       this.props.history.push("/login");
     }
-    console.log("reqtype:", this.getUrlParameter("req_type"), this.getUrlParameter("req_ssstype"))
     let reqType = this.getUrlParameter("req_type");
     if (reqType == "medication_prescribe") {
       this.medication_prescribe = true
@@ -259,98 +254,43 @@ class ProviderRequest extends Component {
   }
 
   updateStateElement = (elementName, text) => {
-    if (elementName === "icdCode") {
-      let selectedCodes = [];
-      this.setState({ deviceArr: [] })
-      this.setState({ validateIcdCode: false })
-      let selectedCode = text[0];
-      for (const key in orderReview) {
-        console.log(elementName, '--value--', selectedCode, "--keyfrom json---", key);
-        if (key === selectedCode) {
-          this.setState({ [elementName]: "order-review" });
-        }
+    // console.log("in update state----", elementName, text);
+    this.setState({ [elementName]: text });
+    this.setState({ validateIcdCode: false })
+  }
+  async getHookFromCategory(){
+    let category_name = this.state.category_name;
+      let hook = this.state.hook;
+      if (category_name === "Healthcare") {
+        hook = "home-health-service";
+      } else if (category_name === "Ambulate or other medical transport services") {
+        hook = "ambulatory-transport";
+      } else if (category_name === "Durable Medical Equipment") {
+        hook = "home-oxygen-therapy";
       }
-      for (const key in liverTransplant) {
-        console.log(elementName, '--value--', selectedCode, "--keyfrom json---", key);
-        if (key === selectedCode) {
-          this.setState({ [elementName]: "liver-transplant" });
-        }
-      }
-
-
-      for (const key in homeOxygen) {
-        if (key === selectedCode) {
-          this.setState({ hook: "home-oxygen-therapy" });
-        }
-        text.forEach(code => {
-          let obj = {
-            "device_code": '',
-            "device_text": ''
-          }
-          if (code === key) {
-            console.log("Inside if -- ", key);
-            obj.device_code = key
-            obj.device_text = homeOxygen[key]
-            selectedCodes.push(obj);
-            const deviceArr = {
-              deviceArr: selectedCodes,
-            };
-            console.log(selectedCodes);
-            this.setState(deviceArr);
-          }
-        });
-      }
-      for (const key in homeHealthService) {
-        if (key === selectedCode) {
-          this.setState({ hook: "home-health-service" });
-        }
-        text.forEach(code => {
-          let obj = {
-            "device_code": '',
-            "device_text": ''
-          }
-          if (code === key) {
-            console.log("Inside if -- ", key);
-            obj.device_code = key
-            obj.device_text = homeHealthService[key]
-            selectedCodes.push(obj);
-            const deviceArr = {
-              deviceArr: selectedCodes,
-            };
-            console.log(selectedCodes);
-            this.setState(deviceArr);
-          }
-        });
-      }
-      for (const key in ambulatoryTransport) {
-        if (key === selectedCode) {
-          this.setState({ hook: "ambulatory-transport" });
-        }
-        console.log("Inside codes ----", key, text)
-        text.forEach(code => {
-          let obj = {
-            "device_code": '',
-            "device_text": ''
-          }
-          console.log("code---", code);
-          if (code === key) {
-            console.log("Inside if -- ", key);
-            obj.device_code = key
-            obj.device_text = ambulatoryTransport[key]
-            selectedCodes.push(obj);
-            const deviceArr = {
-              deviceArr: selectedCodes,
-            };
-            console.log(selectedCodes);
-            this.setState(deviceArr);
-          }
-        })
-      }
-      console.log("Selected codes--", this.state.deviceArr);
-    }
-    else {
-      this.setState({ [elementName]: text });
-      this.setState({ validateIcdCode: false })
+      this.setState({ hook: hook });
+      console.log("hook ----", this.state.hook);
+      return hook;
+  }
+  getIcdDescription(code) {
+    let hook = this.getHookFromCategory();
+    console.log("hook in description----", this.state.hook);
+    // let hook = this.state.hook;
+    if (hook === "home-oxygen-therapy") {
+      console.log("ij home oxygen---", homeOxygen);
+      return homeOxygen[code];
+    } else if (hook === "home-health-service") {
+      console.log("ij home health---", homeHealthService);
+      return homeHealthService[code];
+    } else if (hook === "ambulatory-transport") {
+      console.log("in ambulatory--", ambulatoryTransport);
+      return ambulatoryTransport[code];
+    } else if (hook === "order-review") {
+      console.log("in order review--", orderReview);
+      return orderReview[code];
+    } else if (hook === "liver-transplant") {
+      console.log("in liver transplant--", liverTransplant);
+      return liverTransplant[code];
     }
   }
 
@@ -1324,27 +1264,21 @@ class ProviderRequest extends Component {
         "reference": "Practitioner?identifier=" + this.state.practitionerId
       }
     }
-    let deviceArr = this.state.deviceArr
-    console.log(deviceArr, 'deviceArr')
-
-    for (var i = 0; i < deviceArr.length; i++) {
+    let selectedCodes = this.state.icdCode
+    for (var i = 0; i < selectedCodes.length; i++) {
+      let IcdDescription = this.getIcdDescription(selectedCodes[i]);
       let obj = {
         "code": {
           "coding": [
             {
               "system": "http://loinc.org",
-              "code": deviceArr[i].device_code,
-              "display": deviceArr[i].device_text
+              "code": selectedCodes[i],
+              "display": IcdDescription
             }
           ],
-          "text": deviceArr[i].device_text
+          "text": IcdDescription
         }
       }
-
-      // obj.code.coding.code=deviceArr[i].device_code
-      // obj.code.display=deviceArr[i].device_text
-      // obj.code.text=deviceArr[i].device_text
-
       deviceRequest.parameter.push(obj)
     }
 

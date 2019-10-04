@@ -81,43 +81,45 @@ class LoginPage extends React.Component {
           <div className="container">
             <div className="col-5 offset-7">
               <div className="section-header">
-                <h3 style={{ paddingTop: "25%"}}>Login</h3>
+                <h3 style={{ paddingTop: "25%" }}>Login</h3>
                 <p>to the provider application</p>
               </div>
             </div>
-            <div className="col-5 offset-7" id="errormessage">{this.state.login_error_msg}</div>
+            {this.state.login_error_msg !== "" &&
+              <div className="col-5 offset-7 loginerrormessage">{this.state.login_error_msg}</div>
+            }
             <div className="col-5 offset-7">
               <div className="form-group">
-              <Input
-                icon='user' iconPosition='left'
-                placeholder='User'
-                // label="User name"
-                type='text'
-                className='ui fluid   input'
-                onChange={this.handleName.bind(this)}
-                defaultValue={this.state.name}
-                fluid
-                inputprops={{
-                  maxLength: 50,
-                }}
-              />
+                <Input
+                  icon='user' iconPosition='left'
+                  placeholder='User'
+                  // label="User name"
+                  type='text'
+                  className='ui fluid   input'
+                  onChange={this.handleName.bind(this)}
+                  defaultValue={this.state.name}
+                  fluid
+                  inputprops={{
+                    maxLength: 50,
+                  }}
+                />
               </div>
             </div>
             <div className="col-5 offset-7">
-            <div className="form-group">
-              <Input
-                placeholder='Password'
-                icon='key' iconPosition='left'
-                // label="Password"
-                type="password"
-                className='ui fluid   input'
-                onChange={this.handlepassword.bind(this)}
-                defaultValue={this.state.password}
-                fluid
-                inputprops={{
-                  maxLength: 50,
-                }}
-              />
+              <div className="form-group">
+                <Input
+                  placeholder='Password'
+                  icon='key' iconPosition='left'
+                  // label="Password"
+                  type="password"
+                  className='ui fluid   input'
+                  onChange={this.handlepassword.bind(this)}
+                  defaultValue={this.state.password}
+                  fluid
+                  inputprops={{
+                    maxLength: 50,
+                  }}
+                />
               </div>
             </div>
             <div className="col-5 offset-7">

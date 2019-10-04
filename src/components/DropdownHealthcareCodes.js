@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Dropdown} from 'semantic-ui-react';
-import jsonData from "../healthcareCodes.json";
+import jsonData from "../HomeHealthServices.json";
 
 
 let allCdsOptions=[];

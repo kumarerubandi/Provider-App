@@ -22,31 +22,18 @@ export default class DropdownServiceCode extends Component {
   };
 
   handleCategoryChange = (e, { value }) => {
-    // console.log(this.props);
-    // console.log(options);
-    // console.log(value);
-    // console.log( jsonData[value]);
     if (jsonData[value] !== undefined) {
       let codesList = []
-      // console.log( jsonData[value]);
       for (const key in jsonData[value]) {
-        console.log(key, jsonData[value][key])
         codesList.push({ 'key': key, 'value': key, 'text': key + " - " + jsonData[value][key] })
       }
       this.props.updateCB("category_name", value)
-
-      // this.code_options = codesList
       this.setState({ category: value, code_options: codesList })
-
     }
   }
 
   handleChange = (e, { value }) => {
-    // console.log(this.props);
-    // console.log(options);
-    // console.log(value);
     this.props.updateCB(this.props.elementName, value)
-
     this.setState({ currentValue: value })
   }
 
