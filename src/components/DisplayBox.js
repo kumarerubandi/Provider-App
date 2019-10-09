@@ -178,8 +178,8 @@ class DisplayBox extends Component {
       // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
       let messageJson = this.state.messageJson;
       messageJson['description'] = encodeURIComponent(description);
-      console.log(this.props.config.dtr, 'point')
-      const fhirClient = new Client({ baseUrl: this.props.config.dtr.dtr_fhir });
+      console.log(this.props.config.provider.fhir_url, 'point')
+      const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
       fhirClient.create({
         resourceType: "MessageDefinition",
         body: messageJson,
@@ -196,7 +196,7 @@ class DisplayBox extends Component {
             link.url += '&';
           }
           link.url += `launch=${result.id}`;
-          link.url += `&iss=` + this.props.config.dtr.dtr_fhir;
+          link.url += `&iss=` + this.props.config.provider.fhir_url;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
