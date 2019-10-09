@@ -314,7 +314,7 @@ class DisplayBox extends Component {
 
                   </div>
                   {/* <a className="cta-btn" target="_blank" href={link.url}>{link.label}</a> */}
-                  <button className="cta-btn"
+                  <button className="smart-btn"
                     onClick={e => this.launchLink(e, link)}
                     text={link.label}
                     variant={Button.Opts.Variants['DE-EMPHASIS']}
