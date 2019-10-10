@@ -273,8 +273,9 @@ class ProviderRequest extends Component {
       return hook;
   }
   getIcdDescription(code) {
-    let hook = this.getHookFromCategory();
-    console.log("hook in description----", this.state.hook);
+    this.getHookFromCategory();
+    let hook = this.state.hook //this.getHookFromCategory();
+    console.log("hook in description----", code,this.state.hook,hook);
     // let hook = this.state.hook;
     if (hook === "home-oxygen-therapy") {
       console.log("ij home oxygen---", homeOxygen);
@@ -1267,6 +1268,7 @@ class ProviderRequest extends Component {
     let selectedCodes = this.state.icdCode
     for (var i = 0; i < selectedCodes.length; i++) {
       let IcdDescription = this.getIcdDescription(selectedCodes[i]);
+      console.log("-------",i,IcdDescription)
       let obj = {
         "code": {
           "coding": [
@@ -1282,7 +1284,7 @@ class ProviderRequest extends Component {
       deviceRequest.parameter.push(obj)
     }
 
-
+    console.log(deviceRequest)
     // token = "Bearer " + token;
     // var myHeaders = new Headers({
     //   "Content-Type": "application/json",

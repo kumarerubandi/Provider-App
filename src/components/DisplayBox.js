@@ -301,14 +301,20 @@ class DisplayBox extends Component {
                 <div key={ind}>
                   <div className="div-prior-auth">
                     {link.hasOwnProperty('appContext') &&
-                      <div>
-                        {link.appContext.prior_auth == true &&
-                          <p>Prior Authorization necessary</p>
+                      <ul className="prior_auth_ul">
+                        {
+                          Object.keys(link.appContext.prior_auth).map(function(code,index){
+                            return <li>
+                                {link.appContext.prior_auth[code].value == true &&
+                                  <p>Prior Authorization necessary for {code + " ("+ link.appContext.prior_auth[code].title+")"}</p>
+                                }
+                                {link.appContext.prior_auth[code].value == false &&
+                                  <p>No Prior Authorization is Needed for {code + " ("+ link.appContext.prior_auth[code].title+")"} </p>
+                                }
+                             </li>
+                          })
                         }
-                        {link.appContext.prior_auth == false &&
-                          <p>No Prior Authorization is Needed</p>
-                        }
-                      </div>
+                      </ul>
 
                     }
 
