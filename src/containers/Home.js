@@ -217,7 +217,7 @@ class Home extends Component {
 
                                 </div>
                                 <div className="text-center marginTop50">
-                                    <p className="noMarginBottom submit-link-text">Ready to get started? <a className="cta-btn" href="/provider_request">Submit your Request</a></p>
+                                    <p className="noMarginBottom submit-link-text">Ready to get started? <a className="submit-link-btn" href="/provider_request">Submit your Request</a></p>
                                 
                                 </div>
 
@@ -314,7 +314,7 @@ class Home extends Component {
 
                             </div>
                             <div className="text-center marginTop30">
-                                <p className="noMarginBottom submit-link-text">Ready to get started? <a className="cta-btn" href="/mips">Proceed to Calculate</a></p>
+                                <p className="noMarginBottom submit-link-text">Ready to get started? <a className="submit-link-btn" href="/mips">Proceed to Calculate</a></p>
                                 
                             </div>
 
