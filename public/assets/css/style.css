@@ -685,14 +685,14 @@ body.mobile-nav-active #mobile-nav-toggle {
 /* About Us Section
 --------------------------------*/
 
-#about {
+.about {
   background: url("../img/about-bg.jpg") center top no-repeat fixed;
   background-size: cover;
   padding: 60px 0 40px 0;
   position: relative;
 }
 
-#about::before {
+.about::before {
   content: '';
   position: absolute;
   left: 0;
@@ -703,27 +703,27 @@ body.mobile-nav-active #mobile-nav-toggle {
   z-index: 9;
 }
 
-#about .container {
+.about .container {
   position: relative;
   z-index: 10;
 }
 
-#about .about-col {
+.about .about-col {
   background: #fff;
   border-radius: 0 0 4px 4px;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
 }
 
-#about .about-col .img {
+.about .about-col .img {
   position: relative;
 }
 
-#about .about-col .img img {
+.about .about-col .img img {
   border-radius: 4px 4px 0 0;
 }
 
-#about .about-col .icon {
+.about .about-col .icon {
   width: 64px;
   height: 64px;
   padding-top: 8px;
@@ -738,22 +738,22 @@ body.mobile-nav-active #mobile-nav-toggle {
   transition: 0.3s;
 }
 
-#about .about-col i {
+.about .about-col i {
   font-size: 36px;
   line-height: 1;
   color: #fff;
   transition: 0.3s;
 }
 
-#about .about-col:hover .icon {
+.about .about-col:hover .icon {
   background-color: #fff;
 }
 
-#about .about-col:hover i {
+.about .about-col:hover i {
   color: #18d26e;
 }
 
-#about .about-col h2 {
+.about .about-col h2 {
   color: #000;
   text-align: center;
   font-weight: 700;
@@ -762,15 +762,15 @@ body.mobile-nav-active #mobile-nav-toggle {
   margin: 40px 0 12px 0;
 }
 
-#about .about-col h2 a {
+.about .about-col h2 a {
   color: #000;
 }
 
-#about .about-col h2 a:hover {
+.about .about-col h2 a:hover {
   color: #18d26e;
 }
 
-#about .about-col p {
+.about .about-col p {
   font-size: 14px;
   line-height: 24px;
   color: #333;
@@ -791,13 +791,13 @@ body.mobile-nav-active #mobile-nav-toggle {
   margin-bottom: 30px;
 }
 
-#services .icon {
+#services .icon,.large-icons .icon {
   float: left;
 }
 
-#services .icon i {
+#services .icon i,.large-icons .icon i{
   color: #18d26e;
-  font-size: 36px;
+  font-size: 5em;
   line-height: 1;
   transition: 0.5s;
 }
@@ -827,23 +827,35 @@ body.mobile-nav-active #mobile-nav-toggle {
 /* Call To Action Section
 --------------------------------*/
 
-#call-to-action {
+.call-to-action {
   background: linear-gradient(rgba(0, 142, 99, 0.1), rgba(0, 0, 0, 0.1)), url(../img/call-to-action-bg.jpg) fixed center center;
   background-size: cover;
   padding: 60px 0;
 }
 
-#call-to-action h3 {
+.call-to-action h3 {
   color: #fff;
   font-size: 28px;
   font-weight: 700;
 }
 
-#call-to-action p {
+.call-to-action h4 {
+  color: #fff;
+/*  font-size: 28px;
+*/  font-weight: 500;
+}
+
+.call-to-action h5 {
+  color: #fff;
+/*  font-size: 28px;
+*/  font-weight: 300;
+}
+
+.call-to-action p {
   color: #fff;
 }
 
-#call-to-action .cta-btn {
+.call-to-action .cta-btn {
   font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   font-weight: 500;
@@ -858,7 +870,7 @@ body.mobile-nav-active #mobile-nav-toggle {
   color: #fff;
 }
 
-#call-to-action .cta-btn:hover {
+.call-to-action .cta-btn:hover {
   background: #18d26e;
   border: 2px solid #18d26e;
 }
@@ -1706,3 +1718,9 @@ button[type="reset"]:hover{
   background: #18d26e;
   border: 2px solid #18d26e;
 }
+
+.col-lg-12.bounceInUp{
+  margin-bottom: 15px;
+  margin-top: 15px
+}
+

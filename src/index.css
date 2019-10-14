@@ -745,3 +745,36 @@ color: green;
   text-align: left;
   color:#fff;
 }
+.noTopPadding{
+  padding-top: 0 !important;
+}
+.noLeftPadding{
+  padding-left: 0 !important;
+}
+.noRightPadding{
+  padding-right: 0 !important;
+}
+.rightPadding16{
+  padding-right: 16px !important;
+}
+.marginTop10{
+  margin-top: 10px;
+}
+.marginTop70{
+  margin-top: 70px;
+}
+.marginTop50{
+  margin-top: 70px;
+}
+.marginTop100{
+  margin-top: 100px;
+}
+.marginBottom30{
+  margin-bottom: 30px;
+}
+.marginBottom7{
+  margin-bottom: 7px;
+}
+.marginBottom10{
+  margin-bottom: 10px;
+}
