@@ -7,6 +7,7 @@ import ReportingScenario from '../containers/ReportingScenario';
 import CoverageDetermination from '../containers/CoverageDetermination';
 //import PriorAuthorization from '../containers/PriorAuthorization';
 import ProviderRequest from '../containers/ProviderRequest';
+import Mips from '../containers/Mips';
 //import Review from '../containers/Review';
 import LoginPage from '../containers/loginPage';
 import Launch from '../containers/Launch';
@@ -32,6 +33,7 @@ export default class App extends Component {
                     <Route path={"/cd"} component={CoverageDetermination} />
                     {/* <Route path={"/prior_auth"} component={PriorAuthorization} /> */}
                     <Route path={"/provider_request"} component={ProviderRequest} />                    
+                    <Route path={"/mips"} component={Mips} />                    
                     {/* <Route path={"/review"} component={Review} /> */}
                     <Route exact path="/index" component={Main} />
                     <Route exact path="/home" component={Home} />

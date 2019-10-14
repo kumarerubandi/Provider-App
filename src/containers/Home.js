@@ -25,7 +25,7 @@ class Home extends Component {
                                 <li className="menu-has-children"><a href="#services">Services</a>
                                     <ul>
                                         <li><a href={window.location.protocol + "//" + window.location.host +"/provider_request"}>Prior Auth Submit</a></li>
-                                        <li><a href="#">MIPS Score</a></li>
+                                        <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#team">Doctors</a></li>
