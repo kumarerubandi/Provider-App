@@ -754,6 +754,9 @@ color: green;
 .noRightPadding{
   padding-right: 0 !important;
 }
+.noMarginBottom{
+  margin-bottom: 0 !important;
+}
 .rightPadding16{
   padding-right: 16px !important;
 }
@@ -762,6 +765,9 @@ color: green;
 }
 .marginTop70{
   margin-top: 70px;
+}
+.marginTop30{
+  margin-top: 30px;
 }
 .marginTop50{
   margin-top: 70px;
@@ -876,4 +882,10 @@ ol.progtrckr li.progtrckr-done:before {
 
 ol.progtrckr li.progtrckr-done:hover:before {
   color: #333;
+}
+.submit-link-text{
+  font-size: 1.3em;
+}
+#mips-info{
+  background: #fff;
 }

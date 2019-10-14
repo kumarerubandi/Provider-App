@@ -24,8 +24,9 @@ class Home extends Component {
                                 
                                 <li className="menu-has-children"><a href="#services">Services</a>
                                     <ul>
-                                        <li><a href={window.location.protocol + "//" + window.location.host +"/provider_request"}>Prior Auth Submit</a></li>
-                                        <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
+                                        <li><a href="#prior-auth">Prior Auth Submit</a></li>
+                                        <li><a href="#mips">MIPS Score</a></li>
+
                                     </ul>
                                 </li>
                                 <li><a href="#team">Doctors</a></li>
@@ -39,6 +40,7 @@ class Home extends Component {
                 {/*-==========================
     Intro Section
   ============================*/}
+
                 <section id="intro">
                     <div className="intro-container">
                         <div id="introCarousel" className="carousel  slide carousel-fade" data-ride="carousel">
@@ -46,6 +48,16 @@ class Home extends Component {
                             <ol className="carousel-indicators"></ol>
 
                             <div className="carousel-inner" role="listbox">
+                                 <div className="carousel-item">
+                                    <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/2.jpg"} alt="" /></div>
+                                    <div className="carousel-container">
+                                        <div className="carousel-content">
+                                            <h2> Prior Authorization </h2>
+                                            <p>Streamline Your Prior Authorization process up to 2X Faster.</p>
+                                            <a href="#prior-auth" className="btn-get-started scrollto">Discover How</a>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div className="carousel-item active">
                                     <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/1.jpg"} alt="" /></div>
@@ -53,60 +65,13 @@ class Home extends Component {
                                         <div className="carousel-content">
                                             <h2>MIPS Score Calculator</h2>
                                             <p>Your key Solution for Value-Based Care.</p>
-                                            <a href="#featured-services" className="btn-get-started scrollto">Get MIPS Help</a>
+                                            <a href="#mips" className="btn-get-started scrollto">Get MIPS Help</a>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="carousel-item">
-                                    <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/2.jpg"} alt="" /></div>
-                                    <div className="carousel-container">
-                                        <div className="carousel-content">
-                                            <h2>Streamline Your Prior Authorization process up to 2X Faster.</h2>
-                                            <a href="/provider_request" className="btn-get-started scrollto">Discover How</a>
-                                        </div>
-                                    </div>
-                                </div>
-{/*
-                                <div className="carousel-item">
-                                    <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/3.jpg"} alt="" /></div>
-                                    <div className="carousel-container">
-                                        <div className="carousel-content">
-                                            <h2>Temporibus autem quibusdam</h2>
-                                            <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit
-                                              aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt omnis iste
-                  natus error sit voluptatem accusantium.</p>
-                                            <a href="#featured-services" className="btn-get-started scrollto">Get Started</a>
-                                        </div>
-                                    </div>
-                                </div>
+                               
 
-                                <div className="carousel-item">
-                                    <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/4.jpg"} alt="" /></div>
-                                    <div className="carousel-container">
-                                        <div className="carousel-content">
-                                            <h2>Nam libero tempore</h2>
-                                            <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed
-                                              quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut
-                  enim ad minima veniam, quis nostrum.</p>
-                                            <a href="#featured-services" className="btn-get-started scrollto">Get Started</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="carousel-item">
-                                    <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/5.jpg"} alt="" /></div>
-                                    <div className="carousel-container">
-                                        <div className="carousel-content">
-                                            <h2>Magnam aliquam quaerat</h2>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                                              et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                  aliquip ex ea commodo consequat.</p>
-                                            <a href="#featured-services" className="btn-get-started scrollto">Get Started</a>
-                                        </div>
-                                    </div>
-                                </div>
-*/}
                             </div>
 
                             <a className="carousel-control-prev" href="#introCarousel" role="button" data-slide="prev">
@@ -171,15 +136,131 @@ class Home extends Component {
                                 <p className="noTopPadding"  >MIPS Calculator has all the MIPS Rules built in, supporting measures from Quality, Cost, Promoting Interoperability and Improvement Activity categories.</p>
                                 
                                  */}
+                     <section className=" wow fadeIn call-to-action" id="prior-auth">
+                        <div className="container ">
+                            <div className=" text-center ">
+                                <h3>Tired of Prescription Abandonment?</h3>
+                                <h4>Switch to automated electronic Prior Authorization and increase patient’s speed to recovery</h4>
+                               
+                            </div>
+                            <div className=" marginTop50">
+                                <p  className="marginBottom30">
+                                    Electronic prior authorization (ePA) is the automated process of exchanging patient health and medication information, allowing providers to initiate PA requests after a rejection at the pharmacy or prospectively in their E-Prescribing workflow.
+                                </p>
+                                <p>
+                                    Our comprehensive solution partners with electronic health records (EHRs), payers and providers to initiate, transmit and track the status of PA requests within the clinical workflow, helping patients to more quickly get the medication they need to live healthy lives.
+                                </p>
+                            </div>
+                            {/*
+                            <div className="text-center marginTop50">
+                                <p  className="noMarginBottom">Ready to get started? </p>
+                                <a className="cta-btn" href="/provider_request"> Submit your Request</a>
+                            </div>
+                        */}
+                        </div>
+                    </section>
+                    <section  className="about" >
+                        <div className="container ">
+                                <div className="text-center section-header ">
+                                    <h3>MULTIPLE STAKEHOLDERS ONE POWERFUL PLATFORM </h3>
+                                </div>
+                                <div className="row about-cols marginTop50">
 
-                    <section id="mips-info" className="about" >
+                                    <div className="col-md-3 wow fadeInUp">
+                                        <div className="about-col">
+                                            <div className="img">
+                                                <img src={process.env.PUBLIC_URL + "/assets/img/about-mission.jpg"} alt="" className="img-fluid" />
+                                                <div className="icon"><i className="ion-ios-speedometer-outline"></i></div>
+                                            </div>
+                                            <h2 className="title">Time saving</h2>
+                                            <p>
+                                                Spend more time with your patients by reducing paperwork,phone calls and faxes to the plan.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-3 wow fadeInUp" data-wow-delay="0.1s">
+                                        <div className="about-col">
+                                            <div className="img">
+                                                <img src={process.env.PUBLIC_URL + "/assets/img/about-plan.jpg"} alt="" className="img-fluid" />
+                                                <div className="icon"><i className="ion-ios-list-outline"></i></div>
+                                            </div>
+                                            <h2 className="title"><a href="#">Faster Determinations </a></h2>
+                                            <p>Receive electronic determinations, often within minutes, and create renewals from previously submitted requests.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-3 wow fadeInUp" data-wow-delay="0.2s">
+                                        <div className="about-col">
+                                            <div className="img">
+                                                <img src={process.env.PUBLIC_URL + "/assets/img/about-vision.jpg"} alt="" className="img-fluid" />
+                                                <div className="icon"><i className="ion-ios-eye-outline"></i></div>
+                                            </div>
+                                            <h2 className="title"><a href="#">Cost Saving</a></h2>
+                                            <p>
+                                               Save more money by reducing paperwork, phone calls and faxes to the plan.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-3 wow fadeInUp" data-wow-delay="0.2s">
+                                        <div className="about-col">
+                                            <div className="img">
+                                                <img src={process.env.PUBLIC_URL + "/assets/img/about-vision.jpg"} alt="" className="img-fluid" />
+                                                <div className="icon"><i className="ion-ios-eye-outline"></i></div>
+                                            </div>
+                                            <h2 className="title"><a href="#">Complaint &amp; Secure</a></h2>
+                                            <p>
+                                                Offers an easier way to stay HIPAA and mandate compliant by submitting PA requests electronically.</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div className="text-center marginTop50">
+                                    <p className="noMarginBottom submit-link-text">Ready to get started? <a className="cta-btn" href="/provider_request">Submit your Request</a></p>
+                                
+                                </div>
+
+                                {/*
+                                <div className="row large-icons marginTop70">
+                                    <div className="col-lg-12 col-md-12 box wow bounceInUp" data-wow-duration="1.4s">
+                                        <div class="row">
+
+                                            <div className="icon col-lg-1 rightPadding16 text-right">
+                                                <i className="ion-ios-speedometer-outline "></i>
+                                            </div>
+                                            <div className=" col-lg-11 noLeftPadding">
+                                                <h4 className="title marginBottom10">Complaint &amp; Secure</h4>
+                                                <p className="description">Offers an easier way to stay HIPAA and mandate compliant by submitting PA requests electronically.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                */}
+                        </div>
+                    </section>
+                    <section id="mips" className="wow fadeIn call-to-action">
+                        <div className="container ">
+                                <div className="text-center ">
+                                    <h3>Looking out to avoid Penalty or Maximize Payment Adjustment? </h3>
+                                    <h4>Get the MIPS Help you need</h4>
+                                </div>
+                                <div className="marginTop50 ">
+                                    <p className="marginBottom30">MIPS Score Calculator is an All-in-one solution for provider groups of all sizes that makes the reporting easy by offering an integrated MIPS solution.</p>
+                                    <p className=""  >MIPS Calculator has all the MIPS Rules built in, supporting measures from Quality, Cost, Promoting Interoperability and Improvement Activity categories.</p>
+                                </div>
+                                
+                        </div>
+                    </section>
+
+                    <section id="mips-info" className="about " >
                         <div className="container">
                             
                             <header className="section-header">
                                 <h3>Invest Your Efforts where it counts the most</h3>
                             </header>
-                            <p></p>
-                            <div className="row about-cols">
+                            <div className="row about-cols marginTop50">
 
                                 <div className="col-md-3 wow fadeInUp">
                                     <div className="about-col">
@@ -232,113 +313,20 @@ class Home extends Component {
                                 </div>
 
                             </div>
-
-                        </div>
-                    </section>
-
-
-                     <section  className="wow fadeIn call-to-action">
-                        <div className="container ">
-                                <div className="text-center ">
-                                    <h3>Looking out to avoid Penalty or Maximize Payment Adjustment? </h3>
-                                    <h4>Get the MIPS Help you need</h4>
-                                </div>
-                                <div className="marginTop50 ">
-                                    <p className="marginBottom30">MIPS Score Calculator is an All-in-one solution for provider groups of all sizes that makes the reporting easy by offering an integrated MIPS solution.</p>
-                                    <p className=""  >MIPS Calculator has all the MIPS Rules built in, supporting measures from Quality, Cost, Promoting Interoperability and Improvement Activity categories.</p>
-                                </div>
-                                <div className="text-center marginTop50">
-                                    <p><a className="cta-btn" href="#">Ready to get started? Proceed to Calculate</a></p>
-                                </div>
-                        </div>
-                    </section>
-
-                     <section  className="about">
-                        <div className="container ">
-                                <div className="text-center section-header ">
-                                    <h3>MULTIPLE STAKEHOLDERS ONE POWERFUL PLATFORM </h3>
-                                </div>
-                                <div className="row large-icons marginTop70">
-
-
-
-                                    <div className="col-lg-12 col-md-12 box wow bounceInUp" data-wow-duration="1.4s">
-                                        <div class="row">
-
-                                            <div className="icon col-lg-1 rightPadding16 text-right">
-                                                <i className="ion-ios-bookmarks-outline "></i>
-                                            </div>
-                                            <div className=" col-lg-11 noLeftPadding">
-                                                <h4 className="title marginBottom10">Time saving</h4>
-                                                <p className="description">Spend more time with your patients by reducing paperwork,
-phone calls and faxes to the plan.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-lg-12 col-md-12 box wow bounceInUp" data-wow-duration="1.4s">
-                                        <div class="row">
-
-                                            <div className="icon col-lg-1 rightPadding16 text-right">
-                                                <i className="ion-ios-analytics-outline "></i>
-                                            </div>
-                                            <div className=" col-lg-11 noLeftPadding">
-                                                <h4 className="title marginBottom10">Faster Determinations</h4>
-                                                <p className="description">Receive electronic determinations, often within
-minutes, and create renewals from previously submitted requests.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-lg-12 col-md-12 box wow bounceInUp" data-wow-duration="1.4s">
-                                        <div class="row">
-
-                                            <div className="icon col-lg-1 rightPadding16 text-right">
-                                                <i className="ion-ios-paper-outline "></i>
-                                            </div>
-                                            <div className=" col-lg-11 noLeftPadding">
-                                                <h4 className="title marginBottom10">Cost Saving</h4>
-                                                <p className="description">Save more money by reducing paperwork, phone calls and faxes to the
-plan.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-lg-12 col-md-12 box wow bounceInUp" data-wow-duration="1.4s">
-                                        <div class="row">
-
-                                            <div className="icon col-lg-1 rightPadding16 text-right">
-                                                <i className="ion-ios-speedometer-outline "></i>
-                                            </div>
-                                            <div className=" col-lg-11 noLeftPadding">
-                                                <h4 className="title marginBottom10">Complaint &amp; Secure</h4>
-                                                <p className="description">Offers an easier way to stay HIPAA and mandate
-compliant by submitting PA requests electronically.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-                        </div>
-                    </section>
-
-                     <section className=" wow fadeIn call-to-action">
-                        <div className="container ">
-                            <div className=" text-center ">
-                                <h3>Tired of Prescription Abandonment?</h3>
-                                <h4>Switch to automated electronic Prior Authorization and increase patient’s speed to recovery</h4>
-                               
+                            <div className="text-center marginTop30">
+                                <p className="noMarginBottom submit-link-text">Ready to get started? <a className="cta-btn" href="/mips">Proceed to Calculate</a></p>
+                                
                             </div>
-                            <div className=" marginTop50">
-                                <p  className="marginBottom30">
-                                    Electronic prior authorization (ePA) is the automated process of exchanging patient health and medication information, allowing providers to initiate PA requests after a rejection at the pharmacy or prospectively in their E-Prescribing workflow.
-                                </p>
-                                <p>
-                                    Our comprehensive solution partners with electronic health records (EHRs), payers and providers to initiate, transmit and track the status of PA requests within the clinical workflow, helping patients to more quickly get the medication they need to live healthy lives.
-                                </p>
-                            </div>
-                            <div className="text-center marginTop50">
-                                    <p><a className="cta-btn" href="/provider_request">Ready to get started? Submit your Request</a></p>
-                                </div>
+
                         </div>
                     </section>
+
+
+                  
+
+                    
+
+                    
 
                    
 
@@ -461,20 +449,6 @@ compliant by submitting PA requests electronically.</p>
                         </div>
                     </section>{/*- #services */}
 
-                    {/*-==========================
-      Call To Action Section
-    ============================*/}
-                    <section id="call-to-action" className="wow fadeIn call-to-action">
-                        <div className="container text-center">
-                            <h3>Call To Action</h3>
-                            <p> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-                            <a className="cta-btn" href="#">Call To Action</a>
-                        </div>
-                    </section>{/*- #call-to-action */}
-
-                    
                    
                                        {/*-==========================
       Team Section
