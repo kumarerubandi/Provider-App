@@ -48,7 +48,7 @@ class Home extends Component {
                             <ol className="carousel-indicators"></ol>
 
                             <div className="carousel-inner" role="listbox">
-                                 <div className="carousel-item">
+                                 <div className="carousel-item active">
                                     <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/2.jpg"} alt="" /></div>
                                     <div className="carousel-container">
                                         <div className="carousel-content">
@@ -59,7 +59,7 @@ class Home extends Component {
                                     </div>
                                 </div>
 
-                                <div className="carousel-item active">
+                                <div className="carousel-item ">
                                     <div className="carousel-background"><img src={process.env.PUBLIC_URL + "/assets/img/intro-carousel/1.jpg"} alt="" /></div>
                                     <div className="carousel-container">
                                         <div className="carousel-content">
