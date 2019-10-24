@@ -22,6 +22,13 @@
       "npi": "1932102952"
     }
   ],
+  "keycloak_admin_settings":{
+      "baseUrl": "https://auth.mettles.com:8443/auth",
+      "username": "admin",
+      "password": "keycloak123",
+      "grant_type": "password",
+      "client_id": "admin-cli"
+    },
   "authorized_fhir": true,
   "payer_fhir": "http://54.227.218.17:8280/payer_fhir/baseDstu3/",
   "provider_login_params": {

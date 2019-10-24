@@ -30,6 +30,8 @@ import { createToken } from '../components/Authentication';
 import { connect } from 'react-redux';
 import { Dropdown } from 'semantic-ui-react';
 import stateOptions from '../stateOptions'
+import adminClient from 'keycloak-admin-client'
+
 
 
 const types = {
@@ -134,6 +136,7 @@ class ProviderRequest extends Component {
     this.medication_prescribe = false;
     this.startLoading = this.startLoading.bind(this);
     this.submit_info = this.submit_info.bind(this);
+    this.keyCloakTest = this.keyCloakTest.bind(this);
     this.onFhirUrlChange = this.onFhirUrlChange.bind(this);
     this.onAccessTokenChange = this.onAccessTokenChange.bind(this);
     this.onScopeChange = this.onScopeChange.bind(this);
@@ -592,6 +595,53 @@ class ProviderRequest extends Component {
     this.setState({ requirementSteps: steps, loadCards: false });
   }
 
+  keyCloakTest(){
+    let settings = {
+      baseUrl: 'https://auth.mettles.com:8443/auth',
+      username: 'admin',
+      password: 'keycloak123',
+      grant_type: 'password',
+      client_id: 'admin-cli'
+    };
+
+
+
+     adminClient(settings).then((client) => {
+        console.log('client', client);
+        client.realms.find()
+          .then((realms) => {
+          console.log('realms', realms);
+          });
+         client.users.create("ProviderCredentials",{ username: "apiUser2","credentials": [
+                                                                                 {
+                                                                                     "type": "password",
+                                                                                     "value": "apiUser2",
+                                                                                     "temporary": false
+                                                                                 }
+                                                                             ], enabled: true})
+          .then((msg) => {
+          console.log('create msg', msg);
+          });
+        client.users.find("ProviderCredentials")
+          .then((users) => {
+          console.log('users', users);
+          });
+      })
+      .catch((err) => {
+        console.log('Error', err);
+      });
+
+    // Set a `realm` property to override the realm for only a single operation.
+    // For example, creating a user in another realm:
+    // await this.kcAdminClient.users.create({
+    //   realm: 'a-third-realm',
+    //   username: 'username',
+    //   email: 'user@example.com',
+    // });
+
+
+  }
+
   async submit_info() {
     // this.setState({ loadingSteps: false, stepsErrorString: undefined });
     // this.resetSteps();
@@ -629,9 +679,9 @@ class ProviderRequest extends Component {
           headers: myHeaders,
           body: JSON.stringify(patientResource)
         })
-        console.log("fhir-----------", patientResponse);
+       
+        // this.setState({ response: res_json }); console.log("fhir-----------", patientResponse);
         const patientResoponseJson = await patientResponse.json();
-        // this.setState({ response: res_json });
         // patientId=patientResoponseJson.id
         // json_request.entry[0].resource.id = patientId
         // json_request.context.patientId = patientId
@@ -1068,6 +1118,10 @@ class ProviderRequest extends Component {
                       />
                     </div>
                   </button>
+                  <button type="button" onClick={this.keyCloakTest}>Test Keyclaok
+                    
+                  </button>
+                  
                 </div>
                 {this.state.loadingSteps &&
                   <div className="right-form" style={{ paddingLeft: "2%", listStyle: "none", paddingTop: "3%" }} >

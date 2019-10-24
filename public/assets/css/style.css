@@ -1408,6 +1408,16 @@ body.mobile-nav-active #mobile-nav-toggle {
   font-weight: 600;
   margin-bottom: 15px;
 }
+.success_msg {
+  color: green;
+  display: block;
+  border: 1px solid green;
+  text-align: center;
+  padding: 10px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
 #contact .form #sendmessage {
   color: #18d26e;
   border: 1px solid #18d26e;
