@@ -208,7 +208,7 @@ class Configuration extends Component {
                                         </ul>
                                     </li>
                                     <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
-                                    <li className="menu-has-children"><a href="">{sessionStorage.getItem('name')}</a>
+                                    <li className="menu-has-children"><a href="">{sessionStorage.getItem('username')}</a>
                                         <ul>
                                             <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
                                         </ul>

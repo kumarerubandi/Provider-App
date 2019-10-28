@@ -2,6 +2,37 @@
 
 import React, { Component } from 'react';
 import {Dropdown} from 'semantic-ui-react';
+import Promise from 'promise';
+import promotingInteroperabilityMeasures from '../json/promotingInteroperabilityMeasures.json'
+
+
+var objectiveOptions=[]
+var scoreWeightOptions = []
+
+for(var i =0;i<promotingInteroperabilityMeasures.length;i++){
+  
+  //setting options for Score weight
+  var scoreWeightKey = promotingInteroperabilityMeasures[i]["PERFORMANCE SCORE WEIGHT"].toString().replace(/\s+/g, '_').toLowerCase().replace(/ *\([^)]*\) */g, "");
+  push(scoreWeightOptions, {key:'all', text:'All', value: "all" })
+  push(scoreWeightOptions, {key:scoreWeightKey, text:promotingInteroperabilityMeasures[i]["PERFORMANCE SCORE WEIGHT"], value: promotingInteroperabilityMeasures[i]["PERFORMANCE SCORE WEIGHT"] })
+
+  //setting options for Objective Name
+  var objectiveKey=promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"].replace(/\s+/g, '_').toLowerCase().replace(/ *\([^)]*\) */g, "").replace(/\s+$/, '');
+  push(objectiveOptions, {key:'all', text:'All', value: "all" })
+  push(objectiveOptions, {key:objectiveKey, text:promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"], value: promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"] })
+
+  console.log('collectiont type',objectiveOptions)
+}
+function push(array, item,key=false) {
+  if (!array.find(({text}) => text === item.text)) {
+    array.push(item);
+  }
+  if(key){
+    if (!array.find(({key}) => key === item.key)) {
+      array.push(item);
+    }
+  }
+}
 
 
 export default class PromotingInteroperability extends Component {
@@ -9,93 +40,278 @@ export default class PromotingInteroperability extends Component {
     super(props);
 
     this.state = {
-        collectionType:'',
-        collectionTypeOptions:[{ key: 'eCQMs', text: 'eCQMs (EHR measures or electronic Clinical Quality Measures)', value: 'eCQMs' },
-      { key: 'MIPS-CQMs', text: 'MIPS CQMs (previously known as Registry measures)', value: 'MIPSCQMs' },
-      { key: 'QCDR', text: 'QCDR measures', value: 'QCDR'},
-      { key: 'Claims_measures', text: 'Claims measures (available only to small practices of 1-15 eligible clinicians submitting as individuals, groups, or virtual groups)', value: 'Claims_measures'},
-      { key: 'CAHPS', text: 'CAHPS for MIPS survey (available only to groups)', value: 'CAHPS'},
-      { key: 'CMS', text: 'CMS Web Interface measures (available only to groups of 25 or more)', value: 'CMS'},
+        collectionType: props.getStore().promotingInteroperability.collectionType,
+        measure: props.getStore().promotingInteroperability.measure,
+        measureList:props.getStore().promotingInteroperability.measureList,
+        promotingInteroperability:props.getStore().promotingInteroperability,
+        objectiveOptions:objectiveOptions,
+        scoreWeightOptions:scoreWeightOptions,
+        objectiveName: props.getStore().promotingInteroperability.objectiveName,
+        filteredMeasures:[],
+        measureObj:{},
+        
+        scoreWeight: props.getStore().promotingInteroperability.scoreWeight,
+        measureOptions:props.getStore().promotingInteroperability.measureOptions,
+        };
+    this.handleObjectiveChange = this.handleObjectiveChange.bind(this);
+    this.handleScoreWeightChange = this.handleScoreWeightChange.bind(this);
 
-    ],
-    };
-    this.handlecollectionTypeChange = this.handlecollectionTypeChange.bind(this);
-
+    this.handleMeasureChange = this.handleMeasureChange.bind(this);
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    var measureOptions=[]
+    for(var i =0;i<promotingInteroperabilityMeasures.length;i++){ 
+      push(measureOptions, {key:promotingInteroperabilityMeasures[i]["QUALITY ID"], text:promotingInteroperabilityMeasures[i]["MEASURE NAME"], value: promotingInteroperabilityMeasures[i]["QUALITY ID"] },true)
+    }
+    this.setState({measureOptions:measureOptions})
+  }
 
   componentWillUnmount() {}
 
   // not required as this component has no forms or user entry
   // isValidated() {}
 
-  handlecollectionTypeChange = (event) => {
-    this.setState({ collectionType: event.target.value })
+  handleObjectiveChange = (event, data) => {
+    this.setState({ objectiveName: data.value })
+    let promotingInteroperability = this.state.promotingInteroperability
+    var filteredMeasures= []
+    var measureOptions =[]
+
+
+    if(data.value === 'all' && this.state.scoreWeight === 'all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+        return measure["OBJECTIVE NAME"]
+      })
+    }
+    else if(data.value!=='all' && this.state.scoreWeight ==='all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+        return measure["OBJECTIVE NAME"].includes(data.value)
+      })
+    }
+    else if(data.value ==='all' && this.state.scoreWeight!=='all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+        return measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight)
+      })
+    }
+    else{
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) =>{
+          return (
+            (data.value!== 'all' && measure["OBJECTIVE NAME"].includes(data.value) > 0 ) &&
+            ( this.state.scoreWeight !='all'&& measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight)))
+        })
+
+    }
+    console.log(filteredMeasures,'is it working')
+
+    for(var i =0;i<filteredMeasures.length;i++){ 
+      push(measureOptions, {key:filteredMeasures[i]["MEASURE ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE ID"] },true)
+    }
+
+    this.setState({measureOptions:measureOptions})
+
+    promotingInteroperability.objectiveName = data.value
+    promotingInteroperability.measureOptions = measureOptions
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability:promotingInteroperability,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    });  // Update store here (this is just an example, in reality you will do it via redux or flux)
+  }
+
+  handleScoreWeightChange = (event, data) => {
+    this.setState({ scoreWeight: data.value })
+    let promotingInteroperability = this.state.promotingInteroperability
+    var filteredMeasures=[]
+    var measureOptions =[]
+    
+    if(data.value === 'all' && this.state.objectiveName === 'all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+        return measure["PERFORMANCE SCORE WEIGHT"]
+      })
+    }
+    else if(data.value!=='all' && this.state.objectiveName ==='all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+          console.log(data.value,measure["PERFORMANCE SCORE WEIGHT"].includes(data.value))
+        return measure["PERFORMANCE SCORE WEIGHT"].includes(data.value)
+      })
+    }
+    else if(data.value ==='all' && this.state.objectiveName!=='all'){
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
+        return measure["OBJECTIVE NAME"].includes(this.state.objectiveName)
+      })
+    }
+    else{
+      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) =>{
+          return (
+            (data.value!== 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0 ) &&
+            ( this.state.objectiveName !='all'&& measure["OBJECTIVE NAME"].includes(this.state.objectiveName)))
+        })
+
+    }
+      // this.setState({filteredMeasures:filteredMeasures})
+    console.log(filteredMeasures,'is it working for sure')
+     
+    for(var i =0;i<filteredMeasures.length;i++){ 
+      push(measureOptions, {key:filteredMeasures[i]["MEASURE ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE ID"] },true)
+    }
+    this.setState({measureOptions:measureOptions})
+    promotingInteroperability.scoreWeight = data.value
+    promotingInteroperability.measureOptions = measureOptions
+    // this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability:promotingInteroperability,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    }); 
+  }
+
+
+  handleMeasureChange = (event,data) => {
+    console.log('data,yess',data.value,this.state.promotingInteroperability)
+    this.setState({ measure: data.value })
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.measure = data.value
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability:promotingInteroperability,
+      // measure:data.value,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    });
+    
+  }
+  clearMeasure(index){
+    let measureList = this.state.measureList
+    if (index !== -1) {
+      measureList.splice(index, 1);
+    }
+    this.setState({measureList: measureList});
+      let promotingInteroperability = this.state.promotingInteroperability
+      promotingInteroperability.measureList = measureList
+      this.props.updateStore({
+        promotingInteroperability:promotingInteroperability,
+        // measureList:measureList,
+        savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      });
+    
+  }
+  addMeasure(){
+    if(this.state.measure !==''){
+      if(!this.state.measureObj.hasOwnProperty(this.state.measure)){
+        let measureObj = this.state.measureObj
+        let Obj = this.state.measureOptions.find((m)=>{
+            return m.key === this.state.measure
+          })
+        measureObj[this.state.measure]=Obj.text
+        this.setState({measureObj:measureObj})
+        this.setState(prevState => ({
+            measureList: [...prevState.measureList, {measureId:this.state.measure,measureName:Obj.text}]
+          }))
+        const { measureList } = this.state;
+        let tempArr = [...measureList];
+        tempArr.push({measureId:this.state.measure,measureName:Obj.text});
+        console.log(tempArr,'tempArrs')
+        let promotingInteroperability = this.state.promotingInteroperability
+        promotingInteroperability.measureList = tempArr
+        this.props.updateStore({
+          promotingInteroperability:promotingInteroperability,
+          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+        });
+      }
+    }    
   }
   render() {
+    // console.log(this.props.getStore().measureList,'yess',this.props.getStore().promotingInteroperability.measureList)
     return (
-    //   <div className="step step1">
-    //     <div className="row">
-    //       <form id="Form" className="form-horizontal">
-    //         <div className="form-group">
-    //           <label className="col-md-12 control-label">
-    //             <h1>Step 1: Welcome to the official React StepZilla Example</h1>
-    //             <h3>Source, Installation Instructions and Docs can be found here: <a href="https://github.com/newbreedofgeek/react-stepzilla" target="_blank">https://github.com/newbreedofgeek/react-stepzilla</a></h3>
-    //           </label>
-    //           <div className="row">
-    //             <div className="col-md-12">
-    //               <div className="col-md-6">
-    //                 <h3>This example uses this custom config (which overwrites the default config):</h3>
-    //                 <code>
-    //                     preventEnterSubmission=true<br />
-    //                     nextTextOnFinalActionStep="Save"<br />
-    //                     hocValidationAppliedTo=[3]<br />
-    //                     startAtStep=window.sessionStorage.getItem('step') ? parseFloat(window.sessionStorage.getItem('step')) : 0<br />
-    //                     onStepChange=(step) => window.sessionStorage.setItem('step', step)
-    //                 </code>
-    //               </div>
-    //               <div className="col-md-6">
-    //                 <h3>The default config settings are...</h3>
-    //                 <code>
-    //                   showSteps=true<br />
-    //                   showNavigation=true<br />
-    //                   stepsNavigation=true<br />
-    //                   prevBtnOnLastStep=true<br />
-    //                   dontValidate=false<br />
-    //                   preventEnterSubmission=false<br />
-    //                   startAtStep=0<br />
-    //                   nextButtonText='Next'<br />
-    //                   backButtonText='Previous'<br />
-    //                   nextButtonCls='btn btn-prev btn-primary btn-lg pull-right'<br />
-    //                   backButtonCls='btn btn-next btn-primary btn-lg pull-left'<br />
-    //                   nextTextOnFinalActionStep='[default value of nextButtonText]'<br />
-    //                   hocValidationAppliedTo: []
-    //                 </code>
-    //               </div>
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </form>
-    //     </div>
-    //   </div>
-    <div>
-            <div className="header">
-            PI
-                </div>  
-                {/* <div className="dropdown">
-                <Dropdown
-                    className={"blackBorder"}
-                        options={this.state.collectionTypeOptions}
-                        placeholder='Collection Type'
-                        search
-                        selection
-                        fluid
-                        value={this.state.collectionType}
-                        onChange={this.handlecollectionTypeChange}
-                    />
-                    </div>                  */}
-    </div>
+      <div>
+      <div className="form-row">
+                     <div className="form-group col-md-2 offset-2">
+                       <h4 className="title">Objective Name</h4>
+                     </div>
+                     <div className="form-group col-md-6">
+                     <Dropdown
+                   className={"blackBorder"}
+                       options={this.state.objectiveOptions}
+                       placeholder='Objective Name'
+                       search
+                       selection
+                       fluid
+                       value={this.state.objectiveName}
+                       onChange={this.handleObjectiveChange}
+                   />
+                     </div>
+                   </div>
+                   <div className="form-row">
+                     <div className="form-group col-md-2 offset-2">
+                       <h4 className="title">Score Weight</h4>
+                     </div>
+                     <div className="form-group col-md-6">
+                     <Dropdown
+                   className={"blackBorder"}
+                       options={this.state.scoreWeightOptions}
+                       placeholder='Score Weight'
+                       search
+                       selection
+                       fluid
+                       value={this.state.scoreWeight}
+                       onChange={this.handleScoreWeightChange}
+                   />
+                     </div>
+                   </div>
+                   <div className="form-row">
+                     <div className="form-group col-md-2 offset-2">
+                       <h4 className="title">Measure</h4>
+                     </div>
+                     <div className="form-group col-md-6">
+                     <Dropdown
+                   className={"blackBorder"}
+                       options={this.state.measureOptions}
+                       placeholder='Measure'
+                       search
+                       selection
+                       fluid
+                       value={this.state.measure}
+                       onChange={this.handleMeasureChange}
+/>      
+                     </div>
+                     <div className="form-group col-md-2">
+                     <span><button class="ui circular icon button"  onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+
+                     </div>
+                   </div>    
+                   
+               <div className="form-row">
+               <table className="table">
+                 <thead>
+                   <tr>
+                     <th>Measure </th>
+                     <th></th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {this.state.measureList.map((measure, i) => {
+                     return(
+                       <tr key={i}>
+                         <td>
+                           <span>{measure.measureName}</span>
+                          </td>
+                          <td>
+                           <span>{measure.measureId}</span>
+                          </td>
+                         <td>
+                           <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
+                             x
+                           </button>
+                         </td>
+                       </tr>
+                     )
+                   })
+
+                   }
+                
+                 </tbody>
+               </table>
+               </div>
+   </div>
     )
   }
 }

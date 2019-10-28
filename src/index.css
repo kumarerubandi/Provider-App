@@ -511,9 +511,12 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
     position: relative;
     left: 55%;
 }
+#root{
+  height:inherit
+}
 .main{
   /* background-image: url("call-to-action-bg.jpg"); */
-  background-image: url("login-bg.jpg");
+  background-image: url("login-page-bg.jpg");
   background-color: #cccccc;
     background-repeat: round;
     height: -webkit-fill-available;

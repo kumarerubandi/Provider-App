@@ -86,7 +86,7 @@ class LoginPage extends React.Component {
           .then((msg) => {
           console.log('create msg', msg);
           if(msg.hasOwnProperty("id")){
-            this.setState({ loading: false, success_msg : "User Created Sucessfully",user_created:true });
+            this.setState({ loading: false, success_msg : "User Created Sucessfully",user_created:true, mode:'login' });
           }
 
         });
@@ -174,27 +174,27 @@ class LoginPage extends React.Component {
       <div className="main">
         <div className="form">
           <div className="container">
-            <div className="col-5 offset-7">
+            <div className="col-5 ">
               { this.state.mode == "login" &&
               <div className="section-header">
-                <h3 style={{ paddingTop: "25%" }}>Login</h3>
+                <h3 style={{ paddingTop: "50%" }}>Login</h3>
                 <p>to the provider application</p>
               </div>
               }
               { this.state.mode == "register" &&
               <div className="section-header">
-                <h3 style={{ paddingTop: "25%" }}>Register User</h3>
+                <h3 style={{ paddingTop: "50%" }}>Register User</h3>
                 <p>to the provider application</p>
               </div>
               }
             </div>
             {this.state.login_error_msg !== "" &&
-              <div className="col-5 offset-7 loginerrormessage">{this.state.login_error_msg}</div>
+              <div className="col-5  loginerrormessage">{this.state.login_error_msg}</div>
             }
             {this.state.success_msg !== "" &&
-              <div className="col-5 offset-7 success_msg">{this.state.success_msg}</div>
+              <div className="col-5  success_msg">{this.state.success_msg}</div>
             }
-            <div className="col-5 offset-7">
+            <div className="col-5 ">
               <div className="form-group">
                 <Input
                   icon='user' iconPosition='left'
@@ -211,7 +211,7 @@ class LoginPage extends React.Component {
                 />
               </div>
             </div>
-            <div className="col-5 offset-7">
+            <div className="col-5 ">
               <div className="form-group">
                 <Input
                   placeholder='Password'
@@ -229,7 +229,7 @@ class LoginPage extends React.Component {
               </div>
             </div>
             { this.state.mode == "register" &&
-            <div className="col-5 offset-7">
+            <div className="col-5 ">
               <div className="form-group">
                 <Input
                   placeholder='Confirm Password'
@@ -249,7 +249,7 @@ class LoginPage extends React.Component {
 
              }
              { this.state.mode == "register" &&
-                <div className="col-5 offset-7">
+                <div className="col-5 ">
                   <div className="form-group">
                     <Input
                       placeholder='First Name'
@@ -268,7 +268,7 @@ class LoginPage extends React.Component {
             }
             { 
               this.state.mode == "register" &&
-              <div className="col-5 offset-7">
+              <div className="col-5 ">
                 <div className="form-group">
                   <Input
                     placeholder='Last Name'
@@ -287,7 +287,7 @@ class LoginPage extends React.Component {
             }
             
 
-            <div className="col-5 offset-7">
+            <div className="col-5 text-center">
               <div>
                 {this.state.mode == "login" &&
                 <button type="button" onClick={this.onClickLoginSubmit}>
@@ -303,7 +303,9 @@ class LoginPage extends React.Component {
                 </button>
               }
                 {this.state.mode == "login" &&
-                <button type="button" onClick={e => this.switchMode("register")}>
+                <div style={{ paddingTop: "10%" }}>
+                <p >Don't have a Login? <a href="#" onClick={e => this.switchMode("register")}>Register here</a></p>
+                {/* <button type="button" onClick={e => this.switchMode("register")}>
                   Register
                 <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                     <Loader
@@ -313,9 +315,11 @@ class LoginPage extends React.Component {
                       width="15"
                     />
                   </div>
-                </button>
+                </button> */}
+                </div>
               }
                  {this.state.mode == "register" &&
+
                  <button type="button" onClick={this.registerUser}>
                   Register
                 <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>

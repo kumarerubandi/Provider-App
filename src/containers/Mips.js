@@ -12,7 +12,7 @@ import StepZilla from "react-stepzilla";
 import QualityImprovement from "../components/QualityImprovement"
 import PromotingInteroperability from "../components/PromotingInteroperability"
 import ImprovementActivities from "../components/ImprovementActivities"
-import Cost from "../components/Cost"
+import Cost from "../components/CostMeasures"
 
 
 
@@ -45,15 +45,46 @@ class Mips extends Component {
             dataLoaded: false
 
         };
+        this.store = {
+          qualityImprovement:{
+            collectionType:'all',
+            measureType:'all',
+            specialtyMeasureSet:'all',
+            measure:'',
+            measureList:[],
+            measureOptions:[],
+          },
+          promotingInteroperability:{
+            objectiveName:'all',
+            scoreWeight:'all',
+            measure:'',
+            measureList:[],
+            measureOptions:[],
+          },
+          improvementActivity:{
+            subCategoryName:'all',
+            activityWeight:'all',
+            measure:'',
+            measureList:[],
+            measureOptions:[],
+          },
+          costMeasures:{
+            measure:'',
+            measureList:[],
+            measureOptions:[],
+          },
+          savedToCloud: false
+        };
       }
 
+      
       getStore() {
-        return this.sampleStore;
+        return this.store;
       }
     
       updateStore(update) {
-        this.sampleStore = {
-          ...this.sampleStore,
+        this.store = {
+          ...this.store,
           ...update,
         }
       }
@@ -63,9 +94,10 @@ class Mips extends Component {
       const steps =
           [
             {name: 'Quality Improvement', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            {name: 'PI', component: <PromotingInteroperability />},
-            {name: 'IA', component: <ImprovementActivities />},
-            {name: 'Cost', component: <Cost />},
+            {name: 'PI', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'IA', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Cost', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Final', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
           ]
         return (
             <React.Fragment>
@@ -96,7 +128,7 @@ class Mips extends Component {
                             </ul>
                           </li>
                           <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
-                          <li className="menu-has-children"><a href="">{sessionStorage.getItem('name')}</a>
+                          <li className="menu-has-children"><a href="">{sessionStorage.getItem('username')}</a>
                             <ul>
                               <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
                             </ul>
@@ -114,6 +146,7 @@ class Mips extends Component {
                       <div className='step-progress'>
                             <StepZilla steps={steps}
                             preventEnterSubmission={true}
+                            nextTextOnFinalActionStep={"Save"}
                             startAtStep={
                               window.sessionStorage.getItem("step")
                                 ? parseFloat(window.sessionStorage.getItem("step"))
