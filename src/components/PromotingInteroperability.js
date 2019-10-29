@@ -62,7 +62,7 @@ export default class PromotingInteroperability extends Component {
   componentDidMount() {
     var measureOptions=[]
     for(var i =0;i<promotingInteroperabilityMeasures.length;i++){ 
-      push(measureOptions, {key:promotingInteroperabilityMeasures[i]["QUALITY ID"], text:promotingInteroperabilityMeasures[i]["MEASURE NAME"], value: promotingInteroperabilityMeasures[i]["QUALITY ID"] },true)
+      push(measureOptions, {key:promotingInteroperabilityMeasures[i]["MEASURE ID"], text:promotingInteroperabilityMeasures[i]["MEASURE NAME"], value: promotingInteroperabilityMeasures[i]["MEASURE ID"] },true)
     }
     this.setState({measureOptions:measureOptions})
   }
@@ -71,6 +71,7 @@ export default class PromotingInteroperability extends Component {
 
   // not required as this component has no forms or user entry
   // isValidated() {}
+  
 
   handleObjectiveChange = (event, data) => {
     this.setState({ objectiveName: data.value })
@@ -86,19 +87,19 @@ export default class PromotingInteroperability extends Component {
     }
     else if(data.value!=='all' && this.state.scoreWeight ==='all'){
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
-        return measure["OBJECTIVE NAME"].includes(data.value)
+        return measure["OBJECTIVE NAME"].includes(data.value) > 0
       })
     }
     else if(data.value ==='all' && this.state.scoreWeight!=='all'){
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
-        return measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight)
+        return measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight) > 0
       })
     }
     else{
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure) =>{
           return (
             (data.value!== 'all' && measure["OBJECTIVE NAME"].includes(data.value) > 0 ) &&
-            ( this.state.scoreWeight !='all'&& measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight)))
+            ( this.state.scoreWeight !='all'&& measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight)> 0))
         })
 
     }
@@ -133,19 +134,19 @@ export default class PromotingInteroperability extends Component {
     else if(data.value!=='all' && this.state.objectiveName ==='all'){
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
           console.log(data.value,measure["PERFORMANCE SCORE WEIGHT"].includes(data.value))
-        return measure["PERFORMANCE SCORE WEIGHT"].includes(data.value)
+        return measure["PERFORMANCE SCORE WEIGHT"].includes(data.value)>0
       })
     }
     else if(data.value ==='all' && this.state.objectiveName!=='all'){
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure)=>{
-        return measure["OBJECTIVE NAME"].includes(this.state.objectiveName)
+        return measure["OBJECTIVE NAME"].includes(this.state.objectiveName)>0
       })
     }
     else{
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure) =>{
           return (
             (data.value!== 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0 ) &&
-            ( this.state.objectiveName !='all'&& measure["OBJECTIVE NAME"].includes(this.state.objectiveName)))
+            ( this.state.objectiveName !='all'&& measure["OBJECTIVE NAME"].includes(this.state.objectiveName)>0))
         })
 
     }
@@ -158,7 +159,7 @@ export default class PromotingInteroperability extends Component {
     this.setState({measureOptions:measureOptions})
     promotingInteroperability.scoreWeight = data.value
     promotingInteroperability.measureOptions = measureOptions
-    // this.setState({ promotingInteroperability: promotingInteroperability })
+    this.setState({ promotingInteroperability: promotingInteroperability })
     this.props.updateStore({
       promotingInteroperability:promotingInteroperability,
       savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
@@ -167,7 +168,7 @@ export default class PromotingInteroperability extends Component {
 
 
   handleMeasureChange = (event,data) => {
-    console.log('data,yess',data.value,this.state.promotingInteroperability)
+    console.log(data,'so this is data')
     this.setState({ measure: data.value })
     let promotingInteroperability = this.state.promotingInteroperability
     promotingInteroperability.measure = data.value
@@ -283,7 +284,8 @@ export default class PromotingInteroperability extends Component {
                <table className="table">
                  <thead>
                    <tr>
-                     <th>Measure </th>
+                     <th>Measure Name</th>
+                     <th>Measure ID</th>
                      <th></th>
                    </tr>
                  </thead>

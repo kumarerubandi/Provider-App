@@ -78,19 +78,8 @@ export default class QualityImprovement extends Component {
         measureTypeOptions:measureTypeOptions,
         specialtyMeasureSetOptions:specificMeasureTypeOptions,
         filteredMeasures:[],
-        measures:[{ key: 'e-Prescribing', text: 'e-Prescribing ', value: 'e-Prescribing' ,category:'e-Prescribing'},
-        { key: 'pdmp', text: 'Query of prescription Drug Monitoring Program(PDMP)', value: 'Query of prescription Drug Monitoring Program(PDMP)',category:'e-Prescribing' },
-        { key: 'ota', text: 'Verify Opioid Treatment Agreement', value: 'Verify Opioid Treatment Agreement',category:'e-Prescribing' },
-        { key: 'electronic_referral_loops_sending', text: 'Support Electronic Referral Loops By Sending Health Information Exclusion', value: 'Support Electronic Referral Loops By Sending Health Information Exclusion',category:"health_information_exchange"},
-        { key: 'electronic_referral_loops_receiving', text: 'Support Electronic Referral Loops By Receiving and Incorporating Health Information Exclusion', value: 'Support Electronic Referral Loops By Receiving and Incorporating Health Information Exclusion',category:"health_information_exchange"},
-        { key: 'patient_electronic_access', text: 'Provide Patients Electronic Access to Their Health Information', value: 'Provide Patients Electronic Access to Their Health Information',category:'provider_patient_exchange'},
-        { key: 'immunization_registry_reporting', text: 'Immunization Registry Reporting', value: 'Immunization Registry Reporting',category:'public_health_clinical_data_exchange'},
-        { key: 'public_health_registry_reporting', text: 'Public Health Registry Reporting', value: 'Public Health Registry Reporting',category:'public_health_clinical_data_exchange'},
-        { key: 'syndromic_surveillance_reporting', text: 'Syndromic Surveillance Reporting', value: 'Syndromic Surveillance Reporting',category:'public_health_clinical_data_exchange'},
-        { key: 'electronic_case_reporting', text: 'Electronic Case Reporting', value: 'Electronic Case Reporting',category:'public_health_clinical_data_exchange'},
-        { key: 'clinical_data_registry_reporting', text: 'Clinical Data Registry Reporting', value: 'Clinical Data Registry Reporting',category:'public_health_clinical_data_exchange'},
-        { key: 'security_risk_analysis', text: 'Security Risk Analysis', value: 'Security Risk Analysis',category:'protect_patient_health_information'},
-      ],
+        measureObj:{}
+       
 
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
@@ -106,11 +95,8 @@ export default class QualityImprovement extends Component {
       push(measureOptions, {
         key:qualityMeasures[i]["QUALITY ID"],
         text:qualityMeasures[i]["MEASURE NAME"],
-        value: qualityMeasures[i]["MEASURE NAME"],
-        collectionType:qualityMeasures[i]["DATA SUBMISSION METHOD"],
-        specialtyMeasureSet:qualityMeasures[i]["SPECIALTY MEASURE SET"],
-        measureType:qualityMeasures[i]["MEASURE TYPE"]
-       })
+        value: qualityMeasures[i]["QUALITY ID"]
+       },true)
     }
     this.setState({measureOptions:measureOptions})
   //   var arr =[]
@@ -131,28 +117,64 @@ export default class QualityImprovement extends Component {
   handleCollectionTypeChange = (event, data) => {
     this.setState({ collectionType: data.value })
     let qualityImprovement = this.state.qualityImprovement
-    
+    var filteredMeasures=[]
     let measureOptions=[]
-  
-    if(data.value === 'all'){
-      for(var i =0;i<qualityMeasures.length;i++){ 
-        push(measureOptions, {key:qualityMeasures[i]["QUALITY ID"], text:qualityMeasures[i]["MEASURE NAME"], value: qualityMeasures[i]["MEASURE NAME"] })
-      }
+    if(data.value === 'all' && this.state.specialtyMeasureSet === 'all' && this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["DATA SUBMISSION METHOD"]
+      })
+    }
+    else if(data.value!=='all' && this.state.specialtyMeasureSet ==='all'&& this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["DATA SUBMISSION METHOD"].includes(data.value)
+      })
+    }
+    else if(data.value ==='all' && this.state.specialtyMeasureSet==='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["MEASURE TYPE"].includes(this.state.measureType)
+      })
+    }
+    else if(data.value ==='all' && this.state.specialtyMeasureSet!=='all' && this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)
+      })
+    }
+    else if(data.value !=='all' && this.state.specialtyMeasureSet!=='all' && this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["DATA SUBMISSION METHOD"].includes(data.value) > 0 ) &&
+          ( this.state.specialtyMeasureSet !='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0))
+      })
+    }
+    else if(data.value !=='all' && this.state.specialtyMeasureSet==='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["DATA SUBMISSION METHOD"].includes(data.value) > 0 ) &&
+          ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+      })
+    }
+    else if(data.value ==='all' && this.state.specialtyMeasureSet!=='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          ( this.state.specialtyMeasureSet !=='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0) &&
+          ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+      })
     }
     else{
-      var filteredMeasures = qualityMeasures.filter((measure)=>{
-        console.log(measure["DATA SUBMISSION METHOD"].includes(data.value) > 0,data.value)
-        return measure["DATA SUBMISSION METHOD"].includes(data.value) > 0 
-      })
-      console.log(filteredMeasures,'here')
-      this.setState({filteredMeasures:filteredMeasures})
-      
-      for(var i =0;i<filteredMeasures.length;i++){ 
-        push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE NAME"] })
-      }
-
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+          return (
+            (data.value!== 'all' && measure["DATA SUBMISSION METHOD"].includes(data.value) > 0 ) &&
+            ( this.state.specialtyMeasureSet !=='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0) &&
+            ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+        })
 
     }
+   
+    for(var i =0;i<filteredMeasures.length;i++){ 
+      push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] },true)
+    }
+
+
     this.setState({measureOptions:measureOptions})
     qualityImprovement.collectionType = data.value
     qualityImprovement.measureOptions = measureOptions
@@ -166,34 +188,63 @@ export default class QualityImprovement extends Component {
  
   handleSpecialtyMeasureChange = (event,data) => {
     this.setState({ specialtyMeasureSet: data.value })
-    
+    var filteredMeasures=[]
     
     var measureOptions = [] 
 
     if(data.value === 'all' && this.state.collectionType === 'all' && this.state.measureType==='all'){
-      for(var i =0;i<qualityMeasures.length;i++){ 
-        push(measureOptions, {key:qualityMeasures[i]["QUALITY ID"], text:qualityMeasures[i]["MEASURE NAME"], value: qualityMeasures[i]["MEASURE NAME"] })
-      }
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["SPECIALTY MEASURE SET"]
+      })
     }
-    else if(data.value === 'all' ){
-      var filteredMeasures = this.state.filteredMeasures
-      for(var i =0;i<filteredMeasures.length;i++){ 
-        push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE NAME"] })
-      }
+    else if(data.value!=='all' && this.state.collectionType ==='all'&& this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["SPECIALTY MEASURE SET"].includes(data.value)
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType==='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["MEASURE TYPE"].includes(this.state.measureType)
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType!=='all' && this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["SPECIALTY MEASURE SET"].includes(this.state.measureType)
+      })
+    }
+    else if(data.value !=='all' && this.state.collectionType!=='all' && this.state.measureType==='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["SPECIALTY MEASURE SET"].includes(data.value) > 0 ) &&
+          ( this.state.collectionType !='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0))
+      })
+    }
+    else if(data.value !=='all' && this.state.collectionType==='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["SPECIALTY MEASURE SET"].includes(data.value) > 0 ) &&
+          ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType!=='all' && this.state.measureType!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          ( this.state.collectionType !=='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0) &&
+          ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+      })
     }
     else{
-      var filteredMeasures = this.state.filteredMeasures.filter((measure)=>{
-        console.log(measure["SPECIALTY MEASURE SET"].includes(data.value) > 0,data.value)
-        return measure["SPECIALTY MEASURE SET"].includes(data.value) > 0
-      })
-      console.log(filteredMeasures,'here')
-      this.setState({filteredMeasures:filteredMeasures})  
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+          return (
+            (data.value!== 'all' && measure["SPECIALTY MEASURE SET"].includes(data.value) > 0 ) &&
+            ( this.state.collectionType !=='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0) &&
+            ( this.state.measureType !='all'&& measure["MEASURE TYPE"].includes(this.state.measureType)> 0))
+        })
 
-
-      for(var i =0;i<filteredMeasures.length;i++){ 
-        push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE NAME"] })
-      }
-
+    }
+    console.log(filteredMeasures,'oh yeha')
+    for(var i =0;i<filteredMeasures.length;i++){ 
+      push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] },true)
     }
     let qualityImprovement = this.state.qualityImprovement
     this.setState({measureOptions:measureOptions})
@@ -210,27 +261,60 @@ export default class QualityImprovement extends Component {
   handleMeasureTypeChange = (event,data) => {
     this.setState({ measureType: data.value })
     var measureOptions=[]
+    var filteredMeasures=[]
     if(data.value === 'all' && this.state.collectionType === 'all' && this.state.specialtyMeasureSet==='all'){
-      for(var i =0;i<qualityMeasures.length;i++){ 
-        push(measureOptions, {key:qualityMeasures[i]["QUALITY ID"], text:qualityMeasures[i]["MEASURE NAME"], value: qualityMeasures[i]["MEASURE NAME"] })
-      }
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["MEASURE TYPE"]
+      })
     }
-    else if(data.value === 'all'){
-      var filteredMeasures = this.state.filteredMeasures
-      for(var i =0;i<filteredMeasures.length;i++){ 
-        push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE NAME"] })
-      }
+    else if(data.value!=='all' && this.state.collectionType ==='all'&& this.state.specialtyMeasureSet==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["MEASURE TYPE"].includes(data.value)
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType==='all' && this.state.specialtyMeasureSet!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType!=='all' && this.state.specialtyMeasureSet==='all'){
+      filteredMeasures = qualityMeasures.filter((measure)=>{
+        return measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)
+      })
+    }
+    else if(data.value !=='all' && this.state.collectionType!=='all' && this.state.specialtyMeasureSet==='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["MEASURE TYPE"].includes(data.value) > 0 ) &&
+          ( this.state.collectionType !='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0))
+      })
+    }
+    else if(data.value !=='all' && this.state.collectionType==='all' && this.state.specialtyMeasureSet!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          (data.value!== 'all' && measure["MEASURE TYPE"].includes(data.value) > 0 ) &&
+          ( this.state.specialtyMeasureSet !='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0))
+      })
+    }
+    else if(data.value ==='all' && this.state.collectionType!=='all' && this.state.specialtyMeasureSet!=='all'){
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+        return (
+          ( this.state.collectionType !=='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0) &&
+          ( this.state.specialtyMeasureSet !='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0))
+      })
     }
     else{
-      var filteredMeasures = this.state.filteredMeasures.filter((measure)=>{
-        console.log(measure["MEASURE TYPE"].includes(data.value) > 0,data.value)
-        return measure["MEASURE TYPE"].includes(data.value) > 0
-      })
-      // this.setState({filteredMeasures:filteredMeasures})
+      filteredMeasures = qualityMeasures.filter((measure) =>{
+          return (
+            (data.value!== 'all' && measure["MEASURE TYPE"].includes(data.value) > 0 ) &&
+            ( this.state.collectionType !=='all'&& measure["DATA SUBMISSION METHOD"].includes(this.state.collectionType)> 0) &&
+            ( this.state.specialtyMeasureSet !='all'&& measure["SPECIALTY MEASURE SET"].includes(this.state.specialtyMeasureSet)> 0))
+        })
 
-      for(var i =0;i<filteredMeasures.length;i++){ 
-        push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE NAME"] })
-      }
+    }
+
+    for(var i =0;i<filteredMeasures.length;i++){ 
+      push(measureOptions, {key:filteredMeasures[i]["QUALITY ID"], text:filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] })
     }
 
     let qualityImprovement = this.state.qualityImprovement
@@ -274,25 +358,29 @@ export default class QualityImprovement extends Component {
     
   }
   addMeasure(){
-    if(!(this.state.measureList.includes(this.state.measure)) && this.state.measure !== ''){
-      this.setState(prevState => ({
-        measureList: [...prevState.measureList, this.state.measure]
-      }))
-      const { measureList } = this.state;
-      let tempArr = [...measureList];
-      // var measureList = this.state.measureList
-      tempArr.push(this.state.measure);
-      console.log(tempArr,'tempArrs')
-      let qualityImprovement = this.state.qualityImprovement
-      // var newArray = tempArr.slice();
-      qualityImprovement.measureList = tempArr
-      this.props.updateStore({
-        qualityImprovement:qualityImprovement,
-        // measureList:tempArr,
-        savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-      });
+    if(this.state.measure !==''){
+      if(!this.state.measureObj.hasOwnProperty(this.state.measure)){
+        let measureObj = this.state.measureObj
+        let Obj = this.state.measureOptions.find((m)=>{
+            return m.key === this.state.measure
+          })
+        measureObj[this.state.measure]=Obj.text
+        this.setState({measureObj:measureObj})
+        this.setState(prevState => ({
+            measureList: [...prevState.measureList, {measureId:this.state.measure,measureName:Obj.text}]
+          }))
+        const { measureList } = this.state;
+        let tempArr = [...measureList];
+        tempArr.push({measureId:this.state.measure,measureName:Obj.text});
+        console.log(tempArr,'tempArrs')
+        let qualityImprovement = this.state.qualityImprovement
+        qualityImprovement.measureList = tempArr
+        this.props.updateStore({
+          qualityImprovement:qualityImprovement,
+          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+        });
+      }
     }
-    
   }
   render() {
     return (
@@ -376,18 +464,22 @@ export default class QualityImprovement extends Component {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Measure </th>
+                      <th>Measure Name</th>
+                      <th>Measure ID</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {this.state.measureList.map((key, i) => {
+                    {this.state.measureList.map((measure, i) => {
                       return(
-                        <tr key={key}>
+                        <tr key={i}>
                           <td>
-                            <span>{this.state.measureList[i]}</span>
-                           </td>
+                           <span>{measure.measureName}</span>
+                          </td>
                           <td>
+                           <span>{measure.measureId}</span>
+                          </td>
+                         <td>
                             <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
                               x
                             </button>

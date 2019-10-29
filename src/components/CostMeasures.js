@@ -15,6 +15,7 @@ export default class Cost extends Component {
         measureList: props.getStore().costMeasures.measureList,
         costMeasures: props.getStore().costMeasures,
         measureOptions: props.getStore().improvementActivity.measureOptions,
+        measureObj:{}
 
 
     };
@@ -63,20 +64,28 @@ export default class Cost extends Component {
     
   }
   addMeasure(){
-    if(!(this.state.measureList.includes(this.state.measure)) && (this.state.measure !=='')){
-      this.setState(prevState => ({
-        measureList: [...prevState.measureList, this.state.measure]
-      }))
-      const { measureList } = this.state;
-      let tempArr = [...measureList];
-      tempArr.push(this.state.measure);
-      let costMeasures = this.state.costMeasures
-      costMeasures.measureList = tempArr
-      this.setState({ costMeasures: costMeasures })
-      this.props.updateStore({
-        costMeasures:costMeasures,
-        savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-      });
+    if(this.state.measure !==''){
+      if(!this.state.measureObj.hasOwnProperty(this.state.measure)){
+        let measureObj = this.state.measureObj
+        let Obj = this.state.measureOptions.find((m)=>{
+            return m.key === this.state.measure
+          })
+        measureObj[this.state.measure]=Obj.text
+        this.setState({measureObj:measureObj})
+        this.setState(prevState => ({
+            measureList: [...prevState.measureList, {measureId:this.state.measure,measureName:Obj.text}]
+          }))
+        const { measureList } = this.state;
+        let tempArr = [...measureList];
+        tempArr.push({measureId:this.state.measure,measureName:Obj.text});
+        console.log(tempArr,'tempArrs')
+        let costMeasures = this.state.costMeasures
+        costMeasures.measureList = tempArr
+        this.props.updateStore({
+          costMeasures:costMeasures,
+          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+        });
+      }
     }
     
   }
@@ -109,16 +118,20 @@ export default class Cost extends Component {
                <table className="table">
                  <thead>
                    <tr>
-                     <th>Measures </th>
+                     <th>Measure Name</th>
+                     <th>Measure ID </th>
                      <th></th>
                    </tr>
                  </thead>
                  <tbody>
-                   {this.state.measureList.map((key, i) => {
+                   {this.state.measureList.map((measure, i) => {
                      return(
-                       <tr key={key}>
+                       <tr key={i}>
                          <td>
-                           <span>{this.state.measureList[i]}</span>
+                           <span>{measure.measureName}</span>
+                          </td>
+                          <td>
+                           <span>{measure.measureId}</span>
                           </td>
                          <td>
                            <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>

@@ -82,19 +82,19 @@ export default class ImprovementActivities extends Component {
     }
     else if(data.value!=='all' && this.state.activityWeight ==='all'){
       filteredMeasures = improvementMeasures.filter((measure)=>{
-        return measure["SUBCATEGORY NAME"].includes(data.value)
+        return measure["SUBCATEGORY NAME"].includes(data.value)> 0
       })
     }
     else if(data.value ==='all' && this.state.activityWeight!=='all'){
       filteredMeasures = improvementMeasures.filter((measure)=>{
-        return measure["ACTIVITY WEIGHTING"].includes(this.state.activityWeight)
+        return measure["ACTIVITY WEIGHTING"].includes(this.state.activityWeight)> 0
       })
     }
     else{
       filteredMeasures = improvementMeasures.filter((measure) =>{
           return (
             (data.value!== 'all' && measure["SUBCATEGORY NAME"].includes(data.value) > 0 ) &&
-            ( this.state.activityWeight !='all'&& measure["ACTIVITY WEIGHTING"].includes(this.state.activityWeight)))
+            ( this.state.activityWeight !='all'&& measure["ACTIVITY WEIGHTING"].includes(this.state.activityWeight)> 0))
         })
 
     }
@@ -128,19 +128,19 @@ export default class ImprovementActivities extends Component {
     }
     else if(data.value!=='all' && this.state.subCategoryName ==='all'){
       filteredMeasures = improvementMeasures.filter((measure)=>{
-        return measure["ACTIVITY WEIGHTING"].includes(data.value)
+        return measure["ACTIVITY WEIGHTING"].includes(data.value)>0
       })
     }
     else if(data.value ==='all' && this.state.subCategoryName!=='all'){
       filteredMeasures = improvementMeasures.filter((measure)=>{
-        return measure["SUBCATEGORY NAME"].includes(this.state.subCategoryName)
+        return measure["SUBCATEGORY NAME"].includes(this.state.subCategoryName)>0
       })
     }
     else{
       filteredMeasures = improvementMeasures.filter((measure) =>{
           return (
             (data.value!== 'all' && measure["ACTIVITY WEIGHTING"].includes(data.value) > 0 ) &&
-            ( this.state.subCategoryName !='all'&& measure["SUBCATEGORY NAME"].includes(this.state.subCategoryName)))
+            ( this.state.subCategoryName !='all'&& measure["SUBCATEGORY NAME"].includes(this.state.subCategoryName)>0))
         })
 
     }
