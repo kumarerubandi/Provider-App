@@ -93,10 +93,10 @@ class Mips extends Component {
     render() {
       const steps =
           [
-            {name: 'Quality Improvement', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            {name: 'PI', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'IA', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'Cost', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 1', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 2', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Step 3', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Step 4', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
             {name: 'Final', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
           ]
         return (

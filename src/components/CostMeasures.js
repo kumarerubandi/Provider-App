@@ -92,11 +92,11 @@ export default class Cost extends Component {
   render() {
     return (
     <div>
+      <p className="text-center"><b>Cost</b> - The Cost performance category has 15% weight for the 2019 performance year. CMS will calculate the score for the Cost category from the Medicare Administrative Claims data for the entire calendar year 2019. Thus, no data submission is required.
+</p>
             <div className="form-row">
-                     <div className="form-group col-md-2 offset-2">
-                       <h4 className="title">Measure</h4>
-                     </div>
-                     <div className="form-group col-md-6">
+                     <div className="form-group col-9 offset-1">
+                     <span className="title-small">Search and Select Measure</span>
                      <Dropdown
                    className={"blackBorder"}
                        options={this.state.measureOptions}
@@ -108,14 +108,13 @@ export default class Cost extends Component {
                        onChange={this.handleMeasureChange}
 />      
                      </div>
-                     <div className="form-group col-md-2">
-                     <span><button class="ui circular icon button"  onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
-
+                     <div className="form-group col-2">
+                     <span><button style={{marginTop:"22px"}} class="ui circular icon button"  onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
                      </div>
                    </div>    
                    
                <div className="form-row">
-               <table className="table">
+               <table className="table col-10 offset-1">
                  <thead>
                    <tr>
                      <th>Measure Name</th>
