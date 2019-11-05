@@ -14,7 +14,7 @@ export default class Cost extends Component {
         measure:props.getStore().costMeasures.measure,
         measureList: props.getStore().costMeasures.measureList,
         costMeasures: props.getStore().costMeasures,
-        measureOptions: props.getStore().improvementActivity.measureOptions,
+        measureOptions: props.getStore().costMeasures.measureOptions,
         measureObj:{}
 
 
