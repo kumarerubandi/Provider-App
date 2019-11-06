@@ -2,6 +2,10 @@
 
 import React, { Component } from 'react';
 import {Dropdown} from 'semantic-ui-react';
+import { createToken } from '../components/Authentication';
+import Client from 'fhir-kit-client';
+
+
 
 
 export default class FinalPage extends Component {
@@ -16,11 +20,41 @@ export default class FinalPage extends Component {
         improvementMeasureList: props.getStore().improvementActivity.measureList,
 
     };
+    this.calculateMeasure = this.calculateMeasure.bind(this);
   }
 
   componentDidMount() {}
 
   componentWillUnmount() {}
+
+  calculateMeasure = async () =>{
+    console.log(this.props.getStore())
+    let json={}
+    json.qualityImprovement= this.props.getStore().qualityImprovement
+    json.promotingInteroperability = this.props.getStore().promotingInteroperability
+    json.improvementActivity = this.props.getStore().improvementActivity
+    json.costMeasures = this.props.getStore().costMeasures
+    json.resourceType ='Measure'
+    let token = await createToken('client_credentials', 'payer', 'john', 'john123');
+    const fhirClient = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/$calculate-score" });
+    fhirClient.bearerToken = token;
+    fhirClient.create({
+        resourceType: "Measure",
+        body: json,
+        headers: {
+          "Content-Type": "application/fhir+json",
+        }
+      }).then((result) => {
+        console.log("message def result", result);
+    
+        // return reject(link);
+      }).catch((err) => {
+        console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
+        // link.error = true;
+        // return reject(link);
+      });
+
+  }
 
   render() {
     return (
@@ -162,7 +196,7 @@ export default class FinalPage extends Component {
             }
         </div>
         <div class="footer-buttons">
-                <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button">Calculate MIPS score</button>
+                <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.calculateMeasure()}>Calculate MIPS score</button>
             </div>
     </div>
     )
