@@ -44,7 +44,11 @@ h6 {
   margin: 0 0 20px 0;
   padding: 0;
 }
-
+.title-small{
+    color: gray;
+    font-size: 16px;
+    /* padding-top: 10px; */
+}
 .form-group .title{
     color: dimgray;
     font-size: 18px;

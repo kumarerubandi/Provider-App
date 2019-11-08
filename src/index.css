@@ -36,7 +36,7 @@ body {
     color: white;
     font-family: sans-serif;
     line-height: 10px;
-    background: #3FB1CF;
+    background: #cacbcd;
 }
 .data-label{
   color: #8a6d3b;
@@ -800,6 +800,8 @@ ol.progtrckr li {
   text-align: center;
   line-height: 4.5rem;
   cursor: pointer;
+  width:19%;
+  margin: 5px;
 }
 
 ol.progtrckr li span {

@@ -13,6 +13,8 @@ import QualityImprovement from "../components/QualityImprovement"
 import PromotingInteroperability from "../components/PromotingInteroperability"
 import ImprovementActivities from "../components/ImprovementActivities"
 import Cost from "../components/CostMeasures"
+import FinalPage from "../components/FinalPage"
+import InitialPage from "../components/InitialPage"
 
 
 
@@ -46,6 +48,10 @@ class Mips extends Component {
 
         };
         this.store = {
+          initialPage:{
+            reporting:'',
+            practice:''
+          },
           qualityImprovement:{
             collectionType:'all',
             measureType:'all',
@@ -93,11 +99,13 @@ class Mips extends Component {
     render() {
       const steps =
           [
-            {name: 'Quality Improvement', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            {name: 'PI', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'IA', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'Cost', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            {name: 'Final', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 1', component: <InitialPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 2', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 3', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Step 4', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Step 5', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            // {name: 'Step 6', component: <FinalPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Final', component: <FinalPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
           ]
         return (
             <React.Fragment>
