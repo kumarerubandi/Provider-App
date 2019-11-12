@@ -331,7 +331,7 @@ class DisplayBox extends Component {
 
 
             const builtCard = (
-              <section id="call-to-action" className="wow fadeIn" key={cardInd}>
+              <section id="call-to-action" className="call-to-action wow fadeIn" key={cardInd}>
                 <div className="container text-center">
                   {summarySection}
                   {sourceSection}

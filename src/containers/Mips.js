@@ -104,7 +104,6 @@ class Mips extends Component {
             {name: 'Step 3', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
             {name: 'Step 4', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
             {name: 'Step 5', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            // {name: 'Step 6', component: <FinalPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
             {name: 'Final', component: <FinalPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
           ]
         return (
