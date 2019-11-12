@@ -6,6 +6,7 @@ import { createToken } from '../components/Authentication';
 import Client from 'fhir-kit-client';
 import Inspector from 'react-json-inspector';
 import { element } from 'prop-types';
+import RecursiveProperty from './RecursiveProperty.tsx';
 
 
 export default class FinalPage extends Component {
@@ -2512,7 +2513,8 @@ export default class FinalPage extends Component {
           <Inspector data={element.resource} />
         </div>
       })} */}
-      <Inspector data={finaldata} search={false} isExpanded={(keypath,query)=>{return("",false)}}/>
+      <RecursiveProperty property={finaldata} propertyName="Data List" excludeBottomBorder={false} rootProperty={false}/>
+      {/* <Inspector data={finaldata} search={false} label={'Resources'} isExpanded={(keypath,query)=>{return("",false)}}/> */}
     </div>)
   }
   render() {
@@ -2553,7 +2555,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.promotingMeasureList.length > 0 &&
-            <div>
+            <div style={{width:"100%",margin:"10px"}}>
               <h4 className="title">Promoting Interoperability</h4>
               <table className="table">
                 <thead>
@@ -2585,7 +2587,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.improvementMeasureList.length > 0 &&
-            <div>
+            <div style={{width:"100%",margin:"10px"}}>
               <h4 className="title">Improvement Activity</h4>
               <table className="table">
                 <thead>
@@ -2617,7 +2619,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.costMeasureList.length > 0 &&
-            <div>
+            <div style={{width:"100%",margin:"10px"}}>
               <h4 className="title">Cost Measure</h4>
               <table className="table">
                 <thead>
