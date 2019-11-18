@@ -1118,9 +1118,7 @@ class ProviderRequest extends Component {
                       />
                     </div>
                   </button>
-                  <button type="button" onClick={this.keyCloakTest}>Test Keyclaok
-                    
-                  </button>
+                  
                   
                 </div>
                 {this.state.loadingSteps &&
