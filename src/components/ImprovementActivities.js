@@ -49,10 +49,10 @@ export default class ImprovementActivities extends Component {
       subCategoryName: props.getStore().improvementActivity.subCategoryName,
       activityWeight: props.getStore().improvementActivity.activityWeight,
       filteredMeasures: [],
-      hpsa: false,
-      tin: false,
-      practice: false,
-      npf: false
+      hpsa: props.getStore().improvementActivity.hpsa,
+      tin: props.getStore().improvementActivity.tin,
+      practice: props.getStore().improvementActivity.practice,
+      npf: props.getStore().improvementActivity.npf
     };
     this.handleActivityWeightChange = this.handleActivityWeightChange.bind(this);
     this.handleSubcategoryNameChange = this.handleSubcategoryNameChange.bind(this);
@@ -67,7 +67,7 @@ export default class ImprovementActivities extends Component {
   componentDidMount() {
     var measureOptions = []
     for (var i = 0; i < improvementMeasures.length; i++) {
-      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"] }, true)
+      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"], activityWeight: improvementMeasures[i]["ACTIVITY WEIGHTING"] }, true)
     }
     this.setState({ measureOptions: measureOptions })
   }
@@ -76,15 +76,39 @@ export default class ImprovementActivities extends Component {
 
   handleHpsa(hpsa) {
     this.setState({ hpsa });
+    let improvementActivity = this.state.improvementActivity
+    improvementActivity.hpsa = hpsa;
+    this.setState({ improvementActivity: improvementActivity })
+    this.props.updateStore({
+      improvementActivity: improvementActivity
+    });
   }
   handleTin(tin) {
     this.setState({ tin });
+    let improvementActivity = this.state.improvementActivity
+    improvementActivity.tin = tin;
+    this.setState({ improvementActivity: improvementActivity })
+    this.props.updateStore({
+      improvementActivity: improvementActivity
+    });
   }
   handlePractice(practice) {
     this.setState({ practice });
+    let improvementActivity = this.state.improvementActivity
+    improvementActivity.practice = practice;
+    this.setState({ improvementActivity: improvementActivity })
+    this.props.updateStore({
+      improvementActivity: improvementActivity
+    });
   }
   handleNpf(npf) {
     this.setState({ npf });
+    let improvementActivity = this.state.improvementActivity
+    improvementActivity.npf = npf;
+    this.setState({ improvementActivity: improvementActivity })
+    this.props.updateStore({
+      improvementActivity: improvementActivity
+    });
   }
 
   handleSubcategoryNameChange = (event, data) => {
@@ -174,10 +198,8 @@ export default class ImprovementActivities extends Component {
     improvementActivity.measureOptions = measureOptions
     this.setState({ improvementActivity: improvementActivity })
     this.props.updateStore({
-      improvementActivity: improvementActivity,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      improvementActivity: improvementActivity
     });
-
   }
 
   handleMeasureChange = (event, data) => {
@@ -187,9 +209,7 @@ export default class ImprovementActivities extends Component {
     improvementActivity.measure = data.value
     this.setState({ improvementActivity: improvementActivity })
     this.props.updateStore({
-      improvementActivity: improvementActivity,
-      // measure:data.value,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      improvementActivity: improvementActivity
     });
 
   }
@@ -202,9 +222,7 @@ export default class ImprovementActivities extends Component {
     let improvementActivity = this.state.improvementActivity
     improvementActivity.measureList = measureList
     this.props.updateStore({
-      improvementActivity: improvementActivity,
-      // measureList:measureList,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      improvementActivity: improvementActivity
     });
 
   }
@@ -218,17 +236,16 @@ export default class ImprovementActivities extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight });
         console.log(tempArr, 'tempArrs')
         let improvementActivity = this.state.improvementActivity
         improvementActivity.measureList = tempArr
         this.props.updateStore({
-          improvementActivity: improvementActivity,
-          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+          improvementActivity: improvementActivity
         });
       }
     }
@@ -333,6 +350,7 @@ export default class ImprovementActivities extends Component {
                   <tr>
                     <th>Activity ID </th>
                     <th>Activity Name </th>
+                    <th>Activity Weight </th>
                     <th></th>
                   </tr>
                 </thead>
@@ -345,6 +363,9 @@ export default class ImprovementActivities extends Component {
                         </td>
                         <td>
                           <span>{measure.measureName}</span>
+                        </td>
+                        <td>
+                          <span>{measure.activityWeight}</span>
                         </td>
                         <td>
                           <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>

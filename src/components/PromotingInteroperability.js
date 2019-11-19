@@ -20,8 +20,6 @@ for (var i = 0; i < promotingInteroperabilityMeasures.length; i++) {
   var objectiveKey = promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"].replace(/\s+/g, '_').toLowerCase().replace(/ *\([^)]*\) */g, "").replace(/\s+$/, '');
   push(objectiveOptions, { key: 'all', text: 'All', value: "all" })
   push(objectiveOptions, { key: objectiveKey, text: promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"], value: promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"] })
-
-  console.log('collectiont type', objectiveOptions)
 }
 function push(array, item, key = false) {
   if (!array.find(({ text }) => text === item.text)) {
@@ -52,15 +50,15 @@ export default class PromotingInteroperability extends Component {
 
       scoreWeight: props.getStore().promotingInteroperability.scoreWeight,
       measureOptions: props.getStore().promotingInteroperability.measureOptions,
-      Q1: false,
-      Q2: false,
-      Q3: false,
-      Q4: false,
-      Q5: false,
-      Q6: false,
-      Q7: false,
-      Q8: false,
-      Q9: false
+      Q1: props.getStore().promotingInteroperability.Q1,
+      Q2: props.getStore().promotingInteroperability.Q2,
+      Q3: props.getStore().promotingInteroperability.Q3,
+      Q4: props.getStore().promotingInteroperability.Q4,
+      Q5: props.getStore().promotingInteroperability.Q5,
+      Q6: props.getStore().promotingInteroperability.Q6,
+      Q7: props.getStore().promotingInteroperability.Q7,
+      Q8: props.getStore().promotingInteroperability.Q8,
+      Q9: props.getStore().promotingInteroperability.Q9
     };
     this.handleObjectiveChange = this.handleObjectiveChange.bind(this);
     this.handleScoreWeightChange = this.handleScoreWeightChange.bind(this);
@@ -79,7 +77,7 @@ export default class PromotingInteroperability extends Component {
   componentDidMount() {
     var measureOptions = []
     for (var i = 0; i < promotingInteroperabilityMeasures.length; i++) {
-      push(measureOptions, { key: promotingInteroperabilityMeasures[i]["MEASURE ID"], text: promotingInteroperabilityMeasures[i]["MEASURE NAME"], value: promotingInteroperabilityMeasures[i]["MEASURE ID"] }, true)
+      push(measureOptions, { key: promotingInteroperabilityMeasures[i]["MEASURE ID"], text: promotingInteroperabilityMeasures[i]["MEASURE NAME"], value: promotingInteroperabilityMeasures[i]["MEASURE ID"], objectivename: promotingInteroperabilityMeasures[i]["OBJECTIVE NAME"], measureweight: promotingInteroperabilityMeasures[i]["PERFORMANCE SCORE WEIGHT"] }, true)
     }
     this.setState({ measureOptions: measureOptions })
   }
@@ -88,30 +86,84 @@ export default class PromotingInteroperability extends Component {
 
   handleQ1(Q1) {
     this.setState({ Q1 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q1 = Q1;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ2(Q2) {
     this.setState({ Q2 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q2 = Q2;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ3(Q3) {
     this.setState({ Q3 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q3 = Q3;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ4(Q4) {
     this.setState({ Q4 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q4 = Q4;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ5(Q5) {
     this.setState({ Q5 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q5 = Q5;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ6(Q6) {
     this.setState({ Q6 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q6 = Q6;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ7(Q7) {
     this.setState({ Q7 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q7 = Q7;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ8(Q8) {
     this.setState({ Q8 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q8 = Q8;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
   handleQ9(Q9) {
     this.setState({ Q9 });
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.Q9 = Q9;
+    this.setState({ promotingInteroperability: promotingInteroperability })
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
+    });
   }
 
   handleObjectiveChange = (event, data) => {
@@ -246,11 +298,11 @@ export default class PromotingInteroperability extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
@@ -406,7 +458,7 @@ export default class PromotingInteroperability extends Component {
                 />
               </div>
               <div className="form-group col-md-2">
-                <span><button style={{ marginTop: "22px" }} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+                <span><button style={{ marginTop: "22px" }} className="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" className="add icon"></i></button></span>
               </div>
             </div>
 
@@ -414,8 +466,10 @@ export default class PromotingInteroperability extends Component {
               <table className="table col-10 offset-1">
                 <thead>
                   <tr>
+                  <th>Measure ID</th>
                     <th>Measure Name</th>
-                    <th>Measure ID</th>
+                    <th>Objective</th>
+                    <th>Weight</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -424,10 +478,16 @@ export default class PromotingInteroperability extends Component {
                     return (
                       <tr key={i}>
                         <td>
+                          <span>{measure.measureId}</span>
+                        </td>
+                        <td>
                           <span>{measure.measureName}</span>
                         </td>
                         <td>
-                          <span>{measure.measureId}</span>
+                          <span>{measure.objectivename}</span>
+                        </td>
+                        <td>
+                          <span>{measure.measureweight}</span>
                         </td>
                         <td>
                           <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>

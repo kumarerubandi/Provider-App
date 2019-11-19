@@ -182,6 +182,7 @@ class ProviderRequest extends Component {
   }
   componentDidMount() {
     if (!sessionStorage.getItem('isLoggedIn')) {
+      sessionStorage.setItem('redirectTo', "/provider_request");
       this.props.history.push("/login");
     }
     let reqType = this.getUrlParameter("req_type");
@@ -261,24 +262,24 @@ class ProviderRequest extends Component {
     this.setState({ [elementName]: text });
     this.setState({ validateIcdCode: false })
   }
-  async getHookFromCategory(){
+  async getHookFromCategory() {
     let category_name = this.state.category_name;
-      let hook = this.state.hook;
-      if (category_name === "Healthcare") {
-        hook = "home-health-service";
-      } else if (category_name === "Ambulate or other medical transport services") {
-        hook = "ambulatory-transport";
-      } else if (category_name === "Durable Medical Equipment") {
-        hook = "home-oxygen-therapy";
-      }
-      this.setState({ hook: hook });
-      console.log("hook ----", this.state.hook);
-      return hook;
+    let hook = this.state.hook;
+    if (category_name === "Healthcare") {
+      hook = "home-health-service";
+    } else if (category_name === "Ambulate or other medical transport services") {
+      hook = "ambulatory-transport";
+    } else if (category_name === "Durable Medical Equipment") {
+      hook = "home-oxygen-therapy";
+    }
+    this.setState({ hook: hook });
+    console.log("hook ----", this.state.hook);
+    return hook;
   }
   getIcdDescription(code) {
     this.getHookFromCategory();
     let hook = this.state.hook //this.getHookFromCategory();
-    console.log("hook in description----", code,this.state.hook,hook);
+    console.log("hook in description----", code, this.state.hook, hook);
     // let hook = this.state.hook;
     if (hook === "home-oxygen-therapy") {
       console.log("ij home oxygen---", homeOxygen);
@@ -595,7 +596,7 @@ class ProviderRequest extends Component {
     this.setState({ requirementSteps: steps, loadCards: false });
   }
 
-  keyCloakTest(){
+  keyCloakTest() {
     let settings = {
       baseUrl: 'https://auth.mettles.com:8443/auth',
       username: 'admin',
@@ -604,29 +605,29 @@ class ProviderRequest extends Component {
       client_id: 'admin-cli'
     };
 
-
-
-     adminClient(settings).then((client) => {
-        console.log('client', client);
-        client.realms.find()
-          .then((realms) => {
+    adminClient(settings).then((client) => {
+      console.log('client', client);
+      client.realms.find()
+        .then((realms) => {
           console.log('realms', realms);
-          });
-         client.users.create("ProviderCredentials",{ username: "apiUser2","credentials": [
-                                                                                 {
-                                                                                     "type": "password",
-                                                                                     "value": "apiUser2",
-                                                                                     "temporary": false
-                                                                                 }
-                                                                             ], enabled: true})
-          .then((msg) => {
-          console.log('create msg', msg);
-          });
-        client.users.find("ProviderCredentials")
-          .then((users) => {
-          console.log('users', users);
-          });
+        });
+      client.users.create("ProviderCredentials", {
+        username: "apiUser2", "credentials": [
+          {
+            "type": "password",
+            "value": "apiUser2",
+            "temporary": false
+          }
+        ], enabled: true
       })
+        .then((msg) => {
+          console.log('create msg', msg);
+        });
+      client.users.find("ProviderCredentials")
+        .then((users) => {
+          console.log('users', users);
+        });
+    })
       .catch((err) => {
         console.log('Error', err);
       });
@@ -679,7 +680,7 @@ class ProviderRequest extends Component {
           headers: myHeaders,
           body: JSON.stringify(patientResource)
         })
-       
+
         // this.setState({ response: res_json }); console.log("fhir-----------", patientResponse);
         const patientResoponseJson = await patientResponse.json();
         // patientId=patientResoponseJson.id
@@ -695,7 +696,7 @@ class ProviderRequest extends Component {
       console.log("fhir-----------", fhirResponse);
       const res_json = await fhirResponse.json();
       this.setState({ response: res_json });
-      console.log("------response json",res_json);
+      console.log("------response json", res_json);
 
       if (fhirResponse && fhirResponse.status) {
         this.consoleLog("Server returned status "
@@ -1118,8 +1119,8 @@ class ProviderRequest extends Component {
                       />
                     </div>
                   </button>
-                  
-                  
+
+
                 </div>
                 {this.state.loadingSteps &&
                   <div className="right-form" style={{ paddingLeft: "2%", listStyle: "none", paddingTop: "3%" }} >
@@ -1320,7 +1321,7 @@ class ProviderRequest extends Component {
     let selectedCodes = this.state.icdCode
     for (var i = 0; i < selectedCodes.length; i++) {
       let IcdDescription = this.getIcdDescription(selectedCodes[i]);
-      console.log("-------",i,IcdDescription)
+      console.log("-------", i, IcdDescription)
       let obj = {
         "code": {
           "coding": [

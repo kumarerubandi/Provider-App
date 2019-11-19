@@ -160,7 +160,7 @@ class LoginPage extends React.Component {
         }
       }
       sessionStorage.setItem('isLoggedIn', true);
-      this.props.history.push('/provider_request');
+      this.props.history.push(sessionStorage.getItem("redirectTo"));
     }
     this.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
   }

@@ -45,12 +45,10 @@ for (var i = 0; i < qualityMeasures.length; i++) {
     }
   }
   else {
-    // var collectionTypeKey = qualityMeasures[i]["SPECIALTY MEASURE SET"].replace(/\s+/g, '_').toLowerCase().replace(/ *\([^)]*\) */g, "");
     push(collectionTypeOptions, { key: 'all', text: 'All', value: "all" })
     push(collectionTypeOptions, { key: collectionTypeKey, text: qualityMeasures[i]["DATA SUBMISSION METHOD"], value: qualityMeasures[i]["DATA SUBMISSION METHOD"] })
 
   }
-  console.log('collectiont type', collectionTypeOptions)
 }
 
 
@@ -94,9 +92,9 @@ export default class QualityImprovement extends Component {
       specialtyMeasureSetOptions: specificMeasureTypeOptions,
       filteredMeasures: [],
       measureObj: {},
-      reporting: "",
-      practice: "",
-      submissionType: ""
+      reporting: props.getStore().qualityImprovement.reporting,
+      practice: props.getStore().qualityImprovement.practice,
+      submissionType: props.getStore().qualityImprovement.submissionType
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
@@ -112,7 +110,9 @@ export default class QualityImprovement extends Component {
       push(measureOptions, {
         key: qualityMeasures[i]["QUALITY ID"],
         text: qualityMeasures[i]["MEASURE NAME"],
-        value: qualityMeasures[i]["QUALITY ID"]
+        value: qualityMeasures[i]["QUALITY ID"],
+        highpriority: qualityMeasures[i]["HIGH PRIORITY MEASURE"].toString(),
+        measuretype: qualityMeasures[i]["MEASURE TYPE"]
       }, true)
     }
     this.setState({ measureOptions: measureOptions })
@@ -126,47 +126,43 @@ export default class QualityImprovement extends Component {
     qualityImprovement.reporting = data.value
     this.setState({ qualityImprovement: qualityImprovement })
     this.props.updateStore({
-      qualityImprovement: qualityImprovement,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      qualityImprovement: qualityImprovement
     });
   }
 
   handlePracticeChange = (event, data) => {
     this.setState({ practice: data.value })
     if (data.value === "large") {
-      let submissionTypeOptions =  [
+      let submissionTypeOptions = [
         { key: 'direct', text: "Direct", value: 'direct' },
         { key: 'upload', text: "Log in and Upload", value: 'upload' },
-        { key: 'partb', text: "Medicare Part B claims", value: 'partb' },
         { key: 'cms', text: "CMS Web Interface", value: 'cms' },
       ];
-      this.setState({submissionTypeOptions});
+      this.setState({ submissionTypeOptions });
     } else {
-      let submissionTypeOptions =  [
+      let submissionTypeOptions = [
         { key: 'direct', text: "Direct", value: 'direct' },
         { key: 'upload', text: "Log in and Upload", value: 'upload' },
         { key: 'partb', text: "Medicare Part B claims", value: 'partb' }
       ];
-      this.setState({submissionTypeOptions});
+      this.setState({ submissionTypeOptions });
     }
     let qualityImprovement = this.state.qualityImprovement
     qualityImprovement.practice = data.value
     this.setState({ qualityImprovement: qualityImprovement })
     this.props.updateStore({
-      qualityImprovement: qualityImprovement,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      qualityImprovement: qualityImprovement
     });
   }
 
 
-  handleSuTypeChange = (event, data) => {
+  handleSubTypeChange = (event, data) => {
     this.setState({ submissionType: data.value })
     let qualityImprovement = this.state.qualityImprovement
     qualityImprovement.submissionType = data.value
     this.setState({ qualityImprovement: qualityImprovement })
     this.props.updateStore({
-      qualityImprovement: qualityImprovement,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      qualityImprovement: qualityImprovement
     });
   }
 
@@ -407,9 +403,7 @@ export default class QualityImprovement extends Component {
     let qualityImprovement = this.state.qualityImprovement
     qualityImprovement.measureList = measureList
     this.props.updateStore({
-      qualityImprovement: qualityImprovement,
-      // measureList:measureList,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      qualityImprovement: qualityImprovement
     });
 
   }
@@ -420,20 +414,20 @@ export default class QualityImprovement extends Component {
         let Obj = this.state.measureOptions.find((m) => {
           return m.key === this.state.measure
         })
+        console.log("measure Obj---", Obj);
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype });
         console.log(tempArr, 'tempArrs')
         let qualityImprovement = this.state.qualityImprovement
         qualityImprovement.measureList = tempArr
         this.props.updateStore({
-          qualityImprovement: qualityImprovement,
-          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+          qualityImprovement: qualityImprovement
         });
       }
     }
@@ -481,7 +475,7 @@ export default class QualityImprovement extends Component {
               selection
               fluid
               value={this.state.submissionType}
-              onChange={this.handleSuTypeChange}
+              onChange={this.handleSubTypeChange}
             />
           </div>
         </div>
@@ -545,15 +539,17 @@ export default class QualityImprovement extends Component {
             />
           </div>
           <div className="form-group col-2">
-            <span><button style={{ marginTop: "22px" }} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+            <span><button style={{ marginTop: "22px" }} className="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" className="add icon"></i></button></span>
           </div>
         </div>
         <div className="form-row">
           <table className="table col-10 offset-1">
             <thead>
               <tr>
-                <th>Measure Name</th>
                 <th>Measure ID</th>
+                <th>Measure Name</th>
+                <th>Measure Type</th>
+                <th>High Priority</th>
                 <th></th>
               </tr>
             </thead>
@@ -563,10 +559,19 @@ export default class QualityImprovement extends Component {
                   return (
                     <tr key={i}>
                       <td>
+                        <span>{measure.measureId}</span>
+                      </td>
+                      <td>
                         <span>{measure.measureName}</span>
                       </td>
                       <td>
-                        <span>{measure.measureId}</span>
+                        <span>{measure.measuretype}</span>
+                      </td>
+                      <td>
+                        {measure.highpriority &&
+                          <span>Yes</span>}
+                        {!measure.highpriority &&
+                          <span>No</span>}
                       </td>
                       <td>
                         <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
