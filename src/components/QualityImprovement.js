@@ -66,6 +66,21 @@ export default class QualityImprovement extends Component {
     super(props);
 
     this.state = {
+      reportingOptions: [
+        { key: 'individual', text: "Individual", value: 'individual' },
+        { key: 'group', text: "Group (and virtual group) ", value: 'group' },
+        { key: '', text: "Third Party", value: 'thirdparty' }
+      ],
+      practiceOptions: [
+        { key: 'small', text: "No. of Clinicians <= 15 ", value: 'small' },
+        { key: 'medium', text: "No. of Clinicians > 15 ", value: 'medium' },
+        { key: 'large', text: "No. of Clinicians > 25 ", value: 'large' }
+      ],
+      submissionTypeOptions: [
+        { key: 'direct', text: "Direct", value: 'direct' },
+        { key: 'upload', text: "Log in and Upload", value: 'upload' },
+        { key: 'partb', text: "Medicare Part B claims", value: 'partb' }
+      ],
       collectionType: props.getStore().qualityImprovement.collectionType,
       measure: props.getStore().qualityImprovement.measure,
       measureList: props.getStore().qualityImprovement.measureList,
@@ -78,12 +93,17 @@ export default class QualityImprovement extends Component {
       measureTypeOptions: measureTypeOptions,
       specialtyMeasureSetOptions: specificMeasureTypeOptions,
       filteredMeasures: [],
-      measureObj: {}
+      measureObj: {},
+      reporting: "",
+      practice: "",
+      submissionType: ""
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
     this.handleSpecialtyMeasureChange = this.handleSpecialtyMeasureChange.bind(this);
     this.handleMeasureTypeChange = this.handleMeasureTypeChange.bind(this);
+    this.handleReportingChange = this.handleReportingChange.bind(this);
+    this.handlePracticeChange = this.handlePracticeChange.bind(this);
   }
 
   componentDidMount() {
@@ -96,20 +116,59 @@ export default class QualityImprovement extends Component {
       }, true)
     }
     this.setState({ measureOptions: measureOptions })
-    //   var arr =[]
-    //   for(var i =0;i<this.state.measures.length;i++){
-    //     if(this.state.collectionType ===this.state.measures[i].category){
-    //       arr.push(this.state.measures[i])
-    //     }
-    //   }
-    //   this.setState({measureOptions:arr})
-
   }
 
   componentWillUnmount() { }
 
-  // not required as this component has no forms or user entry
-  // isValidated() {}
+  handleReportingChange = (event, data) => {
+    this.setState({ reporting: data.value })
+    let qualityImprovement = this.state.qualityImprovement
+    qualityImprovement.reporting = data.value
+    this.setState({ qualityImprovement: qualityImprovement })
+    this.props.updateStore({
+      qualityImprovement: qualityImprovement,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    });
+  }
+
+  handlePracticeChange = (event, data) => {
+    this.setState({ practice: data.value })
+    if (data.value === "large") {
+      let submissionTypeOptions =  [
+        { key: 'direct', text: "Direct", value: 'direct' },
+        { key: 'upload', text: "Log in and Upload", value: 'upload' },
+        { key: 'partb', text: "Medicare Part B claims", value: 'partb' },
+        { key: 'cms', text: "CMS Web Interface", value: 'cms' },
+      ];
+      this.setState({submissionTypeOptions});
+    } else {
+      let submissionTypeOptions =  [
+        { key: 'direct', text: "Direct", value: 'direct' },
+        { key: 'upload', text: "Log in and Upload", value: 'upload' },
+        { key: 'partb', text: "Medicare Part B claims", value: 'partb' }
+      ];
+      this.setState({submissionTypeOptions});
+    }
+    let qualityImprovement = this.state.qualityImprovement
+    qualityImprovement.practice = data.value
+    this.setState({ qualityImprovement: qualityImprovement })
+    this.props.updateStore({
+      qualityImprovement: qualityImprovement,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    });
+  }
+
+
+  handleSuTypeChange = (event, data) => {
+    this.setState({ submissionType: data.value })
+    let qualityImprovement = this.state.qualityImprovement
+    qualityImprovement.submissionType = data.value
+    this.setState({ qualityImprovement: qualityImprovement })
+    this.props.updateStore({
+      qualityImprovement: qualityImprovement,
+      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+    });
+  }
 
   handleCollectionTypeChange = (event, data) => {
     this.setState({ collectionType: data.value })
@@ -384,6 +443,49 @@ export default class QualityImprovement extends Component {
       <div>
         <p className="text-center"><b>Quality</b> - worth 45% of the total. Must report on 6 measures worth up to 10 points each and scored against benchmarks.  Bonus points for reporting an additional outcome or high-priority measure and for end-to-end reporting.</p>
         <div className="form-row">
+          <div className="form-group col-3 offset-1">
+            <span className="title-small">Type of Reporting</span>
+            <Dropdown
+              className={"blackBorder"}
+              options={this.state.reportingOptions}
+              placeholder='Type of Reporting'
+              search
+              selection
+              fluid
+              value={this.state.reporting}
+              onChange={this.handleReportingChange}
+            />
+          </div>
+          {this.state.reporting === "group" &&
+            <div className="form-group col-3">
+              <span className="title-small">Type of Practice</span>
+              <Dropdown
+                className={"blackBorder"}
+                options={this.state.practiceOptions}
+                placeholder='Type of Practice'
+                search
+                selection
+                fluid
+                value={this.state.practice}
+                onChange={this.handlePracticeChange}
+              />
+            </div>
+          }
+          <div className="form-group col-4">
+            <span className="title-small">Submission Type</span>
+            <Dropdown
+              className={"blackBorder"}
+              options={this.state.submissionTypeOptions}
+              placeholder='Submission Type'
+              search
+              selection
+              fluid
+              value={this.state.submissionType}
+              onChange={this.handleSuTypeChange}
+            />
+          </div>
+        </div>
+        <div className="form-row">
           {/* <div className="form-group col-2 offset-1">
             <h4 className="title">Filter Measures</h4>
           </div> */}
@@ -443,7 +545,7 @@ export default class QualityImprovement extends Component {
             />
           </div>
           <div className="form-group col-2">
-            <span><button style={{marginTop: "22px"}} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+            <span><button style={{ marginTop: "22px" }} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
           </div>
         </div>
         <div className="form-row">

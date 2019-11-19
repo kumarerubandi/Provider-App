@@ -14,12 +14,12 @@ export default class FinalPage extends Component {
     super(props);
 
     this.state = {
-
       costMeasureList: props.getStore().costMeasures.measureList,
       qualityMeasureList: props.getStore().qualityImprovement.measureList,
       promotingMeasureList: props.getStore().promotingInteroperability.measureList,
       improvementMeasureList: props.getStore().improvementActivity.measureList,
-
+      showScore: false,
+      score: 0
     };
     this.calculateMeasure = this.calculateMeasure.bind(this);
     this.displayPatientwiseInfo = this.displayPatientwiseInfo.bind();
@@ -48,7 +48,10 @@ export default class FinalPage extends Component {
       }
     }).then((result) => {
       console.log("message def result", result);
+      this.setState({ showScore: true });
+      this.setState({ score: result.group[0].measureScore.value });
 
+      window.scrollTop(0);
       // return reject(link);
     }).catch((err) => {
       console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
@@ -2513,17 +2516,25 @@ export default class FinalPage extends Component {
           <Inspector data={element.resource} />
         </div>
       })} */}
-      <RecursiveProperty property={finaldata} propertyName="Data List" excludeBottomBorder={false} rootProperty={false}/>
+      <RecursiveProperty property={finaldata} propertyName="Data List" excludeBottomBorder={false} rootProperty={false} />
       {/* <Inspector data={finaldata} search={false} label={'Resources'} isExpanded={(keypath,query)=>{return("",false)}}/> */}
     </div>)
   }
   render() {
-
     return (
-      <div >
+      <div>
+        {this.state.showScore &&
+          <div>
+            <section id="call-to-action" className="call-to-action wow fadeIn">
+              <div className="container text-center">
+              <h3>Your Calculated Mips Score is {parseFloat((this.state.score).toFixed(4)) }</h3>
+              </div>
+            </section>
+          </div>
+        }
         <div className="form-row">
           {this.state.qualityMeasureList.length > 0 &&
-            <div style={{width:"100%",margin:"10px"}}>
+            <div style={{ width: "100%", margin: "10px" }}>
               <h4 className="title">Quality Improvement</h4>
               <table className="table">
                 <thead>
@@ -2555,7 +2566,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.promotingMeasureList.length > 0 &&
-            <div style={{width:"100%",margin:"10px"}}>
+            <div style={{ width: "100%", margin: "10px" }}>
               <h4 className="title">Promoting Interoperability</h4>
               <table className="table">
                 <thead>
@@ -2587,7 +2598,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.improvementMeasureList.length > 0 &&
-            <div style={{width:"100%",margin:"10px"}}>
+            <div style={{ width: "100%", margin: "10px" }}>
               <h4 className="title">Improvement Activity</h4>
               <table className="table">
                 <thead>
@@ -2619,7 +2630,7 @@ export default class FinalPage extends Component {
         </div>
         <div className="form-row">
           {this.state.costMeasureList.length > 0 &&
-            <div style={{width:"100%",margin:"10px"}}>
+            <div style={{ width: "100%", margin: "10px" }}>
               <h4 className="title">Cost Measure</h4>
               <table className="table">
                 <thead>

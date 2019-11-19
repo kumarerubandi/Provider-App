@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Dropdown } from 'semantic-ui-react';
 import improvementMeasures from '../json/improvementActivitiesMeasures.json';
 import QualityImprovement from './QualityImprovement.js';
+import Switch from "react-switch";
 
 
 var activityWeightOptions = []
@@ -48,12 +49,20 @@ export default class ImprovementActivities extends Component {
       subCategoryName: props.getStore().improvementActivity.subCategoryName,
       activityWeight: props.getStore().improvementActivity.activityWeight,
       filteredMeasures: [],
+      hpsa: false,
+      tin: false,
+      practice: false,
+      npf: false
     };
     this.handleActivityWeightChange = this.handleActivityWeightChange.bind(this);
     this.handleSubcategoryNameChange = this.handleSubcategoryNameChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
-
+    this.handleHpsa = this.handleHpsa.bind(this);
+    this.handleTin = this.handleTin.bind(this);
+    this.handlePractice = this.handlePractice.bind(this);
+    this.handleNpf = this.handleNpf.bind(this);
   }
+
 
   componentDidMount() {
     var measureOptions = []
@@ -65,8 +74,18 @@ export default class ImprovementActivities extends Component {
 
   componentWillUnmount() { }
 
-  // not required as this component has no forms or user entry
-  // isValidated() {}
+  handleHpsa(hpsa) {
+    this.setState({ hpsa });
+  }
+  handleTin(tin) {
+    this.setState({ tin });
+  }
+  handlePractice(practice) {
+    this.setState({ practice });
+  }
+  handleNpf(npf) {
+    this.setState({ npf });
+  }
 
   handleSubcategoryNameChange = (event, data) => {
     this.setState({ subCategoryName: data.value })
@@ -220,85 +239,129 @@ export default class ImprovementActivities extends Component {
       <div>
         <p className="text-center"><b>Improvement Activities</b>– worth 15% of the total MIPS score.  Clinicians or groups must earn a total of 40 points.  High weighted activities are worth 20 points and medium weighted activities are worth 10 points.  Small, rural, or HPSA clinicians or groups earn double points.</p>
         <div className="form-row">
-          <div className="form-group col-5 offset-1">
-            <span className="title-small">Subcategory Name</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.subCategoryOptions}
-              placeholder='Subcategory Name'
-              search
-              selection
-              fluid
-              value={this.state.subCategoryName}
-              onChange={this.handleSubcategoryNameChange}
-            />
-          </div>
-          <div className="form-group col-5">
-            <span className="title-small">Activity Weight</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.activityWeightOptions}
-              placeholder='Activity Weight'
-              search
-              selection
-              fluid
-              value={this.state.activityWeight}
-              onChange={this.handleActivityWeightChange}
-            />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group col-9 offset-1">
-            <span className="title-small">Search and Select Measure</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.measureOptions}
-              placeholder='Measure'
-              search
-              selection
-              fluid
-              value={this.state.measure}
-              onChange={this.handleMeasureChange}
-            />
+          <div className="form-group col-8 offset-1">
+            Your practice is in a rural area or a health professional shortage area (HPSA) ?
           </div>
           <div className="form-group col-2">
-            <span><button style={{marginTop:"22px"}} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+            <label>
+              <Switch onChange={this.handleHpsa} checked={this.state.hpsa} />
+            </label>
           </div>
         </div>
-
         <div className="form-row">
-          <table className="table col-10 offset-1">
-            <thead>
-              <tr>
-                <th>Activity ID </th>
-                <th>Activity Name </th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.measureList.map((measure, i) => {
-                return (
-                  <tr key={i}>
-                    <td>
-                      <span>{measure.measureId}</span>
-                    </td>
-                    <td>
-                      <span>{measure.measureName}</span>
-                    </td>
-                    <td>
-                      <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
-                        x
-                           </button>
-                    </td>
-                  </tr>
-                )
-              })
-
-              }
-
-            </tbody>
-          </table>
+          <div className="form-group col-8 offset-1">
+            Yours is a Small Practice (has 15 or fewer eligible clinicians) ?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handlePractice} checked={this.state.practice} />
+            </label>
+          </div>
         </div>
+        <div className="form-row">
+          <div className="form-group col-8 offset-1">
+            You are a non-patient-facing clinician?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleNpf} checked={this.state.npf} />
+            </label>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group col-8 offset-1">
+            Does your 50% of the practice sites within a TIN are certified as Patient Centered Medical Home (PCMH) ?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleTin} checked={this.state.tin} />
+            </label>
+          </div>
+        </div>
+        {!this.state.tin &&
+          <div>
+            <div className="form-row">
+              <div className="form-group col-5 offset-1">
+                <span className="title-small">Subcategory Name</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.subCategoryOptions}
+                  placeholder='Subcategory Name'
+                  search
+                  selection
+                  fluid
+                  value={this.state.subCategoryName}
+                  onChange={this.handleSubcategoryNameChange}
+                />
+              </div>
+              <div className="form-group col-5">
+                <span className="title-small">Activity Weight</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.activityWeightOptions}
+                  placeholder='Activity Weight'
+                  search
+                  selection
+                  fluid
+                  value={this.state.activityWeight}
+                  onChange={this.handleActivityWeightChange}
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-9 offset-1">
+                <span className="title-small">Search and Select Measure</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.measureOptions}
+                  placeholder='Measure'
+                  search
+                  selection
+                  fluid
+                  value={this.state.measure}
+                  onChange={this.handleMeasureChange}
+                />
+              </div>
+              <div className="form-group col-2">
+                <span><button style={{ marginTop: "22px" }} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <table className="table col-10 offset-1">
+                <thead>
+                  <tr>
+                    <th>Activity ID </th>
+                    <th>Activity Name </th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.measureList.map((measure, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>
+                          <span>{measure.measureId}</span>
+                        </td>
+                        <td>
+                          <span>{measure.measureName}</span>
+                        </td>
+                        <td>
+                          <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
+                            x
+                           </button>
+                        </td>
+                      </tr>
+                    )
+                  })
+
+                  }
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
       </div>
     )
   }

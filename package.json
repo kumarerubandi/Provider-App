@@ -54,6 +54,7 @@
     "react-scripts": "^3.1.2",
     "react-simple-file-input": "^2.1.0",
     "react-stepzilla": "^6.0.2",
+    "react-switch": "^5.0.1",
     "react-table": "^6.8.6",
     "read-more-react": "^1.0.6",
     "recursive-iterator": "^3.3.0",

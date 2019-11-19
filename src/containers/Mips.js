@@ -99,11 +99,11 @@ class Mips extends Component {
     render() {
       const steps =
           [
-            {name: 'Step 1', component: <InitialPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
-            {name: 'Step 2', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            // {name: 'Step 1', component: <InitialPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 1', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
+            {name: 'Step 2', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
             {name: 'Step 3', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'Step 4', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}}/>},
-            {name: 'Step 5', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+            {name: 'Step 4', component: <QualityImprovement getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
             {name: 'Final', component: <FinalPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
           ]
         return (
@@ -149,6 +149,7 @@ class Mips extends Component {
                      <div className="container">
                        <div className ="section-header">
                        <h3>MIPS Score</h3>
+                       <p style={{paddingBottom:"0px"}}><b>MIPS Score Calculator</b> - Calculates MIPS Score on a 100 points scale based on the Quality, Promoting Interoperability and Improvement Activities.</p>
                        </div>
                       <div className='step-progress'>
                             <StepZilla steps={steps}

@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Dropdown } from 'semantic-ui-react';
 import Promise from 'promise';
 import promotingInteroperabilityMeasures from '../json/promotingInteroperabilityMeasures.json'
-
+import Switch from "react-switch";
 
 var objectiveOptions = []
 var scoreWeightOptions = []
@@ -52,11 +52,28 @@ export default class PromotingInteroperability extends Component {
 
       scoreWeight: props.getStore().promotingInteroperability.scoreWeight,
       measureOptions: props.getStore().promotingInteroperability.measureOptions,
+      Q1: false,
+      Q2: false,
+      Q3: false,
+      Q4: false,
+      Q5: false,
+      Q6: false,
+      Q7: false,
+      Q8: false,
+      Q9: false
     };
     this.handleObjectiveChange = this.handleObjectiveChange.bind(this);
     this.handleScoreWeightChange = this.handleScoreWeightChange.bind(this);
-
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
+    this.handleQ1 = this.handleQ1.bind(this);
+    this.handleQ2 = this.handleQ2.bind(this);
+    this.handleQ3 = this.handleQ3.bind(this);
+    this.handleQ4 = this.handleQ4.bind(this);
+    this.handleQ5 = this.handleQ5.bind(this);
+    this.handleQ6 = this.handleQ6.bind(this);
+    this.handleQ7 = this.handleQ7.bind(this);
+    this.handleQ8 = this.handleQ8.bind(this);
+    this.handleQ9 = this.handleQ9.bind(this);
   }
 
   componentDidMount() {
@@ -69,9 +86,33 @@ export default class PromotingInteroperability extends Component {
 
   componentWillUnmount() { }
 
-  // not required as this component has no forms or user entry
-  // isValidated() {}
-
+  handleQ1(Q1) {
+    this.setState({ Q1 });
+  }
+  handleQ2(Q2) {
+    this.setState({ Q2 });
+  }
+  handleQ3(Q3) {
+    this.setState({ Q3 });
+  }
+  handleQ4(Q4) {
+    this.setState({ Q4 });
+  }
+  handleQ5(Q5) {
+    this.setState({ Q5 });
+  }
+  handleQ6(Q6) {
+    this.setState({ Q6 });
+  }
+  handleQ7(Q7) {
+    this.setState({ Q7 });
+  }
+  handleQ8(Q8) {
+    this.setState({ Q8 });
+  }
+  handleQ9(Q9) {
+    this.setState({ Q9 });
+  }
 
   handleObjectiveChange = (event, data) => {
     this.setState({ objectiveName: data.value })
@@ -226,85 +267,184 @@ export default class PromotingInteroperability extends Component {
       <div>
         <p className="text-center"><b>Promoting Interoperability</b>- worth 25% of the total.  Base score is worth 50 points, and performance plus bonus score potential points are 155, but with a maximum score of 100 (base+ performance+ bonus)</p>
         <div className="form-row">
-          <div className="form-group col-md-5 offset-1">
-          <span className="title-small">Objective Name</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.objectiveOptions}
-              placeholder='Objective Name'
-              search
-              selection
-              fluid
-              value={this.state.objectiveName}
-              onChange={this.handleObjectiveChange}
-            />
+          <div className="form-group col-8 offset-1">
+            1. Are you Hospital-based MIPS eligible clinicians?
           </div>
-          <div className="form-group col-md-5">
-            <span className="title-small">Score Weight</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.scoreWeightOptions}
-              placeholder='Score Weight'
-              search
-              selection
-              fluid
-              value={this.state.scoreWeight}
-              onChange={this.handleScoreWeightChange}
-            />
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleQ1} checked={this.state.Q1} />
+            </label>
           </div>
         </div>
         <div className="form-row">
-          <div className="form-group col-md-9 offset-1">
-            <span className="title-small">Search and Select Measure</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.measureOptions}
-              placeholder='Measure'
-              search
-              selection
-              fluid
-              value={this.state.measure}
-              onChange={this.handleMeasureChange}
-            />
+          <div className="form-group col-8 offset-1">
+            2. Are you a Non-Patient-Facing clinicians or group with >75% NPF clinicians?
           </div>
-          <div className="form-group col-md-2">
-            <span><button style={{marginTop:"22px"}} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleQ2} checked={this.state.Q2} />
+            </label>
           </div>
         </div>
+        <div className="form-row">
+          <div className="form-group col-8 offset-1">
+            3. Are you a Ambulatory Surgical Center (ASC) based MIPS eligible clinician?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleQ3} checked={this.state.Q3} />
+            </label>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group col-8 offset-1">
+            4. Are you MIPS Eligible PA, NP, CNS, CRNA, PT, OT, Qualified speech-language pathologists, Qualified audiologists, Clinical psychologists, and Registered dietitian or nutrition professional ?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleQ4} checked={this.state.Q4} />
+            </label>
+          </div>
+        </div>
+        {(!this.state.Q1 && !this.state.Q2 && !this.state.Q3 && !this.state.Q4) &&
+          <div>
+            <div className="form-row">
+              <div className="form-group col-8 offset-1">
+                5. Are you MIPS-eligible clinicians in small practices ( less than or equal to 15) ?
+          </div>
+              <div className="form-group col-2">
+                <label>
+                  <Switch onChange={this.handleQ5} checked={this.state.Q5} />
+                </label>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-8 offset-1">
+                6. Are you MIPS-eligible clinicians using decertified EHR technology?
+          </div>
+              <div className="form-group col-2">
+                <label>
+                  <Switch onChange={this.handleQ6} checked={this.state.Q6} />
+                </label>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-8 offset-1">
+                7. Do you Lack control over the availability of CEHRT?
+          </div>
+              <div className="form-group col-2">
+                <label>
+                  <Switch onChange={this.handleQ7} checked={this.state.Q7} />
+                </label>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-8 offset-1">
+                8. Do you have Insufficient Internet connectivity?
+          </div>
+              <div className="form-group col-2">
+                <label>
+                  <Switch onChange={this.handleQ8} checked={this.state.Q8} />
+                </label>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-8 offset-1">
+                9. Are you a victim of Extreme and uncontrollable circumstances (Natural Disasters, Practice Closure, Severe Financial Distress, or Vendor Issues)?
+          </div>
+              <div className="form-group col-2">
+                <label>
+                  <Switch onChange={this.handleQ9} checked={this.state.Q9} />
+                </label>
+              </div>
+            </div>
+          </div>
+        }
 
-        <div className="form-row ">
-          <table className="table col-10 offset-1">
-            <thead>
-              <tr>
-                <th>Measure Name</th>
-                <th>Measure ID</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.measureList.map((measure, i) => {
-                return (
-                  <tr key={i}>
-                    <td>
-                      <span>{measure.measureName}</span>
-                    </td>
-                    <td>
-                      <span>{measure.measureId}</span>
-                    </td>
-                    <td>
-                      <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
-                        x
-                           </button>
-                    </td>
+        {(!this.state.Q1 && !this.state.Q2 && !this.state.Q3 && !this.state.Q4 && !this.state.Q5 && !this.state.Q6 && !this.state.Q7 && !this.state.Q8 && !this.state.Q9) &&
+          <div>
+            <div className="form-row">
+              <div className="form-group col-md-5 offset-1">
+                <span className="title-small">Objective Name</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.objectiveOptions}
+                  placeholder='Objective Name'
+                  search
+                  selection
+                  fluid
+                  value={this.state.objectiveName}
+                  onChange={this.handleObjectiveChange}
+                />
+              </div>
+              <div className="form-group col-md-5">
+                <span className="title-small">Score Weight</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.scoreWeightOptions}
+                  placeholder='Score Weight'
+                  search
+                  selection
+                  fluid
+                  value={this.state.scoreWeight}
+                  onChange={this.handleScoreWeightChange}
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col-md-9 offset-1">
+                <span className="title-small">Search and Select Measure</span>
+                <Dropdown
+                  className={"blackBorder"}
+                  options={this.state.measureOptions}
+                  placeholder='Measure'
+                  search
+                  selection
+                  fluid
+                  value={this.state.measure}
+                  onChange={this.handleMeasureChange}
+                />
+              </div>
+              <div className="form-group col-md-2">
+                <span><button style={{ marginTop: "22px" }} class="ui circular icon button" onClick={() => this.addMeasure()}><i aria-hidden="true" class="add icon"></i></button></span>
+              </div>
+            </div>
+
+            <div className="form-row ">
+              <table className="table col-10 offset-1">
+                <thead>
+                  <tr>
+                    <th>Measure Name</th>
+                    <th>Measure ID</th>
+                    <th></th>
                   </tr>
-                )
-              })
+                </thead>
+                <tbody>
+                  {this.state.measureList.map((measure, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>
+                          <span>{measure.measureName}</span>
+                        </td>
+                        <td>
+                          <span>{measure.measureId}</span>
+                        </td>
+                        <td>
+                          <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
+                            x
+                           </button>
+                        </td>
+                      </tr>
+                    )
+                  })
 
-              }
+                  }
 
-            </tbody>
-          </table>
-        </div>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
       </div>
     )
   }

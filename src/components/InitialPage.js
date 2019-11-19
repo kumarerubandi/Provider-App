@@ -22,7 +22,6 @@ export default class InitialPage extends Component {
       reporting: props.getStore().initialPage.reporting,
       practice: props.getStore().initialPage.practice,
       initialPage: props.getStore().initialPage
-
     };
     this.handleReportingChange = this.handleReportingChange.bind(this);
     this.handlePracticeChange = this.handlePracticeChange.bind(this);

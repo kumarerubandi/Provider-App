@@ -339,7 +339,6 @@ class DisplayBox extends Component {
                   <div className={styles['suggestions-section']}>
                     {suggestionsSection}
                   </div>
-
                   <div className={styles['links-section']}>
                     {linksSection}
                   </div>
