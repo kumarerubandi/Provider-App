@@ -7,6 +7,8 @@ import Client from 'fhir-kit-client';
 import Inspector from 'react-json-inspector';
 import { element } from 'prop-types';
 import RecursiveProperty from './RecursiveProperty.tsx';
+import DisplayPatientData from '../components//DisplayPatientData';
+import DisplayBundle from '../components//DisplayBundle';
 
 
 export default class FinalPage extends Component {
@@ -502,6 +504,103 @@ export default class FinalPage extends Component {
                       "reference": "Organization/organization04"
                     }
                   ]
+                }
+              },
+              {
+                "name": "resource",
+                "resource": {
+                  "resourceType": "Procedure",
+                  "id": "40307",
+                  "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-10-23T07:34:22.577+00:00"
+                  },
+                  "status": "completed",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "https://hcpcs.codes/",
+                        "code": "1.3.6.1.4.1.33895.1.3.0.45",
+                        "display": "Comfort Measures"
+                      }
+                    ],
+                    "text": "Comfort Measures"
+                  },
+                  "subject": {
+                    "reference": "Patient/patient01"
+                  },
+                  "performedPeriod": {
+                    "start": "2019-10-05T09:20:00-04:00",
+                    "end": "2019-10-05T10:30:00-04:00"
+                  },
+                  "performer": [
+                    {
+                      "actor": {
+                        "reference": "Practitioner/practitioner01"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "resource",
+                "resource": {
+                  "resourceType": "Condition",
+                  "id": "40305",
+                  "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-10-23T07:24:25.142+00:00"
+                  },
+                  "clinicalStatus": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                        "code": "active"
+                      }
+                    ]
+                  },
+                  "verificationStatus": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                        "code": "confirmed"
+                      }
+                    ]
+                  },
+                  "category": [
+                    {
+                      "coding": [
+                        {
+                          "system": "http://snomed.info/sct",
+                          "code": "439401001",
+                          "display": "Diagnosis"
+                        }
+                      ]
+                    }
+                  ],
+                  "severity": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "24484000",
+                        "display": "Severe"
+                      }
+                    ]
+                  },
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://snomed.info/sct",
+                        "code": "2.16.840.1.113883.3.117.1.7.1.212",
+                        "display": "Hemorrhagic Stroke"
+                      }
+                    ],
+                    "text": "Hemorrhagic Stroke"
+                  },
+                  "subject": {
+                    "reference": "Patient/patient01"
+                  },
+                  "onsetDateTime": "2019-10-04"
                 }
               },
               {
@@ -2506,19 +2605,17 @@ export default class FinalPage extends Component {
       ]
     }
     var finaldata = []
-    data.entry[0].resource.parameter.forEach(element => {
-      finaldata.push(element.resource);
-    });
-    return (<div>
-      {/* {data.entry[0].resource.parameter.forEach(element => {
-        <div>
-          <h4>{element.resourceType}</h4>
-          <Inspector data={element.resource} />
-        </div>
-      })} */}
-      <RecursiveProperty property={finaldata} propertyName="Data List" excludeBottomBorder={false} rootProperty={false} />
-      {/* <Inspector data={finaldata} search={false} label={'Resources'} isExpanded={(keypath,query)=>{return("",false)}}/> */}
-    </div>)
+    var patient = ''
+    data.entry.map((e, k) => {
+      console.log()
+      finaldata[k] = []
+      e.resource.parameter.forEach(element => {
+        finaldata[k].push(element.resource);
+      })
+    })
+    return (
+      <DisplayBundle finaldata={finaldata} />
+    )
   }
   render() {
     return (
@@ -2527,7 +2624,7 @@ export default class FinalPage extends Component {
           <div>
             <section id="call-to-action" className="call-to-action wow fadeIn">
               <div className="container text-center">
-              <h3>Your Calculated Mips Score is {parseFloat((this.state.score).toFixed(4)) }</h3>
+                <h3>Your Calculated Mips Score is {parseFloat((this.state.score).toFixed(4))}</h3>
               </div>
             </section>
           </div>
