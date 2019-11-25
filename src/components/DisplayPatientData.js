@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import moment from "moment";
 import RecursiveProperty from './RecursiveProperty.tsx';
+import { all } from 'q';
 
 
 export default class DisplayPatientData extends Component {
@@ -12,10 +13,15 @@ export default class DisplayPatientData extends Component {
         let encounterArray = []
         let procedureArray = []
         let conditionArray = []
+        let medicationRequestArray = []
+        let serviceRequestArray = []
+        let observationArray=[]
+        let allergyIntoleranceArray = []
+
         let resourcesObj = {}
 
         this.props.data.forEach(element => {
-            console.log('element', element)
+            // console.log('element', element)
             if (element.resourceType === 'Patient') {
                 patient = element
             }
@@ -34,6 +40,18 @@ export default class DisplayPatientData extends Component {
             else if (element.resourceType === 'Condition') {
                 conditionArray.push(element)
             }
+            else if (element.resourceType === 'AllergyIntolerance') {
+                allergyIntoleranceArray.push(element)
+            }
+            else if (element.resourceType === 'MedicationRequest') {
+                medicationRequestArray.push(element)
+            }
+            else if (element.resourceType === 'ServiceRequest') {
+                serviceRequestArray.push(element)
+            }
+            else if (element.resourceType === 'Observation') {
+                observationArray.push(element)
+            }
             else if (element.resourceType !== 'MeasureReport' && element.resourceType !== 'Task') {
                 resourcesObj[element.resourceType] = []
                 if (resourcesObj.hasOwnProperty(element.resourceType)) {
@@ -51,6 +69,10 @@ export default class DisplayPatientData extends Component {
             procedureArray: procedureArray,
             encounterArray: encounterArray,
             conditionArray: conditionArray,
+            observationArray:observationArray,
+            medicationRequestArray:medicationRequestArray,
+            serviceRequestArray:serviceRequestArray,
+            allergyIntoleranceArray:allergyIntoleranceArray,
             resourcesObj: resourcesObj,
             //   name:'',
             //   gender:'',
@@ -70,7 +92,7 @@ export default class DisplayPatientData extends Component {
 
     }
     componentDidMount() {
-        console.log('police', this.props.data,this.props.id)
+        // console.log('police', this.props.data,this.props.id)
 
         // this.props.data.forEach(element => {
         //     console.log('element',element   )
@@ -114,10 +136,10 @@ export default class DisplayPatientData extends Component {
         var birthDate = new Date(this.state.patient.birthDate);
         var diff = cur - birthDate; // This is the difference in milliseconds
         var age = Math.floor(diff / 31557600000); // Divide by 1000*60*60*24*365.25
-        console.log(age, 'age', this.state.resourcesObj)
-        Object.keys(this.state.resourcesObj).map(key => {
-            console.log(key, this.state.resourcesObj[key], 'tree')
-        })
+        // console.log(age, 'age', this.state.resourcesObj)
+        // Object.keys(this.state.resourcesObj).map(key => {
+        //     console.log(key, this.state.resourcesObj[key], 'tree')
+        // })
         return (
             <div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
