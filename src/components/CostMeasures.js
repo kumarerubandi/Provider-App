@@ -73,11 +73,11 @@ export default class Cost extends Component {
         measureObj[this.state.measure]=Obj.text
         this.setState({measureObj:measureObj})
         this.setState(prevState => ({
-            measureList: [...prevState.measureList, {measureId:this.state.measure,measureName:Obj.text}]
+            measureList: [...prevState.measureList, {measureId:this.state.measure,measureName:Obj.text,loading:true}]
           }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({measureId:this.state.measure,measureName:Obj.text});
+        tempArr.push({measureId:this.state.measure,measureName:Obj.text,loading:true});
         console.log(tempArr,'tempArrs')
         let costMeasures = this.state.costMeasures
         costMeasures.measureList = tempArr

@@ -236,11 +236,11 @@ export default class ImprovementActivities extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false,loading: true }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false,loading: true });
         console.log(tempArr, 'tempArrs')
         let improvementActivity = this.state.improvementActivity
         improvementActivity.measureList = tempArr

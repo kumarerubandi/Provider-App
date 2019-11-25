@@ -53,9 +53,12 @@ export default class DisplayPatientData extends Component {
                 observationArray.push(element)
             }
             else if (element.resourceType !== 'MeasureReport' && element.resourceType !== 'Task') {
-                resourcesObj[element.resourceType] = []
+                // resourcesObj[element.resourceType] = []
                 if (resourcesObj.hasOwnProperty(element.resourceType)) {
                     resourcesObj[element.resourceType].push(element)
+                }
+                else{
+                    resourcesObj[element.resourceType] = [element]
                 }
 
             }
@@ -131,7 +134,7 @@ export default class DisplayPatientData extends Component {
 
     render() {
         let patientName = this.state.patient.name[0].given.join(' ') + " " + this.state.patient.name[0].family
-        let practitionerName = this.state.practitioner.name[0].given.join(' ') + " " + this.state.practitioner.name[0].family
+        // let practitionerName = this.state.practitioner.name[0].given.join(' ') + " " + this.state.practitioner.name[0].family
         var cur = new Date();
         var birthDate = new Date(this.state.patient.birthDate);
         var diff = cur - birthDate; // This is the difference in milliseconds
@@ -146,12 +149,12 @@ export default class DisplayPatientData extends Component {
                     <li class="nav-item">
                         <a class="nav-link active" id={"patient-tab" + this.props.id} data-toggle="tab" href={"#patient" + this.props.id} role="tab" aria-controls={"patient" + this.props.id} aria-selected="true">Patient</a>
                     </li>
-                    <li class="nav-item">
+                    {/* <li class="nav-item">
                         <a class="nav-link" id={"practitioner-tab" + this.props.id} data-toggle="tab" href={"#practitioner" + this.props.id} role="tab" aria-controls={"practitioner" + this.props.id} aria-selected="false">Practitioner</a>
-                    </li>
-                    <li class="nav-item">
+                    </li> */}
+                    {/* <li class="nav-item">
                         <a class="nav-link" id={"organization-tab" + this.props.id} data-toggle="tab" href={"#organization" + this.props.id} role="tab" aria-controls={"organization" + this.props.id} aria-selected="false">Organization</a>
-                    </li>
+                    </li> */}
                     <li class="nav-item">
                         <a class="nav-link" id={"encounter-tab" + this.props.id} data-toggle="tab" href={"#encounter" + this.props.id} role="tab" aria-controls={"encounter" + this.props.id} aria-selected="false">Encounter</a>
                     </li>
@@ -216,7 +219,7 @@ export default class DisplayPatientData extends Component {
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id={"practitioner" + this.props.id} role="tabpanel" aria-labelledby={"practitioner-tab" + this.props.id}>
+                    {/* <div class="tab-pane fade" id={"practitioner" + this.props.id} role="tabpanel" aria-labelledby={"practitioner-tab" + this.props.id}>
                         <div className="form-row">
                             <div class="form-group col-md-6">
                                 <span className="title-small">Name - </span>
@@ -233,8 +236,8 @@ export default class DisplayPatientData extends Component {
                                 <span>{this.state.practitioner.identifier[0].value}</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="tab-pane fade" id={"organization" + this.props.id} role="tabpanel" aria-labelledby={"organization-tab" + this.props.id}>
+                    </div> */}
+                    {/* <div class="tab-pane fade" id={"organization" + this.props.id} role="tabpanel" aria-labelledby={"organization-tab" + this.props.id}>
                         <div className="form-row">
                             <div class="form-group col-md-6">
                                 <span className="title-small">Name - </span>
@@ -264,7 +267,7 @@ export default class DisplayPatientData extends Component {
                             </div>
                         </div>
 
-                    </div>
+                    </div> */}
                     <div class="tab-pane fade" id={"encounter" + this.props.id} role="tabpanel" aria-labelledby={"encounter-tab" + this.props.id}>
                         <table className="table">
                             <thead>

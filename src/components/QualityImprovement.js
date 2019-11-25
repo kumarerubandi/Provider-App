@@ -630,89 +630,6 @@ export default class QualityImprovement extends Component {
 
   reconcile = async (patient, mlibDR) => {
     console.log('in reconcile method')
-    // smart.api.read({type: "Measure", id: orgID})
-
-    // let libDR = {
-    //   "resourceType": "Library",
-    //   "status": "active",
-    //   "type": {
-    //     "coding": [
-    //       {
-    //         "code": "module-definition"
-    //       }
-    //     ]
-    //   },
-    //   "relatedArtifact": [
-    //     {
-    //       "type": "depends-on",
-    //       "resource": {
-    //         "reference": "http://hl7.org/fhir/us/hedis/Library/library-mrp-logic"
-    //       }
-    //     }
-    //   ],
-    //   "dataRequirement": [
-    //     {
-    //       "type": "MeasureReport",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/davinci-deqm/STU3/StructureDefinition/measurereport-deqm"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Patient",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Coverage",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Procedure",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Condition",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Encounter",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Location",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-location"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Task",
-    //       "profile": [
-    //         "http://ncqa.org/fhir/us/hedis/StructureDefinition/hedis-task"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Organization",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/davinci-deqm/STU3/StructureDefinition/organization-deqm"
-    //       ]
-    //     },
-    //     {
-    //       "type": "Practitioner",
-    //       "profile": [
-    //         "http://hl7.org/fhir/us/davinci-deqm/STU3/StructureDefinition/practitioner-deqm"
-    //       ]
-    //     }
-    //   ]
-    // }
     let libDR = mlibDR
     // console.log(patient,'patient organization',smart,'client')
     let orgID = null
@@ -880,19 +797,44 @@ export default class QualityImprovement extends Component {
 
   }
 
-  async getDataByCategory(measureList) {
+  async getDataByCategory(measureList, type) {
     let response = [];
+    let qualityImprovement = this.state.qualityImprovement
+    let promotingInteroperability = this.state.promotingInteroperability
+    let improvementActivity = this.state.improvementActivity
+    let costMeasures = this.state.costMeasures
+    if (type === 'qi') {
+      // let result = response.push(measure)
+      measureList = qualityImprovement.measureList
+    }
+    else if (type === 'pi') {
+      measureList= promotingInteroperability.measureList
+    }
+    else if (type === 'ia') {
+      measureList = improvementActivity.measureList
+    }
     measureList.map((measure, i) => {
       // let promise =   this.getDataRequirementsByIdentifier(measure.measureId);
       this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
         // console.log("result");
         if (result.hasOwnProperty("dataRequirement")) {
-          this.getSummaryBundle(result).then((res)=>{
-            console.log(res,'ppppppppp')
-            measure.data = res
-            measureList.push(measure);
-          });
-         
+          this.getSummaryBundle(result).then((res) => {
+            console.log(res, 'ppppppppp')
+            measure.measureData = res
+            // measureList.push(measure);
+            measure.loading = false
+            if (type === 'qi') {
+              this.props.updateStore({ qualityImprovement: qualityImprovement })
+            }
+            else if (type === 'pi') {
+              this.props.updateStore({ promotingInteroperability: promotingInteroperability })
+            }
+            else if (type === 'ia') {
+              this.props.updateStore({ improvementActivity: improvementActivity })
+            }
+          }); 
+
+
         }
         else {
           measure.data = null;
@@ -903,7 +845,7 @@ export default class QualityImprovement extends Component {
       }).catch((error) => { console.log(error); });
     });
 
-    return Promise.resolve  (response)
+    return Promise.resolve(response)
   }
 
   // async  submitAndSave() {
@@ -972,84 +914,20 @@ export default class QualityImprovement extends Component {
     let costMeasures = this.state.costMeasures
     let qualityMeasureList = [];
     let promotingMeasureList = []
-    // let q=this.getDataByCategory(qualityImprovement.measureList)
-    //   let p = new Promise((resolve, reject) => {
-    //     q.then((data) => {
-    //       // if (err) {
-    //       //   reject(err);
-    //       // }
-    //       resolve(data);
-    //     });
-    //   });
-    //   p.then((content)=>{console.log(content,'whats happening??')
-    //     qualityMeasureList=content
-    // })
-    // let promise = await this.getDataByCategory(qualityImprovement.measureList)
-    // promise.then((result)=>{
-    //   qualityMeasureList = result
-    // })
-    // })
-    // await this.delay()
 
-    // new Promise( function  (qualityMeasureList) {
-    //   qualityMeasureList=    this.getDataByCategory(qualityImprovement.measureList)
-    //   // resolve(); 
-    // })
-    // }).then(function (result) {
-    //   // do something else in B
-    //   return result;
-    // })
     console.log(qualityMeasureList)
 
-    // let qualityMeasureList = 
-    // await this.delay().then(()=>{
-    //   qualityMeasureList =  this.getDataByCategory(qualityImprovement.measureList);
-    //   if (promotingInteroperability.measureList.length < 0) {
-    //     promotingMeasureList =  this.getDataByCategory(promotingInteroperability.measureList);
-    //   }
-    // })
-    // qualityMeasureList = await this.getDataByCategory(qualityImprovement.measureList);
-    // if (promotingInteroperability.measureList.length < 0) {
-    //   promotingMeasureList = await this.getDataByCategory(promotingInteroperability.measureList);
-    // }
-    // qualityMeasureList =  this.getDataByCategory(qualityImprovement.measureList);
-    // let 
-//     useEffect(() => {
-//     const fetchData = async () => {
-//       await this.getDataByCategory(qualityImprovement.measureList).then((result) => {
-//         qualityImprovement.measureList = result
-//         qualityImprovement.loading = false
-//         this.setState({ qualityImprovement: qualityImprovement })
-//         console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
-//         // qualityImprovement.loading = false
-//         this.props.updateStore({
-//           qualityImprovement: qualityImprovement
-//         })
-//     })
-//   }
-//     fetchData();
-// }, []);
-    await this.getDataByCategory(qualityImprovement.measureList).then((result) => {
+    await this.getDataByCategory(qualityImprovement.measureList, 'qi').then((result) => {
       qualityImprovement.measureList = result
       qualityImprovement.loading = false
       this.setState({ qualityImprovement: qualityImprovement })
       console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
-      // qualityImprovement.loading = false
-      this.props.updateStore({
-        qualityImprovement: qualityImprovement
-      })
-      // qualityImprovement.measureList = result
-      // qualityImprovement.loading = false
-      // this.setState({ qualityImprovement: qualityImprovement })
-      // console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
-      // // qualityImprovement.loading = false
       // this.props.updateStore({
       //   qualityImprovement: qualityImprovement
       // })
     })
-    // await this.delay()
-    
-    await this.getDataByCategory(promotingInteroperability.measureList).then((result) => {
+
+    await this.getDataByCategory(promotingInteroperability.measureList, 'pi').then((result) => {
 
       promotingInteroperability.measureList = result;
       promotingInteroperability.loading = false;
@@ -1061,7 +939,7 @@ export default class QualityImprovement extends Component {
       })
 
     })
-    await this.getDataByCategory(improvementActivity.measureList).then((result) => {
+    await this.getDataByCategory(improvementActivity.measureList, 'ia').then((result) => {
       improvementActivity.measureList = result;
       improvementActivity.loading = false;
       this.setState({ improvementActivity: improvementActivity })
@@ -1072,44 +950,7 @@ export default class QualityImprovement extends Component {
       })
 
     })
-    await this.getDataByCategory(costMeasures.measureList).then((result) => {
-      costMeasures.measureList = result;
-      costMeasures.loading = false;
-      this.setState({ costMeasures: costMeasures })
-      // console.log(this.state.costMeasures, 'costMeasures123', result)
-      // costMeasures.loading = false
-      this.props.updateStore({
-        costMeasures: costMeasures
-      })
-
-    })
-    // let improvementMeasureList = await this.getDataByCategory(improvementActivity.measureList);
-    // let costMeasureList = await this.getDataByCategory(costMeasures.measureList);
-
-
-
-    // console.log("doneeeeee----", costMeasureList, improvementMeasureList, promotingMeasureList)
-    // // qualityImprovement.measureList = await Promise.resolve(qualityMeasureList);
-
-
-
-    // promotingInteroperability.measureList = promotingMeasureList;
-    // improvementActivity.measureList = improvementMeasureList;
-    // costMeasures.measureList = costMeasureList
-    // this.setState({
-    //   // qualityImprovement: qualityImprovement,
-    //   promotingInteroperability: promotingInteroperability,
-    //   improvementActivity: improvementActivity,
-    //   costMeasures: costMeasures
-    // })
-
-    // this.props.updateStore({
-    //   // qualityImprovement: qualityImprovement,
-    //   promotingInteroperability: promotingInteroperability,
-    //   improvementActivity: improvementActivity,
-    //   costMeasures: costMeasures,
-    //   savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-    // });
+    
     console.log("--------qualityImprovement", "promotingInteroperability", "improvementActivity", "costMeasures");
 
     console.log(qualityImprovement, promotingInteroperability, improvementActivity, costMeasures);
