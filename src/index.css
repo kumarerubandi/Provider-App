@@ -788,6 +788,15 @@ color: green;
   margin-bottom: 10px;
 }
 
+#myTabContent{
+  color:inherit;
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 15px;
+}
+#myTabContent > div{
+  color:inherit;
+}
 
 /*react-steps*/
 ol.progtrckr {
