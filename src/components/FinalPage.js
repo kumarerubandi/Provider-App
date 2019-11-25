@@ -9,6 +9,7 @@ import { element, object } from 'prop-types';
 import RecursiveProperty from './RecursiveProperty.tsx';
 import DisplayPatientData from '../components//DisplayPatientData';
 import DisplayBundle from '../components//DisplayBundle';
+import { throwStatement } from '@babel/types';
 
 
 export default class FinalPage extends Component {
@@ -91,6 +92,24 @@ export default class FinalPage extends Component {
       console.log(measureObj, QI.measureList);
       measureObj.showData= !measureObj.showData;
       this.setState({ qualityImprovement: QI });
+    }
+    if (category === "PI") {
+      let QI = this.state.promotingInteroperability;
+      let measureObj = QI.measureList.find((m) => {
+        return m.measureId === measureId
+      })
+      console.log(measureObj, QI.measureList);
+      measureObj.showData= !measureObj.showData;
+      this.setState({ promotingInteroperability: QI });
+    }
+    if (category === "IA") {
+      let QI = this.state.improvementActivity;
+      let measureObj = QI.measureList.find((m) => {
+        return m.measureId === measureId
+      })
+      console.log(measureObj, QI.measureList);
+      measureObj.showData= !measureObj.showData;
+      this.setState({ improvementActivity: QI });
     }
 
   }
@@ -2661,6 +2680,20 @@ export default class FinalPage extends Component {
           </div>
         }
         <div className="form-row">
+              <div className="form-group col-md-2">
+                  <span className="title-small">Type of Reporting</span>
+                </div>
+                <div className="form-group col-md-4">
+                  <span>{this.state.qualityImprovement.reporting}</span>
+                </div>
+                <div className="form-group col-md-2">
+                  <span className="title-small">Submission Type</span>
+                </div>
+                <div className="form-group col-md-4">
+                  <span>{this.state.qualityImprovement.submissionType}</span>
+                </div>
+        </div>
+        <div className="form-row">
           {this.state.qualityImprovement.measureList.length > 0 &&
             <div style={{ width: "100%", margin: "10px" }}>
               <h4 className="title">Quality Improvement</h4>
@@ -2668,10 +2701,10 @@ export default class FinalPage extends Component {
                 <div className="form-group col-md-4">
                   <span className="title-small">Measure ID</span>
                 </div>
-                <div className="form-group col-md-4">
+                <div className="form-group col-md-6">
                   <span className="title-small">Measure Name</span>
                 </div>
-                <div className="form-group col-md-4">
+                <div className="form-group col-md-2">
                   <span className="title-small">Measure Data</span>
                 </div>
               </div>
@@ -2681,10 +2714,10 @@ export default class FinalPage extends Component {
                     <div className="form-group col-md-4">
                       <span>{measure.measureId}</span>
                     </div>
-                    <div className="form-group col-md-4">
+                    <div className="form-group col-md-6">
                       <span>{measure.measureName}</span>
                     </div>
-                    <div className="form-group col-md-4">
+                    <div className="form-group col-md-2">
                       <a style={{color: "#18d26e"}} onClick={() => this.showMeasureData(measure.measureId, "QI")}>Show Measure data</a>
                     </div>
                   </div>
@@ -2704,98 +2737,154 @@ export default class FinalPage extends Component {
         <div className="form-row">
           {this.state.promotingInteroperability.measureList.length > 0 &&
             <div style={{ width: "100%", margin: "10px" }}>
-              <h4 className="title">Promoting Interoperability</h4>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Measure ID </th>
-                    <th>Measure Name</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.promotingInteroperability.measureList.map((measure, i) => {
-                    return (
-                      <tr key={i}>
-                        <td>
-                          <span>{measure.measureId}</span>
-                        </td>
-                        <td>
-                          <span>{measure.measureName}</span>
-                        </td>
-                        <td>{this.displayPatientwiseInfo()}</td>
-                      </tr>
-                    )
-                  })
-                  }
-                </tbody>
-              </table>
+            <h4 className="title">Promoting Interoperability</h4>
+            <div className="form-row">
+              <div className="form-group col-md-4">
+                <span className="title-small">Measure ID</span>
+              </div>
+              <div className="form-group col-md-6">
+                <span className="title-small">Measure Name</span>
+              </div>
+              <div className="form-group col-md-2">
+                <span className="title-small">Measure Data</span>
+              </div>
             </div>
+            {this.state.promotingInteroperability.measureList.map((measure, i) => {
+              return (<div key={i}>
+                <div className="form-row">
+                  <div className="form-group col-md-4">
+                    <span>{measure.measureId}</span>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <span>{measure.measureName}</span>
+                  </div>
+                  <div className="form-group col-md-2">
+                    <a style={{color: "#18d26e",cursor: "pointer"}} onClick={() => this.showMeasureData(measure.measureId, "PI")}>Show Measure data</a>
+                  </div>
+                </div>
+                {measure.showData &&
+                <div className="form-row">
+                  <div className="form-group col-12">
+                    {this.displayPatientwiseInfo(measure.data)}
+                  </div>
+                </div>
+                }
+              </div>)
+            })
+            }
+          </div>
           }
         </div>
         <div className="form-row">
           {this.state.improvementActivity.measureList.length > 0 &&
             <div style={{ width: "100%", margin: "10px" }}>
-              <h4 className="title">Improvement Activity</h4>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Measure ID </th>
-                    <th>Measure Name</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.improvementActivity.measureList.map((measure, i) => {
-                    return (
-                      <tr key={i}>
-                        <td>
-                          <span>{measure.measureId}</span>
-                        </td>
-                        <td>
-                          <span>{measure.measureName}</span>
-                        </td>
-                        <td>{this.displayPatientwiseInfo()}</td>
-                      </tr>
-                    )
-                  })
-                  }
-                </tbody>
-              </table>
+            <h4 className="title">Improvement Activity</h4>
+            <div className="form-row">
+              <div className="form-group col-md-4">
+                <span className="title-small">Measure ID</span>
+              </div>
+              <div className="form-group col-md-6">
+                <span className="title-small">Measure Name</span>
+              </div>
+              <div className="form-group col-md-2">
+                <span className="title-small">Measure Data</span>
+              </div>
             </div>
+            {this.state.improvementActivity.measureList.map((measure, i) => {
+              return (<div key={i}>
+                <div className="form-row">
+                  <div className="form-group col-md-4">
+                    <span>{measure.measureId}</span>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <span>{measure.measureName}</span>
+                  </div>
+                  <div className="form-group col-md-2">
+                    <a style={{color: "#18d26e",cursor: "pointer"}} onClick={() => this.showMeasureData(measure.measureId, "IA")}>Show Measure data</a>
+                  </div>
+                </div>
+                {measure.showData &&
+                <div className="form-row">
+                  <div className="form-group col-12">
+                    {this.displayPatientwiseInfo(measure.data)}
+                  </div>
+                </div>
+                }
+              </div>)
+            })
+            }
+          </div>
           }
         </div>
         <div className="form-row">
           {this.state.costMeasures.measureList.length > 0 &&
             <div style={{ width: "100%", margin: "10px" }}>
-              <h4 className="title">Cost Measure</h4>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Measure ID </th>
-                    <th>Measure Name</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.costMeasures.measureList.map((measure, i) => {
-                    return (
-                      <tr key={i}>
-                        <td>
-                          <span>{measure.measureId}</span>
-                        </td>
-                        <td>
-                          <span>{measure.measureName}</span>
-                        </td>
-                        <td>{this.displayPatientwiseInfo()}</td>
-                      </tr>
-                    )
-                  })
-                  }
-
-                </tbody>
-              </table>
+            <h4 className="title">Promoting Interoperability</h4>
+            <div className="form-row">
+              <div className="form-group col-md-4">
+                <span className="title-small">Measure ID</span>
+              </div>
+              <div className="form-group col-md-6">
+                <span className="title-small">Measure Name</span>
+              </div>
+              <div className="form-group col-md-2">
+                <span className="title-small">Measure Data</span>
+              </div>
             </div>
+            {this.state.promotingInteroperability.measureList.map((measure, i) => {
+              return (<div key={i}>
+                <div className="form-row">
+                  <div className="form-group col-md-4">
+                    <span>{measure.measureId}</span>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <span>{measure.measureName}</span>
+                  </div>
+                  <div className="form-group col-md-2">
+                    <a style={{color: "#18d26e",cursor: "pointer"}} onClick={() => this.showMeasureData(measure.measureId, "PI")}>Show Measure data</a>
+                  </div>
+                </div>
+                {measure.showData &&
+                <div className="form-row">
+                  <div className="form-group col-12">
+                    {this.displayPatientwiseInfo(measure.data)}
+                  </div>
+                </div>
+                }
+              </div>)
+            })
+            }
+          </div>
+          }
+        </div>
+        <div className="form-row">
+          {this.state.improvementActivity.measureList.length > 0 &&
+            <div style={{ width: "100%", margin: "10px" }}>
+            <h4 className="title">Cost Measure</h4>
+            <div className="form-row">
+              <div className="form-group col-md-4">
+                <span className="title-small">Measure ID</span>
+              </div>
+              <div className="form-group col-md-8">
+                <span className="title-small">Measure Name</span>
+              </div>
+            </div>
+            {this.state.improvementActivity.measureList.map((measure, i) => {
+              return (<div key={i}>
+                <div className="form-row">
+                  <div className="form-group col-md-4">
+                    <span>{measure.measureId}</span>
+                  </div>
+                  <div className="form-group col-md-8">
+                    <span>{measure.measureName}</span>
+                  </div>
+                  
+                </div>
+                
+              </div>)
+            })
+            }
+          </div>
           }
         </div>
         <div class="footer-buttons">

@@ -298,11 +298,11 @@ export default class PromotingInteroperability extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
