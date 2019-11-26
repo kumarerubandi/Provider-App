@@ -128,22 +128,26 @@ class DisplayBox extends Component {
    * @param {*} card - Card object to process the links for
    */
   modifySmartLaunchUrls(card) {
-      console.log("Props---",this.props);
-      return card.links.map((link) => {
-        let linkCopy = Object.assign({}, link);
-        console.log("LInkkk obj", link)
-        if (link.type === 'smart' && this.props.fhirAccessToken) {
-          this.retrieveLaunchContext(
+    console.log("Props---", this.props);
+    return card.links.map((link) => {
+      let linkCopy = Object.assign({}, link);
+      console.log("LInkkk obj", link)
+      if (link.type === 'smart' && this.props.fhirAccessToken) {
+        // this.retrieveLaunchContext(
+        //   linkCopy, this.props.fhirAccessToken,
+        //   this.props.patientId, this.props.fhirServerUrl,
+        // ).then((result) => {
+        //   linkCopy = result;
+        //   console.log("Link after retrieve method---", linkCopy);
+        //   return linkCopy;
+        // });
+        return this.retrieveLaunchContext(
             linkCopy, this.props.fhirAccessToken,
             this.props.patientId, this.props.fhirServerUrl,
-          ).then((result) => {
-            linkCopy = result;
-            console.log("Link after retrieve method---", linkCopy);
-            return linkCopy;
-          });
-        }
-        return linkCopy;
-      });
+          )
+      }
+      return linkCopy;
+    });
   }
 
   /**
@@ -159,55 +163,67 @@ class DisplayBox extends Component {
 
 
   retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
-    return new Promise((resolve, reject) => {
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${accessToken.access_token}`,
-      };
+    if (link.url.indexOf('?') < 0) {
+      link.url += '?';
+    } else {
+      link.url += '&';
+    }
+    link.url += `iss=` + this.props.config.provider.fhir_url;
+    if(link.hasOwnProperty('appContext')){
+      link.url += `&launch=${link.appContext.launchContext}`;
+      link.url += `&launchContextId=${link.appContext.launchContext}`;
+    }
+    console.log("link----",link);
+    return link;
+    // return new Promise((resolve, reject) => {
+    //   const headers = {
+    //     Accept: 'application/json',
+    //     Authorization: `Bearer ${accessToken.access_token}`,
+    //   };
 
-      const launchParameters = {
-        patient: patientId,
-      };
-      let description;
+    //   const launchParameters = {
+    //     patient: patientId,
+    //   };
+    //   let description;
 
-      if (link.appContext) {
-        console.log("Inside app context if")
-        launchParameters.appContext = link.appContext;
-        description = "template=" + link.appContext.template + "&request=" + JSON.stringify(link.appContext.request) + "&patient=" + patientId
-      }
-      // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
-      let messageJson = this.state.messageJson;
-      messageJson['description'] = encodeURIComponent(description);
-      console.log(this.props.config.provider.fhir_url, 'point')
-      const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
-      fhirClient.create({
-        resourceType: "MessageDefinition",
-        body: messageJson,
-        headers: {
-          "Content-Type": "application/fhir+json",
-          "Authorization": accessToken
-        }
-      }).then((result) => {
-        console.log("message def result", result);
-        if (result && Object.prototype.hasOwnProperty.call(result, 'id')) {
-          if (link.url.indexOf('?') < 0) {
-            link.url += '?';
-          } else {
-            link.url += '&';
-          }
-          link.url += `launch=${result.id}`;
-          link.url += `&iss=` + this.props.config.provider.fhir_url;
-          return resolve(link);
-        }
-        console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
-        link.error = true;
-        return reject(link);
-      }).catch((err) => {
-        console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
-        link.error = true;
-        return reject(link);
-      });
-    });
+    //   if (link.appContext) {
+    //     console.log("Inside app context if")
+    //     launchParameters.appContext = link.appContext;
+    //     description = "template=" + link.appContext.template + "&request=" + JSON.stringify(link.appContext.request) + "&patient=" + patientId
+    //   }
+    //   // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
+    //   let messageJson = this.state.messageJson;
+    //   messageJson['description'] = encodeURIComponent(description);
+    //   console.log(this.props.config.provider.fhir_url, 'point')
+    //   const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
+    //   fhirClient.create({
+    //     resourceType: "MessageDefinition",
+    //     body: messageJson,
+    //     headers: {
+    //       "Content-Type": "application/fhir+json",
+    //       "Authorization": accessToken
+    //     }
+    //   }).then((result) => {
+    //     console.log("message def result", result);
+    //     if (result && Object.prototype.hasOwnProperty.call(result, 'id')) {
+    //       if (link.url.indexOf('?') < 0) {
+    //         link.url += '?';
+    //       } else {
+    //         link.url += '&';
+    //       }
+    //       link.url += `launch=${result.id}`;
+    //       link.url += `&iss=` + this.props.config.provider.fhir_url;
+    //       return resolve(link);
+    //     }
+    //     console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
+    //     link.error = true;
+    //     return reject(link);
+    //   }).catch((err) => {
+    //     console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
+    //     link.error = true;
+    //     return reject(link);
+    //   });
+    // });
   }
 
   /**
@@ -300,18 +316,18 @@ class DisplayBox extends Component {
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>
                   <div className="div-prior-auth">
-                    {link.hasOwnProperty('appContext') &&
+                    {link.hasOwnProperty('appContext') && link.appContext.length > 0 &&
                       <ul className="prior_auth_ul">
                         {
-                          Object.keys(link.appContext.prior_auth).map(function(code,index){
+                          Object.keys(link.appContext.prior_auth).map(function (code, index) {
                             return <li>
-                                {link.appContext.prior_auth[code].value == true &&
-                                  <p>Prior Authorization necessary for {code + " ("+ link.appContext.prior_auth[code].title+")"}</p>
-                                }
-                                {link.appContext.prior_auth[code].value == false &&
-                                  <p>No Prior Authorization is Needed for {code + " ("+ link.appContext.prior_auth[code].title+")"} </p>
-                                }
-                             </li>
+                              {link.appContext.prior_auth[code].value == true &&
+                                <p>Prior Authorization necessary for {code + " (" + link.appContext.prior_auth[code].title + ")"}</p>
+                              }
+                              {link.appContext.prior_auth[code].value == false &&
+                                <p>No Prior Authorization is Needed for {code + " (" + link.appContext.prior_auth[code].title + ")"} </p>
+                              }
+                            </li>
                           })
                         }
                       </ul>

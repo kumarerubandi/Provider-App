@@ -201,8 +201,8 @@ class ProviderRequest extends Component {
       logs: [...prevState.logs, jsonContent]
     }))
   }
-  handleGenderChange = (event) => {
-    this.setState({ gender: event.target.value })
+  handleGenderChange = (event, data) => {
+    this.setState({ gender: data.value })
   }
   handlePatientStateChange = (event, data) => {
     this.setState({ patientState: data.value })
@@ -301,10 +301,10 @@ class ProviderRequest extends Component {
 
   validateForm() {
     let formValidate = true;
-    if (this.state.patientId === '') {
-      formValidate = false;
-      this.setState({ validatePatient: true });
-    }
+    // if (this.state.patientId === '') {
+    //   formValidate = false;
+    //   this.setState({ validatePatient: true });
+    // }
     // if ((this.state.hook === '' || this.state.hook === null) ) {
     //   formValidate = false;
     //   this.setState({ validateIcdCode: true });
@@ -665,29 +665,9 @@ class ProviderRequest extends Component {
     if (this.state.hook === 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
-
-    let dtr_url = this.props.config.dtr.dtr_fhir + "/Patient"
-    // console.log("Fetching response from " + url + ",types.info")
     console.log("json_request", json_request)
-    let patientId;
     try {
 
-      if (this.state.prefetch === false) {
-        let patientResource = this.state.patientResource
-        console.log(patientResource, JSON.stringify(patientResource))
-        const patientResponse = await fetch(dtr_url, {
-          method: "POST",
-          headers: myHeaders,
-          body: JSON.stringify(patientResource)
-        })
-
-        // this.setState({ response: res_json }); console.log("fhir-----------", patientResponse);
-        const patientResoponseJson = await patientResponse.json();
-        // patientId=patientResoponseJson.id
-        // json_request.entry[0].resource.id = patientId
-        // json_request.context.patientId = patientId
-        console.log(patientResoponseJson, 'yes its working')
-      }
       const fhirResponse = await fetch(url, {
         method: "POST",
         headers: myHeaders,
@@ -813,8 +793,10 @@ class ProviderRequest extends Component {
             <div className="form">
               <div className="container">
                 <div className="section-header">
-                  <h3>Prior Authorization</h3>
-                  <p>Submit your request to check for prior authorization.</p>
+                  <h3>Prior Authorization
+                  <div className="sub-heading">Submit your request to check for prior authorization.</div>
+                  </h3>
+                  
                 </div>
                 {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
                   <div>
@@ -1494,7 +1476,6 @@ class ProviderRequest extends Component {
       request.context.patient = patientResource
     }
     else {
-      // var birthDate = new Date(this.state.birthDate); 
       patientResource = {
         resourceType: "Patient",
         id: patientId,
@@ -1536,8 +1517,9 @@ class ProviderRequest extends Component {
           }
         ],
       }
-      this.setState({ patientResource: patientResource })
-
+      this.setState({ patientResource: patientResource });
+      console.log(patientResource, JSON.stringify(patientResource))
+      request.context.patient = patientResource;
     }
     if (this.state.hookName === 'order-review') {
       request.hook = this.state.hook
