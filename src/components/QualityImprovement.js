@@ -633,23 +633,25 @@ export default class QualityImprovement extends Component {
     let libDR = mlibDR
     // console.log(patient,'patient organization',smart,'client')
     let orgID = null
+    let practitionerID = null
 
     if (patient.hasOwnProperty("managingOrganization")) {
       orgID = patient.managingOrganization.reference.split('/')[1];
     }
+    if (patient.hasOwnProperty("generalPractitioner")) {
+      practitionerID = patient.generalPractitioner[0].reference.split('/')[1];
+    }
     var dataToLoad = []
     for (var i = 0; i < libDR.dataRequirement.length; i++) {
       if (libDR.dataRequirement[i].type !== "Patient") {
-        if (libDR.dataRequirement[i].type === 'Practitioner') {
-          // console.log(smart.user,'user')
-          // dataToLoad.push(smart.user.read())
-          dataToLoad.push(smart.read({ resourceType: "Practitioner", id: "practitioner01" }))
-        }
-        else if (libDR.dataRequirement[i].type === 'Organization' && orgID != null) {
-          console.log('inside organization if')
+        if (orgID !== null) {
           dataToLoad.push(smart.read({ resourceType: "Organization", id: orgID }))
         }
-        else if (libDR.dataRequirement[i].type === 'Location' && orgID != null) {
+        if (practitionerID !== null) {
+          dataToLoad.push(smart.read({ resourceType: "Practitioner", id: practitionerID }))
+        }
+
+        if (libDR.dataRequirement[i].type === 'Location' && orgID != null) {
           console.log('inside Lcoation if')
           dataToLoad.push(smart.search({ resourceType: "Location", searchParams: { organization: orgID } }))
         }
@@ -704,8 +706,8 @@ export default class QualityImprovement extends Component {
 
     let location = ''
     let coverage = ''
-    let organization = ''
-    let practitioner = ''
+    let organization = res[0]
+    let practitioner = res[1]
     let condition = ''
     let procedure = []
     let encounter = []
@@ -777,6 +779,8 @@ export default class QualityImprovement extends Component {
     //   }
     // }
     resultArray.push(patient)
+    resultArray.push(organization)
+    resultArray.push(practitioner)
     let payload = ''
     if (count > 0) {
       // payload = await this.generatePayload(patient, practitioner, organization, location, coverage, condition, procedure, encounter);
@@ -802,24 +806,19 @@ export default class QualityImprovement extends Component {
     let qualityImprovement = this.state.qualityImprovement
     let promotingInteroperability = this.state.promotingInteroperability
     let improvementActivity = this.state.improvementActivity
-    let costMeasures = this.state.costMeasures
     if (type === 'qi') {
-      // let result = response.push(measure)
       measureList = qualityImprovement.measureList
     }
     else if (type === 'pi') {
-      measureList= promotingInteroperability.measureList
+      measureList = promotingInteroperability.measureList
     }
     else if (type === 'ia') {
       measureList = improvementActivity.measureList
     }
     measureList.map((measure, i) => {
-      // let promise =   this.getDataRequirementsByIdentifier(measure.measureId);
       this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
-        // console.log("result");
         if (result.hasOwnProperty("dataRequirement")) {
           this.getSummaryBundle(result).then((res) => {
-            console.log(res, 'ppppppppp')
             measure.measureData = res
             // measureList.push(measure);
             measure.loading = false
@@ -832,7 +831,7 @@ export default class QualityImprovement extends Component {
             else if (type === 'ia') {
               this.props.updateStore({ improvementActivity: improvementActivity })
             }
-          }); 
+          });
 
 
         }
@@ -911,29 +910,19 @@ export default class QualityImprovement extends Component {
     let qualityImprovement = this.state.qualityImprovement
     let promotingInteroperability = this.state.promotingInteroperability
     let improvementActivity = this.state.improvementActivity
-    let costMeasures = this.state.costMeasures
-    let qualityMeasureList = [];
-    let promotingMeasureList = []
-
-    console.log(qualityMeasureList)
 
     await this.getDataByCategory(qualityImprovement.measureList, 'qi').then((result) => {
       qualityImprovement.measureList = result
       qualityImprovement.loading = false
       this.setState({ qualityImprovement: qualityImprovement })
+      this.props.updateStore({qualityImprovement:qualityImprovement})
       console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
-      // this.props.updateStore({
-      //   qualityImprovement: qualityImprovement
-      // })
     })
 
     await this.getDataByCategory(promotingInteroperability.measureList, 'pi').then((result) => {
-
       promotingInteroperability.measureList = result;
       promotingInteroperability.loading = false;
       this.setState({ promotingInteroperability: promotingInteroperability })
-      // console.log(this.state.promotingInteroperability, 'promotingInteroperability123', result)
-      // promotingInteroperability.loading = false
       this.props.updateStore({
         promotingInteroperability: promotingInteroperability
       })
@@ -943,17 +932,15 @@ export default class QualityImprovement extends Component {
       improvementActivity.measureList = result;
       improvementActivity.loading = false;
       this.setState({ improvementActivity: improvementActivity })
-      // console.log(this.state.improvementActivity, 'improvementActivity123', result)
-      // improvementActivity.loading = false
       this.props.updateStore({
         improvementActivity: improvementActivity
       })
 
     })
-    
-    console.log("--------qualityImprovement", "promotingInteroperability", "improvementActivity", "costMeasures");
 
-    console.log(qualityImprovement, promotingInteroperability, improvementActivity, costMeasures);
+    console.log("--------qualityImprovement", "promotingInteroperability", "improvementActivity");
+
+    console.log(qualityImprovement, promotingInteroperability, improvementActivity);
     console.log('yooo its wroking')
     this.setState({
       saving: true

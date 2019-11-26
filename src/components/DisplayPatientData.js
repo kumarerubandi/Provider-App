@@ -15,13 +15,13 @@ export default class DisplayPatientData extends Component {
         let conditionArray = []
         let medicationRequestArray = []
         let serviceRequestArray = []
-        let observationArray=[]
+        let observationArray = []
         let allergyIntoleranceArray = []
 
         let resourcesObj = {}
 
         this.props.data.forEach(element => {
-            // console.log('element', element)
+            console.log('element', element)
             if (element.resourceType === 'Patient') {
                 patient = element
             }
@@ -31,33 +31,34 @@ export default class DisplayPatientData extends Component {
             else if (element.resourceType === 'Organization') {
                 organization = element
             }
-            else if (element.resourceType === 'Procedure') {
-                procedureArray.push(element)
-            }
             else if (element.resourceType === 'Encounter') {
+                console.log('are we here?')
                 encounterArray.push(element)
             }
-            else if (element.resourceType === 'Condition') {
-                conditionArray.push(element)
-            }
-            else if (element.resourceType === 'AllergyIntolerance') {
-                allergyIntoleranceArray.push(element)
-            }
-            else if (element.resourceType === 'MedicationRequest') {
-                medicationRequestArray.push(element)
-            }
-            else if (element.resourceType === 'ServiceRequest') {
-                serviceRequestArray.push(element)
-            }
-            else if (element.resourceType === 'Observation') {
-                observationArray.push(element)
-            }
+            // else if (element.resourceType === 'Procedure') {
+            //     procedureArray.push(element)
+            // }
+            // else if (element.resourceType === 'Condition') {
+            //     conditionArray.push(element)
+            // }
+            // else if (element.resourceType === 'AllergyIntolerance') {
+            //     allergyIntoleranceArray.push(element)
+            // }
+            // else if (element.resourceType === 'MedicationRequest') {
+            //     medicationRequestArray.push(element)
+            // }
+            // else if (element.resourceType === 'ServiceRequest') {
+            //     serviceRequestArray.push(element)
+            // }
+            // else if (element.resourceType === 'Observation') {
+            //     observationArray.push(element)
+            // }
             else if (element.resourceType !== 'MeasureReport' && element.resourceType !== 'Task') {
                 // resourcesObj[element.resourceType] = []
                 if (resourcesObj.hasOwnProperty(element.resourceType)) {
                     resourcesObj[element.resourceType].push(element)
                 }
-                else{
+                else {
                     resourcesObj[element.resourceType] = [element]
                 }
 
@@ -69,13 +70,13 @@ export default class DisplayPatientData extends Component {
             patient: patient,
             practitioner: practitioner,
             organization: organization,
-            procedureArray: procedureArray,
+            // procedureArray: procedureArray,
             encounterArray: encounterArray,
-            conditionArray: conditionArray,
-            observationArray:observationArray,
-            medicationRequestArray:medicationRequestArray,
-            serviceRequestArray:serviceRequestArray,
-            allergyIntoleranceArray:allergyIntoleranceArray,
+            // conditionArray: conditionArray,
+            // observationArray:observationArray,
+            // medicationRequestArray:medicationRequestArray,
+            // serviceRequestArray:serviceRequestArray,
+            // allergyIntoleranceArray:allergyIntoleranceArray,
             resourcesObj: resourcesObj,
             //   name:'',
             //   gender:'',
@@ -134,7 +135,7 @@ export default class DisplayPatientData extends Component {
 
     render() {
         let patientName = this.state.patient.name[0].given.join(' ') + " " + this.state.patient.name[0].family
-        // let practitionerName = this.state.practitioner.name[0].given.join(' ') + " " + this.state.practitioner.name[0].family
+        let practitionerName = this.state.practitioner.name[0].given.join(' ') + " " + this.state.practitioner.name[0].family
         var cur = new Date();
         var birthDate = new Date(this.state.patient.birthDate);
         var diff = cur - birthDate; // This is the difference in milliseconds
@@ -149,21 +150,23 @@ export default class DisplayPatientData extends Component {
                     <li class="nav-item">
                         <a class="nav-link active" id={"patient-tab" + this.props.id} data-toggle="tab" href={"#patient" + this.props.id} role="tab" aria-controls={"patient" + this.props.id} aria-selected="true">Patient</a>
                     </li>
-                    {/* <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" id={"practitioner-tab" + this.props.id} data-toggle="tab" href={"#practitioner" + this.props.id} role="tab" aria-controls={"practitioner" + this.props.id} aria-selected="false">Practitioner</a>
-                    </li> */}
-                    {/* <li class="nav-item">
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id={"organization-tab" + this.props.id} data-toggle="tab" href={"#organization" + this.props.id} role="tab" aria-controls={"organization" + this.props.id} aria-selected="false">Organization</a>
-                    </li> */}
+                    </li>
+                    {this.state.encounterArray.length > 0 &&
                     <li class="nav-item">
                         <a class="nav-link" id={"encounter-tab" + this.props.id} data-toggle="tab" href={"#encounter" + this.props.id} role="tab" aria-controls={"encounter" + this.props.id} aria-selected="false">Encounter</a>
                     </li>
-                    <li class="nav-item">
+    }
+                    {/* <li class="nav-item">
                         <a class="nav-link" id={"procedure-tab" + this.props.id} data-toggle="tab" href={"#procedure" + this.props.id} role="tab" aria-controls={"procedure" + this.props.id} aria-selected="false">Procedure</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id={"condition-tab" + this.props.id} data-toggle="tab" href={"#condition" + this.props.id} role="tab" aria-controls={"condition" + this.props.id} aria-selected="false">Condition</a>
-                    </li>
+                    </li>  */}
                     {Object.keys(this.state.resourcesObj).map((key, i) => {
                         return (
                             <li class="nav-item" key={i}>
@@ -219,7 +222,7 @@ export default class DisplayPatientData extends Component {
                             </div>
                         </div>
                     </div>
-                    {/* <div class="tab-pane fade" id={"practitioner" + this.props.id} role="tabpanel" aria-labelledby={"practitioner-tab" + this.props.id}>
+                    <div class="tab-pane fade" id={"practitioner" + this.props.id} role="tabpanel" aria-labelledby={"practitioner-tab" + this.props.id}>
                         <div className="form-row">
                             <div class="form-group col-md-6">
                                 <span className="title-small">Name - </span>
@@ -236,8 +239,8 @@ export default class DisplayPatientData extends Component {
                                 <span>{this.state.practitioner.identifier[0].value}</span>
                             </div>
                         </div>
-                    </div> */}
-                    {/* <div class="tab-pane fade" id={"organization" + this.props.id} role="tabpanel" aria-labelledby={"organization-tab" + this.props.id}>
+                    </div>
+                    <div class="tab-pane fade" id={"organization" + this.props.id} role="tabpanel" aria-labelledby={"organization-tab" + this.props.id}>
                         <div className="form-row">
                             <div class="form-group col-md-6">
                                 <span className="title-small">Name - </span>
@@ -267,46 +270,48 @@ export default class DisplayPatientData extends Component {
                             </div>
                         </div>
 
-                    </div> */}
-                    <div class="tab-pane fade" id={"encounter" + this.props.id} role="tabpanel" aria-labelledby={"encounter-tab" + this.props.id}>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Type </th>
-                                    <th>Status</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.state.encounterArray.map((encounter, i) => {
-                                    return (
-                                        <tr key={i}>
-                                            <td>
-                                                <span>{encounter.type[0].coding[0].display}</span>
-                                            </td>
-                                            <td>
-                                                <span>{encounter.status}</span>
-                                            </td>
-                                            <td>
-                                                <span>{moment(encounter.period.start).format(" YYYY-MM-DD, hh:mm a")}</span>
-                                            </td>
-                                            <td>
-                                                <span>{moment(encounter.period.end).format(" YYYY-MM-DD, hh:mm a")}</span>
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                                }
-                            </tbody>
-                        </table>
                     </div>
-                    <div class="tab-pane fade" id={"procedure" + this.props.id} role="tabpanel" aria-labelledby={"procedure-tab" + this.props.id}>
+                    {this.state.encounterArray.length > 0 &&
+                        <div class="tab-pane fade" id={"encounter" + this.props.id} role="tabpanel" aria-labelledby={"encounter-tab" + this.props.id}>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Type </th>
+                                        <th>Status</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.state.encounterArray.map((encounter, i) => {
+                                        return (
+                                            <tr key={i}>
+                                                <td>
+                                                    <span>{encounter.type[0].coding[0].display}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{encounter.status}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{moment(encounter.period.start).format(" YYYY-MM-DD, hh:mm a")}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{moment(encounter.period.end).format(" YYYY-MM-DD, hh:mm a")}</span>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    {/* <div class="tab-pane fade" id={"procedure" + this.props.id} role="tabpanel" aria-labelledby={"procedure-tab" + this.props.id}>
                         <RecursiveProperty property={this.state.procedureArray} propertyName="Procedure" excludeBottomBorder={false} rootProperty={false} />
                     </div>
                     <div class="tab-pane fade" id={"condition" + this.props.id} role="tabpanel" aria-labelledby={"condition-tab" + this.props.id}>
                         <RecursiveProperty property={this.state.conditionArray} propertyName="Condition" excludeBottomBorder={false} rootProperty={false} />
-                    </div>
+                    </div> */}
                     {Object.keys(this.state.resourcesObj).map(key => {
                         return (
                             <div class="tab-pane fade" id={key.toLowerCase() + this.props.id} role="tabpanel" aria-labelledby={key.toLowerCase() + "-tab" + this.props.id}>
