@@ -179,8 +179,9 @@ class Mips extends Component {
             <div className="form">
               <div className="container">
                 <div className="section-header">
-                  <h3>MIPS Score Calculator</h3>
-                  <p style={{ paddingBottom: "0px" }}>Calculates MIPS Score on a 100 points scale based on the Quality, Promoting Interoperability and Improvement Activities.</p>
+                  <h3>MIPS Score Calculator
+                  <div className="sub-heading">Calculates MIPS Score on a 100 points scale based on the Quality, Promoting Interoperability and Improvement Activities.</div>
+                  </h3>
                 </div>
                 <div className='step-progress'>
                   <StepZilla steps={steps}

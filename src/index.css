@@ -792,10 +792,16 @@ color: green;
   color:inherit;
   border: 1px solid #ccc;
   border-top: none;
-  padding: 15px;
+  padding: 13px;
 }
 #myTabContent > div{
   color:inherit;
+}
+.sub-heading{
+  text-transform: none;
+  font-size: 15px;
+  font-weight: normal;
+  padding-bottom: 0px;
 }
 
 /*react-steps*/
