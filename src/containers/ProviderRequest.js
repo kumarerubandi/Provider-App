@@ -6,6 +6,7 @@ import DropdownFrequency from '../components/DropdownFrequency';
 import DropdownState from '../components/DropdownState';
 import DropdownDiagnosis from '../components/DropdownDiagnosis';
 import DropdownPayer from '../components/DropdownPayer';
+import SelectPayer from '../components/SelectPayer';
 import DropdownMedicationList from '../components/DropdownMedicationList';
 import DropdownUnits from '../components/DropdownUnits';
 import DropdownServiceCode from '../components/DropdownServiceCode';
@@ -72,7 +73,6 @@ class ProviderRequest extends Component {
       medicationStartDate: '',
       medicationEndDate: '',
       hook: null,
-      icdCode: [],
       hookName: 'order-review',
       healthcareCode: null,
       resource_records: {},
@@ -83,7 +83,6 @@ class ProviderRequest extends Component {
       validatePatient: false,
       validateFhirUrl: false,
       validateAccessToken: false,
-      validateIcdCode: false,
       req_active: 'active',
       auth_active: '',
       prefetchData: {},
@@ -91,10 +90,10 @@ class ProviderRequest extends Component {
       frequency: null,
       loadCards: false,
       showMenu: false,
-      service_code: "",
+      selected_codes: [],
       category_name: "",
-      device_code: "",
-      device_text: "",
+      // device_code: "",
+      // device_text: "",
       // quantity:'',
       unit: null,
       birthDate: '',
@@ -258,9 +257,7 @@ class ProviderRequest extends Component {
   }
 
   updateStateElement = (elementName, text) => {
-    // console.log("in update state----", elementName, text);
     this.setState({ [elementName]: text });
-    this.setState({ validateIcdCode: false })
   }
   async getHookFromCategory() {
     let category_name = this.state.category_name;
@@ -301,13 +298,15 @@ class ProviderRequest extends Component {
 
   validateForm() {
     let formValidate = true;
+    if(this.state.firstName === '' || this.state.lastName === ''){
+      formValidate = false;
+    }
     // if (this.state.patientId === '') {
     //   formValidate = false;
     //   this.setState({ validatePatient: true });
     // }
     // if ((this.state.hook === '' || this.state.hook === null) ) {
     //   formValidate = false;
-    //   this.setState({ validateIcdCode: true });
     // }
     return formValidate;
   }
@@ -405,11 +404,10 @@ class ProviderRequest extends Component {
   medicationButton() {
     console.log('Medication')
     this.setState({ hookName: 'order-select' })
-    this.setState({ validateIcdCode: false })
     // this.setState({patientId : ''})
     this.setState({ hook: null })
     // this.setState({quantity : ''})
-    this.setState({ service_code: "" })
+    // this.setState({ service_code: "" })
     // this.setState({quantity : ''})
 
   }
@@ -665,7 +663,7 @@ class ProviderRequest extends Component {
     if (this.state.hook === 'patient-view') {
       url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
     }
-    console.log("json_request", json_request)
+    console.log("json_request", json_request, this.props.config.crd.crd_url)
     try {
 
       const fhirResponse = await fetch(url, {
@@ -796,7 +794,7 @@ class ProviderRequest extends Component {
                   <h3>Prior Authorization
                   <div className="sub-heading">Submit your request to check for prior authorization.</div>
                   </h3>
-                  
+
                 </div>
                 {(this.state.hookName === 'order-review' || this.state.hookName === 'order-select') &&
                   <div>
@@ -823,21 +821,14 @@ class ProviderRequest extends Component {
                     }
                   </div>*/}
 
-                    <div className="form-row">
-                      <div className="form-group col-md-2 offset-2">
-                        <h4 className="title">Payer</h4>
-                      </div>
-                      <div className="form-group col-md-6">
-                        <DropdownPayer
+                    {/* <DropdownPayer
                           elementName='payer'
                           updateCB={this.updateStateElement}
-                        />
-                      </div>
-                    </div>
-
+                        /> */}
+                    <SelectPayer elementName='payer' updateCB={this.updateStateElement} />
                     <div className="form-row">
                       <div className="form-group col-md-2 offset-2">
-                        <h4 className="title">Beneficiary Id*</h4>
+                        <h4 className="title">Beneficiary Id</h4>
                       </div>
                       <div className="form-group col-md-3">
                         <input type="text" name="patient" className="form-control" id="name" placeholder="Beneficiary Id"
@@ -860,7 +851,7 @@ class ProviderRequest extends Component {
                     </div>
                     <div className="form-row">
                       <div className="form-group col-md-2 offset-2">
-                        <h4 className="title">Patient Info</h4>
+                        <h4 className="title">Patient Info*</h4>
                       </div>
                       <div className="form-group col-md-3">
                         <input type="text" name="firstName" className="form-control" id="name" placeholder="First Name"
@@ -931,57 +922,7 @@ class ProviderRequest extends Component {
                       <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                     }
                   </div>}
-                {this.state.hookName === 'order-review' &&
-                  <div>
-                    <DropdownServiceCode elementName="service_code" updateCB={this.updateStateElement} />
-                  </div>}
-                {this.state.auth_active !== 'active' &&
-                  <div>
-                    {this.state.category_name === 'Durable Medical Equipment' &&
-                      <div className="form-row">
-                        <div className="form-group col-md-2 offset-2">
-                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
-                        </div>
-                        <div className="form-group col-md-6">
-                          <DropdownCDSHook
-                            elementName="icdCode"
-                            updateCB={this.updateStateElement}
-                          />
-                        </div>
-                      </div>
-                    }
-                    {this.state.category_name === 'Healthcare' &&
-                      <div className="form-row">
-                        <div className="form-group col-md-2 offset-2">
-                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
-                        </div>
-                        <div className="form-group col-md-6">
-                          <DropdownHealthcareCodes
-                            elementName="icdCode"
-                            updateCB={this.updateStateElement}
-                          />
-                        </div>
-                      </div>
-                    }
-                    {this.state.category_name === 'Ambulate or other medical transport services' &&
-                      <div className="form-row">
-                        <div className="form-group col-md-2 offset-2">
-                          <h4 className="title">ICD 10 / HCPCS Codes*</h4>
-                        </div>
-                        <div className="form-group col-md-6">
-                          <DropdownAmbulanceCodes
-                            elementName="icdCode"
-                            updateCB={this.updateStateElement}
-                          />
-                        </div>
-                      </div>
-                    }
-
-                    {this.state.validateIcdCode === true &&
-                      <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
-                    }
-                  </div>}
-
+                    <DropdownServiceCode elementName="selected_codes"  updateCB={this.updateStateElement} />
                 {this.state.hookName === 'order-select' &&
                   <div>
                     <div className="header">
@@ -1207,7 +1148,7 @@ class ProviderRequest extends Component {
     const max = 1000000000;
     const num = parseInt(min + Math.random() * (max - min));
     // console.log("num----------", num);
-    let req_check = await this.getResources(token, "DeviceRequest", num);
+    let req_check = await this.getResources(token, "ServiceRequest", num);
     // console.log("random------------", req_check);
     if (req_check.hasOwnProperty('total')) {
       if (req_check.total > 0) {
@@ -1277,49 +1218,45 @@ class ProviderRequest extends Component {
         ]
       }
     };
-    let deviceRequest = {
-      "resourceType": "DeviceRequest",
+    let serviceRequest = {
+      "resourceType": "ServiceRequest",
       "identifier": [
         {
           "value": await this.getRequestID(token)
         }
       ],
-      "status": "active",
-      "intent": "instance-order",
-      "priority": "routine",
-      "parameter": [],
+      "status": "completed",
+      "intent": "order",
+      "category": [],
       "subject": {
-        "reference": "Patient?identifier=" + patientId
+        "display": this.state.firstName + " " + this.state.lastName
       },
-      // "encounter": {
-      //   "reference": "Encounter/"+this.state.encounterId
-      // },
       // "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
       // "authoredOn": "2013-05-08T09:33:27+07:00",
       "requester": {
-        "reference": "Practitioner?identifier=" + this.state.practitionerId
+        "display": this.state.practitionerId
       }
     }
-    let selectedCodes = this.state.icdCode
-    for (var i = 0; i < selectedCodes.length; i++) {
-      let IcdDescription = this.getIcdDescription(selectedCodes[i]);
-      console.log("-------", i, IcdDescription)
+    let selected_codes = this.state.selected_codes;
+    console.log("selected codes---",selected_codes)
+    for (var i = 0; i < selected_codes.length; i++) {
+      // let IcdDescription = this.getIcdDescription(selected_codes[i]);
       let obj = {
         "code": {
           "coding": [
             {
               "system": "http://loinc.org",
-              "code": selectedCodes[i],
-              "display": IcdDescription
+              "code": selected_codes[i],
+              "display": ""
             }
           ],
-          "text": IcdDescription
+          "text": ""
         }
       }
-      deviceRequest.parameter.push(obj)
+      serviceRequest.category.push(obj)
     }
 
-    console.log(deviceRequest)
+    console.log(serviceRequest)
     // token = "Bearer " + token;
     // var myHeaders = new Headers({
     //   "Content-Type": "application/json",
@@ -1444,13 +1381,13 @@ class ProviderRequest extends Component {
       }
     }
     // "99183": "Physician attendance and supervision of hyperbaric oxygen therapy, per session",
-    // console.log("------------final device request", deviceRequest)
+    // console.log("------------final device request", serviceRequest)
     console.log(this.state.dtr_fhir, 'wedding')
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
       fhirServer: this.state.dtr_fhir,
       payerName: this.state.payer,
-      service_code: this.state.service_code,
+      // service_code: this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
         "token_type": this.props.config.authorization_service.token_type, // json
@@ -1527,7 +1464,7 @@ class ProviderRequest extends Component {
         resourceType: "Bundle",
         entry: [
           {
-            resource: deviceRequest
+            resource: serviceRequest
           }
         ]
       }

@@ -47,7 +47,9 @@
       },
       "cds_service":{
         "vsac_user":"prathyanusha",
-        "vsac_password":"Anusha56"
+        "vsac_password":"Anusha56",
+        "get_payers":"http://localhost:4200/getPayers",
+        "get_codes":"http://localhost:4200/getCodes"
       },
 
       "operationPayload":{

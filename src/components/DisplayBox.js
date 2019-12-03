@@ -12,6 +12,7 @@ import { createToken } from '../components/Authentication';
 import Client from 'fhir-kit-client';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import { faLaughWink } from '@fortawesome/free-solid-svg-icons';
 
 // const propTypes = {
 /**
@@ -132,7 +133,7 @@ class DisplayBox extends Component {
     return card.links.map((link) => {
       let linkCopy = Object.assign({}, link);
       console.log("LInkkk obj", link)
-      if (link.type === 'smart' && this.props.fhirAccessToken) {
+      if (link.type === 'smart') {
         // this.retrieveLaunchContext(
         //   linkCopy, this.props.fhirAccessToken,
         //   this.props.patientId, this.props.fhirServerUrl,
@@ -141,11 +142,16 @@ class DisplayBox extends Component {
         //   console.log("Link after retrieve method---", linkCopy);
         //   return linkCopy;
         // });
-        return this.retrieveLaunchContext(
-            linkCopy, this.props.fhirAccessToken,
-            this.props.patientId, this.props.fhirServerUrl,
-          )
+        this.retrieveLaunchContext(
+          linkCopy, this.props.fhirAccessToken,
+          this.props.patientId, this.props.fhirServerUrl,
+        ).then((result) => {
+          linkCopy = result;
+          console.log("Link after retrieve method---", linkCopy);
+          return linkCopy;
+        });
       }
+      console.log("final---",linkCopy);
       return linkCopy;
     });
   }
@@ -163,18 +169,21 @@ class DisplayBox extends Component {
 
 
   retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
-    if (link.url.indexOf('?') < 0) {
-      link.url += '?';
-    } else {
-      link.url += '&';
-    }
-    link.url += `iss=` + this.props.config.provider.fhir_url;
-    if(link.hasOwnProperty('appContext')){
-      link.url += `&launch=${link.appContext.launchContext}`;
-      link.url += `&launchContextId=${link.appContext.launchContext}`;
-    }
-    console.log("link----",link);
-    return link;
+    return new Promise((resolve,reject) => {
+      if (link.url.indexOf('?') < 0) {
+        link.url += '?';
+      } else {
+        link.url += '&';
+      }
+      link.url += `iss=` + this.props.config.provider.fhir_url;
+      if (link.hasOwnProperty('appContext')) {
+        link.url += `&launch=${link.appContext.launchContext}`;
+        link.url += `&launchContextId=${link.appContext.launchContext}`;
+      }
+      console.log("link----", link);
+      return resolve(link);
+    })
+
     // return new Promise((resolve, reject) => {
     //   const headers = {
     //     Accept: 'application/json',
@@ -311,8 +320,9 @@ class DisplayBox extends Component {
             // -- Links --
             let linksSection;
             if (card.links) {
+              console.log("Smart launch url --1---", this.modifySmartLaunchUrls(card));
               card.links = this.modifySmartLaunchUrls(card) || card.links;
-
+              console.log("Smart launch url -----", card.links);
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>
                   <div className="div-prior-auth">
@@ -320,12 +330,13 @@ class DisplayBox extends Component {
                       <ul className="prior_auth_ul">
                         {
                           Object.keys(link.appContext.prior_auth).map(function (code, index) {
+                            console.log("in prior auth loop--", code);
                             return <li>
                               {link.appContext.prior_auth[code].value == true &&
-                                <p>Prior Authorization necessary for {code + " (" + link.appContext.prior_auth[code].title + ")"}</p>
+                                <p>Prior Authorization necessary for {code}</p>
                               }
                               {link.appContext.prior_auth[code].value == false &&
-                                <p>No Prior Authorization is Needed for {code + " (" + link.appContext.prior_auth[code].title + ")"} </p>
+                                <p>No Prior Authorization is Needed for {code} </p>
                               }
                             </li>
                           })

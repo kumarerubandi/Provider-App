@@ -61,7 +61,9 @@ class Configuration extends Component {
                 },
                 cds_service: {
                     vsac_user: props.config.cds_service.vsac_user,
-                    vsac_password: props.config.cds_service.vsac_password
+                    vsac_password: props.config.cds_service.vsac_password,
+                    get_payers: props.config.cds_service.get_payers,
+                    get_codes: props.config.cds_service.get_codes
                 },
                 xmlx12_url: props.config.xmlx12_url,
             },
@@ -84,7 +86,7 @@ class Configuration extends Component {
         this.onChangeTokenVerificationUrl = this.onChangeTokenVerificationUrl.bind(this);
         this.onChangeTokenType = this.onChangeTokenType.bind(this);
         this.onSaveConfiguration = this.onSaveConfiguration.bind(this);
-        this.restToDefaults = this.restToDefaults.bind(this);
+        this.resetToDefaults = this.resetToDefaults.bind(this);
         this.goTo = this.goTo.bind(this);
     }
 
@@ -179,7 +181,7 @@ class Configuration extends Component {
         this.props.saveConfiguration(config);
         NotificationManager.success('Your changes have been updated successfully', 'Success');
     }
-    restToDefaults() {
+    resetToDefaults() {
         this.props.saveConfiguration(config_default);
         window.location.reload();
         NotificationManager.success('Your changes have been updated successfully', 'Reset Successfull');
@@ -392,7 +394,7 @@ class Configuration extends Component {
                                             />
                                         </div>
                                     </button>
-                                    <button type="reset" className="btn2" onClick={this.restToDefaults}>Reset to defaults
+                                    <button type="reset" className="btn2" onClick={this.resetToDefaults}>Reset to defaults
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                                             <Loader
                                                 type="Oval"
@@ -503,7 +505,7 @@ class Configuration extends Component {
                             <button className="submit-btn btn btn-class button-ready"
                                 onClick={this.onSaveConfiguration}>Save</button>
                             <button className="btn default-btn"
-                                onClick={this.restToDefaults}>Reset to defaults</button>
+                                onClick={this.resetToDefaults}>Reset to defaults</button>
                         </div>
                     </div>*/}
                     <NotificationContainer />
