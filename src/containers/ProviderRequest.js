@@ -208,8 +208,8 @@ class ProviderRequest extends Component {
   }
   handlePrefetch = async () => {
     console.log(this.state.prefetch, 'here kya')
-
-    //if (this.state.prefetch === false) {
+    this.setState({ prefetch: true });
+    // if (this.state.prefetch === false) {
       this.setState({ prefetchloading: true });
       let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       token = "Bearer " + token;
@@ -233,7 +233,7 @@ class ProviderRequest extends Component {
       );
       console.log(sender, 'sender')
       if (sender.resourceType === 'Patient') {
-        this.setState((prevState) => ({ prefetch: !prevState.prefetch }))
+        // this.setState((prevState) => ({ prefetch: !prevState.prefetch }))
         this.setState({ patientResource: sender })
         this.setState({ firstName: sender.name[0].given })
         this.setState({ lastName: sender.name[0].family })
@@ -251,7 +251,7 @@ class ProviderRequest extends Component {
         this.setState({ firstName: '' })
         this.setState({ lastName: '' })
       }
-    //}
+    // }
 
 
   }
@@ -1402,14 +1402,14 @@ class ProviderRequest extends Component {
         patientId: '',
         coverageId: this.state.coverageId,
         encounterId: this.state.encounterId,
-        patient: ''
+        patient: patientId
       }
     };
     let patientResource;
     if (this.state.prefetch === true) {
 
       patientResource = this.state.patientResource
-      request.context.patientId = patientResource.id
+      request.context.patientId = patientId
       request.context.patient = patientResource
     }
     else {
