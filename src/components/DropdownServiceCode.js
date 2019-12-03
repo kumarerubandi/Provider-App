@@ -120,10 +120,10 @@ class DropdownServiceCode extends Component {
     return (
       <div>
         <div className="form-row">
-          <div className="form-group col-md-2 offset-2">
+          <div className="form-group col-md-3 offset-1">
             <h4 className="title">Service type*</h4>
           </div>
-          <div className="form-group col-md-6">
+          <div className="form-group col-md-8">
             <Dropdown
               className={blackBorder}
               options={this.state.service_category}
@@ -147,10 +147,10 @@ class DropdownServiceCode extends Component {
           </div> */}
         </div>
         <div className="form-row">
-          <div className="form-group col-md-2 offset-2">
+          <div className="form-group col-md-3 offset-1">
             <h4 className="title">ICD 10 / HCPCS Codes*</h4>
           </div>
-          <div className="form-group col-md-6">
+          <div className="form-group col-md-8">
             <Dropdown
               className={blackBorder}
               options={this.state.codes}

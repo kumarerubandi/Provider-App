@@ -827,16 +827,16 @@ class ProviderRequest extends Component {
                         /> */}
                     <SelectPayer elementName='payer' updateCB={this.updateStateElement} />
                     <div className="form-row">
-                      <div className="form-group col-md-2 offset-2">
+                      <div className="form-group col-md-3 offset-1">
                         <h4 className="title">Beneficiary Id</h4>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <input type="text" name="patient" className="form-control" id="name" placeholder="Beneficiary Id"
                           value={this.state.patientId} onChange={this.onPatientChange}
                           data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                         <div className="validation"></div>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <button type="button" onClick={this.handlePrefetch}>Prefetch
                         <div id="fse" className={"spinner " + (this.state.prefetchloading ? "visible" : "invisible")}>
                             <Loader
@@ -850,16 +850,16 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2 offset-2">
+                      <div className="form-group col-md-3 offset-1">
                         <h4 className="title">Patient Info*</h4>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <input type="text" name="firstName" className="form-control" id="name" placeholder="First Name"
                           value={this.state.firstName} onChange={this.onChangeFirstName}
                           data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                         <div className="validation"></div>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <input type="text" name="lastName" className="form-control" id="name" placeholder="Last Name"
                           value={this.state.lastName} onChange={this.onChangeLastName}
                           data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
@@ -867,10 +867,10 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2 offset-2">
+                      <div className="form-group col-md-3 offset-1">
                         <h4 className="title"></h4>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <Dropdown
                           className={"blackBorder"}
                           options={this.state.genderOptions}
@@ -882,7 +882,7 @@ class ProviderRequest extends Component {
                           onChange={this.handleGenderChange}
                         />
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <DateInput
                           name="birthDate"
                           placeholder="Birth Date"
@@ -895,10 +895,10 @@ class ProviderRequest extends Component {
                       </div>
                     </div>
                     <div className="form-row">
-                      <div className="form-group col-md-2 offset-2">
+                      <div className="form-group col-md-3 offset-1">
                         <h4 className="title"></h4>
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <Dropdown
                           className={"blackBorder"}
                           options={this.state.stateOptions}
@@ -910,7 +910,7 @@ class ProviderRequest extends Component {
                           onChange={this.handlePatientStateChange}
                         />
                       </div>
-                      <div className="form-group col-md-3">
+                      <div className="form-group col-md-4">
                         <input type="text" name="patientPostalCoade" className="form-control" id="name" placeholder="Postal Code"
                           value={this.state.patientPostalCode} onChange={this.onPatientPostalChange}
                           data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
@@ -1021,10 +1021,10 @@ class ProviderRequest extends Component {
                   </div>
                 }
                 <div className="form-row">
-                  <div className="form-group col-md-2 offset-2">
+                  <div className="form-group col-md-3 offset-1">
                     <h4 className="title">NPI</h4>
                   </div>
-                  <div className="form-group col-md-6">
+                  <div className="form-group col-md-8">
                     <input type="text" name="practitioner" className="form-control" id="name" placeholder="Practitioner NPI"
                       value={this.state.practitionerId} onChange={this.onPractitionerChange}
                       data-rule="minlen:4" data-msg="Please enter at least 4 chars" />

@@ -108,10 +108,10 @@ export class SelectPayer extends Component {
     }
     return (
       <div className="form-row">
-        <div className="form-group col-md-2 offset-2">
+        <div className="form-group col-md-3 offset-1">
           <h4 className="title">Payer*</h4>
         </div>
-        <div className="form-group col-md-3">
+        <div className="form-group col-md-4">
           <Dropdown
             className={blackBorder}
             options={this.state.payer_type}
@@ -122,7 +122,7 @@ export class SelectPayer extends Component {
             onChange={this.handlePayerTypeChange}
           />
         </div>
-        <div className="form-group col-md-3">
+        <div className="form-group col-md-4">
           <Dropdown
             className={blackBorder}
             options={this.state.payers}
