@@ -674,7 +674,7 @@ class Home extends Component {
 
                     <div className="container">
                         <div className="copyright">
-                            &copy; Copyright <strong>PilotIncubator</strong>. All Rights Reserved
+                            &copy; Copyright <strong>Beryllium</strong>. All Rights Reserved
       </div>
                         <div className="credits">
                             Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
