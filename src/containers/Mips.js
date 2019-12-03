@@ -152,7 +152,7 @@ class Mips extends Component {
             <div className="container">
 
               <div id="logo" className="pull-left">
-                <h1><a href="#intro" className="scrollto">PilotIncubator</a></h1>
+                <h1><a href="#intro" className="scrollto">Beryllium</a></h1>
                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
               </div>
 
