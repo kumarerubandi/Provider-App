@@ -326,7 +326,7 @@ class DisplayBox extends Component {
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>
                   <div className="div-prior-auth">
-                    {link.hasOwnProperty('appContext') && link.appContext.length > 0 &&
+                    {link.hasOwnProperty('appContext') && link.appContext.hasOwnProperty("prior_auth") &&
                       <ul className="prior_auth_ul">
                         {
                           Object.keys(link.appContext.prior_auth).map(function (code, index) {
