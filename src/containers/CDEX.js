@@ -601,12 +601,12 @@ class CDEX extends Component {
         comm_req.status = 'completed'
         console.log(this.state.communicationRequest, 'what value')
         this.setState({ communicationRequest: comm_req })
-        const token = await createToken(this.state.config.provider.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         if (this.props.config.payer.authorized_fhir) {
             headers['Authorization'] = 'Bearer ' + token
         }
         // var communicationUrl = '';
-        var url = this.state.config.provider.fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
+        var url = this.state.config.payer.fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
 
         let Communication = await fetch(url, {
             method: "PUT",

@@ -209,7 +209,7 @@ class ProviderRequest extends Component {
   handlePrefetch = async () => {
     console.log(this.state.prefetch, 'here kya')
 
-    if (this.state.prefetch === false) {
+    //if (this.state.prefetch === false) {
       this.setState({ prefetchloading: true });
       let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       token = "Bearer " + token;
@@ -251,7 +251,7 @@ class ProviderRequest extends Component {
         this.setState({ firstName: '' })
         this.setState({ lastName: '' })
       }
-    }
+    //}
 
 
   }

@@ -60,7 +60,8 @@ export class SelectPayer extends Component {
   }
 
   async getResources() {
-    var url = this.props.config.cds_service.get_payers;
+      //var url = this.props.config.cds_service.get_payers;
+      var url = "http://cdex.mettles.com:4200/getPayers";
     // let token;
     // token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
     let headers = {

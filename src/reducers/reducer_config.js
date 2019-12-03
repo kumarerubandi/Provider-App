@@ -9,6 +9,6 @@ export const Config = function(state = {}, action){
 			return {...state}
 		default:
 			state = config_default;
-			return state
+	    return state;
 		}
 }
