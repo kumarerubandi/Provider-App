@@ -745,8 +745,10 @@ color: green;
   padding-bottom:10px
 }
 .prior_auth_ul{
-  text-align: left;
-  color:#fff;
+
+  text-align: center;
+    color: #fff;
+    list-style: none;
 }
 .noTopPadding{
   padding-top: 0 !important;

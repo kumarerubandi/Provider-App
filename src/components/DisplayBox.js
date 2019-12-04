@@ -180,6 +180,7 @@ class DisplayBox extends Component {
         link.url += `&launch=${link.appContext.launchContext}`;
         link.url += `&launchContextId=${link.appContext.launchContext}`;
       }
+      link.url += `&client_id=` + this.props.config.provider.client_id;
       console.log("link----", link);
       return resolve(link);
     })
@@ -295,7 +296,7 @@ class DisplayBox extends Component {
             const card = JSON.parse(JSON.stringify(c));
 
             // -- Summary --
-            const summarySection = <h3>{card.summary}</h3>;
+            const summarySection = <h3></h3>;
 
             // -- Source --
             const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
@@ -361,7 +362,7 @@ class DisplayBox extends Component {
               <section id="call-to-action" className="call-to-action wow fadeIn" key={cardInd}>
                 <div className="container text-center">
                   {summarySection}
-                  {sourceSection}
+               
                   {detailSection}
                   <div className={styles['suggestions-section']}>
                     {suggestionsSection}
