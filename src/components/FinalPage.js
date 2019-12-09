@@ -59,46 +59,46 @@ export default class FinalPage extends Component {
     let promotingInteroperability = this.props.getStore().promotingInteroperability
     let improvementActivity = this.props.getStore().improvementActivity
     let costMeasures = this.props.getStore().costMeasures
-    // // let token = await createToken(Config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-    // let token = await createToken('client_credentials', 'payer', 'john', 'john123');
-    // token = "Bearer " + token;
-    // let arr=[]
-    // qualityImprovement.measureList.map(async (measure,key)=>{
-    //   // let url = "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data"
-    //   let measureUrl = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure?identifier="+measure.measureId
+    // let token = await createToken(Config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    let token = await createToken('client_credentials', 'payer', 'john', 'john123');
+    token = "Bearer " + token;
+    let arr=[]
+    qualityImprovement.measureList.map(async (measure,key)=>{
+      // let url = "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data"
+      let measureUrl = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure?identifier="+measure.measureId
 
 
-    //   // let fhir_url = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data";
-    //   // var myHeaders = new Headers({
-    //   //   "Content-Type": "application/json",
-    //   //   "authorization": token,
-    //   // });
-    //   // // var url = fhir_url + "/Measure/$data-requirements-by-identfier?identifier=" + identifier + "&periodStart=2019-07-19&periodEnd=2020-10-25";
-    //   // let requirements = await fetch(fhir_url, {
-    //   //   method: "POST",
-    //   //   body: JSON.stringify(measure.measureData),
-    //   //   headers: myHeaders
-    //   // }).then(response => {
-    //   //   console.log("response----------", response);
-    //   //   return response.json();
-    //   // }).then((response) => {
-    //   //   console.log("----------response", response);
-    //   //   this.setState({ prefetchloading: false });
-    //   //   return response;
-    //   // }).catch(reason =>
-    //   //   console.log("No response recieved from the server", reason)
-    //   // );
-    //   // arr.push(requirements)
-    //   var smart = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Mesure/"+measure.measureId+"/$submit-data" });
-    //   var myHeaders = {
-    //     "Content-Type": "application/json",
-    //     "authorization": token,
-    //   }
+      // let fhir_url = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data";
+      // var myHeaders = new Headers({
+      //   "Content-Type": "application/json",
+      //   "authorization": token,
+      // });
+      // // var url = fhir_url + "/Measure/$data-requirements-by-identfier?identifier=" + identifier + "&periodStart=2019-07-19&periodEnd=2020-10-25";
+      // let requirements = await fetch(fhir_url, {
+      //   method: "POST",
+      //   body: JSON.stringify(measure.measureData),
+      //   headers: myHeaders
+      // }).then(response => {
+      //   console.log("response----------", response);
+      //   return response.json();
+      // }).then((response) => {
+      //   console.log("----------response", response);
+      //   this.setState({ prefetchloading: false });
+      //   return response;
+      // }).catch(reason =>
+      //   console.log("No response recieved from the server", reason)
+      // );
+      // arr.push(requirements)
+      var smart = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data-bundle" });
+      var myHeaders = {
+        "Content-Type": "application/json",
+        "authorization": token,
+      }
 
-    //   arr.push(smart.create({ resourceType: "Bundle",headers:myHeaders, body:measure.measureData}))
-    // })
-    // var res = await Promise.all(arr)
-    // console.log(res,'resssssss')
+      arr.push(smart.create({ headers:myHeaders, body:measure.measureData}))
+    })
+    var res = await Promise.all(arr)
+    console.log(res,'resssssss')
 
     
 
@@ -110,7 +110,7 @@ export default class FinalPage extends Component {
     json.improvementActivity = improvementActivity
     json.costMeasures = costMeasures
     json.resourceType = 'Measure'
-    let token = await createToken('client_credentials', 'payer', 'john', 'john123');
+    // let token = await createToken('client_credentials', 'payer', 'john', 'john123');
     const fhirClient = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/$calculate-score" });
     fhirClient.bearerToken = token;
     fhirClient.create({

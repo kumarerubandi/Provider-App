@@ -61,7 +61,9 @@ class Mips extends Component {
         practice: "",
         submissionType: "",
         weightage: "45",
-        loading:true
+        loading:true,
+        group:false
+
       },
       promotingInteroperability: {
         objectiveName: 'all',
@@ -79,7 +81,9 @@ class Mips extends Component {
         Q8: false,
         Q9: false,
         weightage: "25",
-        loading:true
+        loading:true,
+        group:false
+
 
       },
       improvementActivity: {
@@ -93,7 +97,8 @@ class Mips extends Component {
         practice: false,
         npf: false,
         weightage: "15",
-        loading:true
+        loading:true,
+        group:false
 
       },
       costMeasures: {

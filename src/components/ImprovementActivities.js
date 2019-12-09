@@ -52,7 +52,8 @@ export default class ImprovementActivities extends Component {
       hpsa: props.getStore().improvementActivity.hpsa,
       tin: props.getStore().improvementActivity.tin,
       practice: props.getStore().improvementActivity.practice,
-      npf: props.getStore().improvementActivity.npf
+      npf: props.getStore().improvementActivity.npf,
+      group: props.getStore().improvementActivity.group
     };
     this.handleActivityWeightChange = this.handleActivityWeightChange.bind(this);
     this.handleSubcategoryNameChange = this.handleSubcategoryNameChange.bind(this);
@@ -61,6 +62,7 @@ export default class ImprovementActivities extends Component {
     this.handleTin = this.handleTin.bind(this);
     this.handlePractice = this.handlePractice.bind(this);
     this.handleNpf = this.handleNpf.bind(this);
+    this.handleGroup = this.handleGroup.bind(this);
   }
 
 
@@ -73,6 +75,16 @@ export default class ImprovementActivities extends Component {
   }
 
   componentWillUnmount() { }
+
+  handleGroup(group) {
+    this.setState({ group });
+    let improvementActivity = this.state.improvementActivity
+    improvementActivity.group = group;
+    this.setState({ improvementActivity: improvementActivity })
+    this.props.updateStore({
+      improvementActivity: improvementActivity
+    });
+  }
 
   handleHpsa(hpsa) {
     this.setState({ hpsa });
@@ -236,11 +248,11 @@ export default class ImprovementActivities extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false,loading: true }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false, loading: true }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false,loading: true });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, activityWeight: Obj.activityWeight, showData: false, loading: true });
         console.log(tempArr, 'tempArrs')
         let improvementActivity = this.state.improvementActivity
         improvementActivity.measureList = tempArr
@@ -254,10 +266,20 @@ export default class ImprovementActivities extends Component {
   render() {
     return (
       <div>
-        <p className="text-center"><b>Improvement Activities</b>– worth 15% of the total MIPS score.  Clinicians or groups must earn a total of 40 points.  High weighted activities are worth 20 points and medium weighted activities are worth 10 points.  Small, rural, or HPSA clinicians or groups earn double points.</p>
+        <p className="text-center"><b>Improvement Activities</b>– 15% OF FINAL SCORE.  The Improvement Activities performance category rewards clinicians for delivering care that emphasizes care coordination, patient engagement, and patient safety. For 2019, data for a minimum of 90 continuous days will need to be reported for the IA category. You have to attest that you completed <b>one or more</b> out of <b>118</b> Improvement Activities available in 2019.</p>
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-            Your practice is in a rural area or a health professional shortage area (HPSA) ?
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you reporting as a group?
+          </div>
+          <div className="form-group col-2">
+            <label>
+              <Switch onChange={this.handleGroup} checked={this.state.group} />
+            </label>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group col-8 offset-1">
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Is the practice in a Rural area or a Health Professional Shortage area (HPSA) ?
           </div>
           <div className="form-group col-2">
             <label>
@@ -265,19 +287,21 @@ export default class ImprovementActivities extends Component {
             </label>
           </div>
         </div>
-        <div className="form-row">
-          <div className="form-group col-8 offset-1">
-            Yours is a Small Practice (has 15 or fewer eligible clinicians) ?
-          </div>
-          <div className="form-group col-2">
-            <label>
-              <Switch onChange={this.handlePractice} checked={this.state.practice} />
-            </label>
-          </div>
+        {this.state.group &&
+          <div className="form-row">
+            <div className="form-group col-8 offset-1">
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Does the practice have less than or equal to 15 Eligible Clinicians ?
         </div>
+            <div className="form-group col-2">
+              <label>
+                <Switch onChange={this.handlePractice} checked={this.state.practice} />
+              </label>
+            </div>
+          </div>
+        }
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-            You are a non-patient-facing clinician?
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a non-patient-facing Clinician?
           </div>
           <div className="form-group col-2">
             <label>
@@ -287,7 +311,7 @@ export default class ImprovementActivities extends Component {
         </div>
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-            Does your 50% of the practice sites within a TIN are certified as Patient Centered Medical Home (PCMH) ?
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Does more than half (50 percent) of the practice sites within your TIN  certified as Patient Centered Medical Home (PCMH) ?
           </div>
           <div className="form-group col-2">
             <label>

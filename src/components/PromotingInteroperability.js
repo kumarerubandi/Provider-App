@@ -50,6 +50,7 @@ export default class PromotingInteroperability extends Component {
 
       scoreWeight: props.getStore().promotingInteroperability.scoreWeight,
       measureOptions: props.getStore().promotingInteroperability.measureOptions,
+      group: props.getStore().improvementActivity.group,
       Q1: props.getStore().promotingInteroperability.Q1,
       Q2: props.getStore().promotingInteroperability.Q2,
       Q3: props.getStore().promotingInteroperability.Q3,
@@ -61,7 +62,7 @@ export default class PromotingInteroperability extends Component {
       Q9: props.getStore().promotingInteroperability.Q9
     };
     this.handleObjectiveChange = this.handleObjectiveChange.bind(this);
-    this.handleScoreWeightChange = this.handleScoreWeightChange.bind(this);
+    // this.handleScoreWeightChange = this.handleScoreWeightChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
     this.handleQ1 = this.handleQ1.bind(this);
     this.handleQ2 = this.handleQ2.bind(this);
@@ -84,6 +85,7 @@ export default class PromotingInteroperability extends Component {
 
   componentWillUnmount() { }
 
+ 
   handleQ1(Q1) {
     this.setState({ Q1 });
     let promotingInteroperability = this.state.promotingInteroperability
@@ -172,30 +174,40 @@ export default class PromotingInteroperability extends Component {
     var filteredMeasures = []
     var measureOptions = []
 
-
-    if (data.value === 'all' && this.state.scoreWeight === 'all') {
+    if (data.value === 'all') {
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
         return measure["OBJECTIVE NAME"]
       })
     }
-    else if (data.value !== 'all' && this.state.scoreWeight === 'all') {
+    else  {
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
         return measure["OBJECTIVE NAME"].includes(data.value) > 0
       })
     }
-    else if (data.value === 'all' && this.state.scoreWeight !== 'all') {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        return measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight) > 0
-      })
-    }
-    else {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        return (
-          (data.value !== 'all' && measure["OBJECTIVE NAME"].includes(data.value) > 0) &&
-          (this.state.scoreWeight != 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight) > 0))
-      })
 
-    }
+    // if (data.value === 'all' && this.state.scoreWeight === 'all') {
+    //   filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+    //     return measure["OBJECTIVE NAME"]
+    //   })
+    // }
+    // else if (data.value !== 'all' && this.state.scoreWeight === 'all') {
+    //   filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+    //     return measure["OBJECTIVE NAME"].includes(data.value) > 0
+    //   })
+    // }
+    // else if (data.value === 'all' && this.state.scoreWeight !== 'all') {
+    //   filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+    //     return measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight) > 0
+    //   })
+    // }
+    // else {
+    //   filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+    //     return (
+    //       (data.value !== 'all' && measure["OBJECTIVE NAME"].includes(data.value) > 0) &&
+    //       (this.state.scoreWeight != 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(this.state.scoreWeight) > 0))
+    //   })
+
+    // }
     console.log(filteredMeasures, 'is it working')
 
     for (var i = 0; i < filteredMeasures.length; i++) {
@@ -213,51 +225,51 @@ export default class PromotingInteroperability extends Component {
     });  // Update store here (this is just an example, in reality you will do it via redux or flux)
   }
 
-  handleScoreWeightChange = (event, data) => {
-    this.setState({ scoreWeight: data.value })
-    let promotingInteroperability = this.state.promotingInteroperability
-    var filteredMeasures = []
-    var measureOptions = []
+  // handleScoreWeightChange = (event, data) => {
+  //   this.setState({ scoreWeight: data.value })
+  //   let promotingInteroperability = this.state.promotingInteroperability
+  //   var filteredMeasures = []
+  //   var measureOptions = []
 
-    if (data.value === 'all' && this.state.objectiveName === 'all') {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        return measure["PERFORMANCE SCORE WEIGHT"]
-      })
-    }
-    else if (data.value !== 'all' && this.state.objectiveName === 'all') {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        console.log(data.value, measure["PERFORMANCE SCORE WEIGHT"].includes(data.value))
-        return measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0
-      })
-    }
-    else if (data.value === 'all' && this.state.objectiveName !== 'all') {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        return measure["OBJECTIVE NAME"].includes(this.state.objectiveName) > 0
-      })
-    }
-    else {
-      filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
-        return (
-          (data.value !== 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0) &&
-          (this.state.objectiveName != 'all' && measure["OBJECTIVE NAME"].includes(this.state.objectiveName) > 0))
-      })
+  //   if (data.value === 'all' && this.state.objectiveName === 'all') {
+  //     filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+  //       return measure["PERFORMANCE SCORE WEIGHT"]
+  //     })
+  //   }
+  //   else if (data.value !== 'all' && this.state.objectiveName === 'all') {
+  //     filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+  //       console.log(data.value, measure["PERFORMANCE SCORE WEIGHT"].includes(data.value))
+  //       return measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0
+  //     })
+  //   }
+  //   else if (data.value === 'all' && this.state.objectiveName !== 'all') {
+  //     filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+  //       return measure["OBJECTIVE NAME"].includes(this.state.objectiveName) > 0
+  //     })
+  //   }
+  //   else {
+  //     filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
+  //       return (
+  //         (data.value !== 'all' && measure["PERFORMANCE SCORE WEIGHT"].includes(data.value) > 0) &&
+  //         (this.state.objectiveName != 'all' && measure["OBJECTIVE NAME"].includes(this.state.objectiveName) > 0))
+  //     })
 
-    }
-    // this.setState({filteredMeasures:filteredMeasures})
-    console.log(filteredMeasures, 'is it working for sure')
+  //   }
+  //   // this.setState({filteredMeasures:filteredMeasures})
+  //   console.log(filteredMeasures, 'is it working for sure')
 
-    for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: filteredMeasures[i]["MEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE ID"] }, true)
-    }
-    this.setState({ measureOptions: measureOptions })
-    promotingInteroperability.scoreWeight = data.value
-    promotingInteroperability.measureOptions = measureOptions
-    this.setState({ promotingInteroperability: promotingInteroperability })
-    this.props.updateStore({
-      promotingInteroperability: promotingInteroperability,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-    });
-  }
+  //   for (var i = 0; i < filteredMeasures.length; i++) {
+  //     push(measureOptions, { key: filteredMeasures[i]["MEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["MEASURE ID"] }, true)
+  //   }
+  //   this.setState({ measureOptions: measureOptions })
+  //   promotingInteroperability.scoreWeight = data.value
+  //   promotingInteroperability.measureOptions = measureOptions
+  //   this.setState({ promotingInteroperability: promotingInteroperability })
+  //   this.props.updateStore({
+  //     promotingInteroperability: promotingInteroperability,
+  //     savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+  //   });
+  // }
 
 
   handleMeasureChange = (event, data) => {
@@ -298,11 +310,11 @@ export default class PromotingInteroperability extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false,loading: true }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false, loading: true }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false,loading: true });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false, loading: true });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
@@ -317,10 +329,11 @@ export default class PromotingInteroperability extends Component {
     // console.log(this.props.getStore().measureList,'yess',this.props.getStore().promotingInteroperability.measureList)
     return (
       <div>
-        <p className="text-center"><b>Promoting Interoperability</b>- worth 25% of the total.  Base score is worth 50 points, and performance plus bonus score potential points are 155, but with a maximum score of 100 (base+ performance+ bonus)</p>
+        <p className="text-center"><b>Promoting Interoperability</b>- 25% OF FINAL SCORE.  The Promoting Interoperability (PI) performance category assesses the meaningful use of certified EHR technology under the Quality Payment Program (QPP).
+</p>
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-            1. Are you Hospital-based MIPS eligible clinicians?
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Hospital-based MIPS eligible clinician?
           </div>
           <div className="form-group col-2">
             <label>
@@ -328,19 +341,33 @@ export default class PromotingInteroperability extends Component {
             </label>
           </div>
         </div>
+        {!this.state.group &&
+          <div className="form-row">
+            <div className="form-group col-8 offset-1">
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Non-Patient-Facing clinicians?(Reporting as individual)
+            </div>
+            <div className="form-group col-2">
+              <label>
+                <Switch onChange={this.handleQ2} checked={this.state.Q2} />
+              </label>
+            </div>
+          </div>
+        }
+        {this.state.group &&
+          <div className="form-row">
+            <div className="form-group col-8 offset-1">
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a  group with greater than seventy five percent NPF clinicians?(Reporting as group)
+          </div>
+            <div className="form-group col-2">
+              <label>
+                <Switch onChange={this.handleQ2} checked={this.state.Q2} />
+              </label>
+            </div>
+          </div>
+        }
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-            2. Are you a Non-Patient-Facing clinicians or group with >75% NPF clinicians?
-          </div>
-          <div className="form-group col-2">
-            <label>
-              <Switch onChange={this.handleQ2} checked={this.state.Q2} />
-            </label>
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group col-8 offset-1">
-            3. Are you a Ambulatory Surgical Center (ASC) based MIPS eligible clinician?
+          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you an Ambulatory Surgical Center (ASC) based MIPS eligible clinician?
           </div>
           <div className="form-group col-2">
             <label>
@@ -348,21 +375,23 @@ export default class PromotingInteroperability extends Component {
             </label>
           </div>
         </div>
-        <div className="form-row">
-          <div className="form-group col-8 offset-1">
-            4. Are you MIPS Eligible PA, NP, CNS, CRNA, PT, OT, Qualified speech-language pathologists, Qualified audiologists, Clinical psychologists, and Registered dietitian or nutrition professional ?
+        {this.state.group &&
+          <div className="form-row">
+            <div className="form-group col-8 offset-1">
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinician in small practice ( less than or equal to 15) ?(Reporting as group)
           </div>
-          <div className="form-group col-2">
-            <label>
-              <Switch onChange={this.handleQ4} checked={this.state.Q4} />
-            </label>
+            <div className="form-group col-2">
+              <label>
+                <Switch onChange={this.handleQ4} checked={this.state.Q4} />
+              </label>
+            </div>
           </div>
-        </div>
+        }
         {(!this.state.Q1 && !this.state.Q2 && !this.state.Q3 && !this.state.Q4) &&
           <div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-                5. Are you MIPS-eligible clinicians in small practices ( less than or equal to 15) ?
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinicians using decertified EHR technology?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -372,7 +401,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-                6. Are you MIPS-eligible clinicians using decertified EHR technology?
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you Lack control over the availability of CEHRT?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -382,7 +411,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-                7. Do you Lack control over the availability of CEHRT?
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you have Insufficient Internet connectivity?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -392,7 +421,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-                8. Do you have Insufficient Internet connectivity?
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a victim of Extreme and uncontrollable circumstances (Natural Disasters, Practice Closure, Severe Financial Distress, or Vendor Issues)?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -400,7 +429,7 @@ export default class PromotingInteroperability extends Component {
                 </label>
               </div>
             </div>
-            <div className="form-row">
+            {/* <div className="form-row">
               <div className="form-group col-8 offset-1">
                 9. Are you a victim of Extreme and uncontrollable circumstances (Natural Disasters, Practice Closure, Severe Financial Distress, or Vendor Issues)?
           </div>
@@ -409,11 +438,11 @@ export default class PromotingInteroperability extends Component {
                   <Switch onChange={this.handleQ9} checked={this.state.Q9} />
                 </label>
               </div>
-            </div>
+            </div> */}
           </div>
         }
 
-        {(!this.state.Q1 && !this.state.Q2 && !this.state.Q3 && !this.state.Q4 && !this.state.Q5 && !this.state.Q6 && !this.state.Q7 && !this.state.Q8 && !this.state.Q9) &&
+        {(!this.state.Q1 && !this.state.Q2 && !this.state.Q3 && !this.state.Q4 && !this.state.Q5 && !this.state.Q6 && !this.state.Q7 && !this.state.Q8) &&
           <div>
             <div className="form-row">
               <div className="form-group col-md-5 offset-1">
@@ -429,7 +458,7 @@ export default class PromotingInteroperability extends Component {
                   onChange={this.handleObjectiveChange}
                 />
               </div>
-              <div className="form-group col-md-5">
+              {/* <div className="form-group col-md-5">
                 <span className="title-small">Score Weight</span>
                 <Dropdown
                   className={"blackBorder"}
@@ -441,7 +470,7 @@ export default class PromotingInteroperability extends Component {
                   value={this.state.scoreWeight}
                   onChange={this.handleScoreWeightChange}
                 />
-              </div>
+              </div> */}
             </div>
             <div className="form-row">
               <div className="form-group col-md-9 offset-1">
@@ -466,7 +495,7 @@ export default class PromotingInteroperability extends Component {
               <table className="table col-10 offset-1">
                 <thead>
                   <tr>
-                  <th>Measure ID</th>
+                    <th>Measure ID</th>
                     <th>Measure Name</th>
                     <th>Objective</th>
                     <th>Weight</th>

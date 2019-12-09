@@ -92,7 +92,8 @@ export default class Cost extends Component {
   render() {
     return (
     <div>
-      <p className="text-center"><b>Cost</b> - The Cost performance category has 15% weight for the 2019 performance year. CMS will calculate the score for the Cost category from the Medicare Administrative Claims data for the entire calendar year 2019. Thus, no data submission is required.
+      <p className="text-center"><b>Cost</b>– 15% OF FINAL SCORE. All clinicians and groups will be evaluated on the same 10 cost measures if they meet or exceed the measures' minimum case volume necessary for the specific measure to be evaluated and scored.
+CMS uses Medicare claims data to calculate cost measure performance which means clinicians and groups <b>do not have to submit any data</b> for this performance category.
 </p>
             <div className="form-row">
                      <div className="form-group col-9 offset-1">

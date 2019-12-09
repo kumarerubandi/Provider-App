@@ -100,7 +100,7 @@
   {
     "MEASURE NAME": "Adult Major Depressive Disorder (MDD): Suicide Risk Assessment",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of major depressive disorder (MDD) with a suicide risk assessment completed during the visit in which a new diagnosis or recurrent episode was identified",
-    "eMEASURE ID": "CMS161v7",
+    "eMEASURE ID": "161",
     "eMEASURE NQF": "None",
     "NQF": "0104",
     "QUALITY ID": 107,
@@ -296,7 +296,7 @@
   {
     "MEASURE NAME": "Anti-Depressant Medication Management",
     "MEASURE DESCRIPTION": "Percentage of patients 18 years of age and older who were treated with antidepressant medication, had a diagnosis of major depression, and who remained on an antidepressant medication treatment. Two rates are reported. a. Percentage of patients who remained on an antidepressant medication for at least 84 days (12 weeks). b. Percentage of patients who remained on an antidepressant medication for at least 180 days (6 months)",
-    "eMEASURE ID": "CMS128v7",
+    "eMEASURE ID": "128",
     "eMEASURE NQF": "None",
     "NQF": "0105",
     "QUALITY ID": "009",
@@ -366,7 +366,7 @@
   {
     "MEASURE NAME": "Appropriate Testing for Children with Pharyngitis",
     "MEASURE DESCRIPTION": "Percentage of children 3-18 years of age who were diagnosed with pharyngitis, ordered an antibiotic and received a group A streptococcus (strep) test for the episode",
-    "eMEASURE ID": "CMS146v7",
+    "eMEASURE ID": "146",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": "066",
@@ -380,7 +380,7 @@
   {
     "MEASURE NAME": "Appropriate Treatment for Children with Upper Respiratory Infection (URI)",
     "MEASURE DESCRIPTION": "Percentage of children 3 months - 18 years of age who were diagnosed with upper respiratory infection (URI) and were not dispensed an antibiotic prescription on or three days after the episode",
-    "eMEASURE ID": "CMS154v7",
+    "eMEASURE ID": "154",
     "eMEASURE NQF": "None",
     "NQF": "0069",
     "QUALITY ID": "065",
@@ -408,7 +408,7 @@
   {
     "MEASURE NAME": "Appropriate Use of DXA Scans in Women Under 65 Years Who Do Not Meet the Risk Factor Profile for Osteoporotic Fracture",
     "MEASURE DESCRIPTION": "Percentage of female patients 50 to 64 years of age without select risk factors for osteoporotic fracture who received an order for a dual-energy x-ray absorptiometry (DXA) scan during the measurement period.",
-    "eMEASURE ID": "CMS249v1",
+    "eMEASURE ID": "249",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 472,
@@ -604,7 +604,7 @@
   {
     "MEASURE NAME": "Bone Density Evaluation for Patients with Prostate Cancer and Receiving Androgen Deprivation Therapy",
     "MEASURE DESCRIPTION": "Patients determined as having prostate cancer who are currently starting or undergoing androgen deprivation therapy (ADT), for an anticipated period of 12 months or greater (indicated by HCPCS code) and who receive an initial bone density evaluation. The bone density evaluation must be prior to the start of ADT or within 3 months of the start of ADT",
-    "eMEASURE ID": "CMS645v2",
+    "eMEASURE ID": "645",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 462,
@@ -618,7 +618,7 @@
   {
     "MEASURE NAME": "Breast Cancer Screening",
     "MEASURE DESCRIPTION": "Percentage of women 50 - 74 years of age who had a mammogram to screen for breast cancer",
-    "eMEASURE ID": "CMS125v7",
+    "eMEASURE ID": "125",
     "eMEASURE NQF": "None",
     "NQF": 2372,
     "QUALITY ID": 112,
@@ -884,7 +884,7 @@
   {
     "MEASURE NAME": "Cataracts: 20/40 or Better Visual Acuity within 90 Days Following Cataract Surgery",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of uncomplicated cataract who had cataract surgery and no significant ocular conditions impacting the visual outcome of surgery and had best-corrected visual acuity of 20/40 or better (distance or near) achieved within 90 days following the cataract surgery",
-    "eMEASURE ID": "CMS133v7",
+    "eMEASURE ID": "133",
     "eMEASURE NQF": "None",
     "NQF": "0565",
     "QUALITY ID": 191,
@@ -898,7 +898,7 @@
   {
     "MEASURE NAME": "Cataracts: Complications within 30 Days Following Cataract Surgery Requiring Additional Surgical Procedures",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of uncomplicated cataract who had cataract surgery and had any of a specified list of surgical procedures in the 30 days following cataract surgery which would indicate the occurrence of any of the following major complications: retained nuclear fragments, endophthalmitis, dislocated or wrong power IOL, retinal detachment, or wound dehiscence",
-    "eMEASURE ID": "CMS132v7",
+    "eMEASURE ID": "132",
     "eMEASURE NQF": "None",
     "NQF": "0564",
     "QUALITY ID": 192,
@@ -940,7 +940,7 @@
   {
     "MEASURE NAME": "Cervical Cancer Screening",
     "MEASURE DESCRIPTION": "Percentage of women 21-64 years of age who were screened for cervical cancer using either of the following criteria:*  Women age 21-64 who had cervical cytology performed every 3 years*  Women age 30-64 who had cervical cytology/human papillomavirus (HPV) co-testing performed every 5 years",
-    "eMEASURE ID": "CMS124v7",
+    "eMEASURE ID": "124",
     "eMEASURE NQF": "None",
     "NQF": "0032",
     "QUALITY ID": 309,
@@ -954,7 +954,7 @@
   {
     "MEASURE NAME": "Child and Adolescent Major Depressive Disorder (MDD): Suicide Risk Assessment",
     "MEASURE DESCRIPTION": "Percentage of patient visits for those patients aged 6 through 17 years with a diagnosis of major depressive disorder with an assessment for suicide risk",
-    "eMEASURE ID": "CMS177v7",
+    "eMEASURE ID": "177",
     "eMEASURE NQF": "1365e",
     "NQF": "None",
     "QUALITY ID": 382,
@@ -968,7 +968,7 @@
   {
     "MEASURE NAME": "Childhood Immunization Status",
     "MEASURE DESCRIPTION": "Percentage of children 2 years of age who had four diphtheria, tetanus and acellular pertussis (DTaP); three polio (IPV), one measles, mumps and rubella (MMR); three H influenza type B (HiB); three hepatitis B (Hep B); one chicken pox (VZV); four pneumococcal conjugate (PCV); one hepatitis A (Hep A); two or three rotavirus (RV); and two influenza (flu) vaccines by their second birthday",
-    "eMEASURE ID": "CMS117v7",
+    "eMEASURE ID": "117",
     "eMEASURE NQF": "None",
     "NQF": "0038",
     "QUALITY ID": 240,
@@ -982,7 +982,7 @@
   {
     "MEASURE NAME": "Children Who Have Dental Decay or Cavities",
     "MEASURE DESCRIPTION": "Percentage of children, age 0-20 years, who have had tooth decay or cavities during the measurement period",
-    "eMEASURE ID": "CMS75v7",
+    "eMEASURE ID": "75",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 378,
@@ -996,7 +996,7 @@
   {
     "MEASURE NAME": "Chlamydia Screening for Women",
     "MEASURE DESCRIPTION": "Percentage of women 16-24 years of age who were identified as sexually active and who had at least one test for chlamydia during the measurement period",
-    "eMEASURE ID": "CMS153v7",
+    "eMEASURE ID": "153",
     "eMEASURE NQF": "None",
     "NQF": "0033",
     "QUALITY ID": 310,
@@ -1009,7 +1009,7 @@
   },
   {
     "MEASURE NAME": "Chronic Obstructive Pulmonary Disease (COPD): Long-Acting Inhaled Bronchodilator Therapy",
-    "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of COPD (FEV1/FVC < 70%) and who have an FEV1 less than 60% predicted and have symptoms who were prescribed a long-acting inhaled bronchodilator",
+    "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of COPD (FE/FVC < 70%) and who have an FE less than 60% predicted and have symptoms who were prescribed a long-acting inhaled bronchodilator",
     "eMEASURE ID": "None",
     "eMEASURE NQF": "None",
     "NQF": "0102",
@@ -1052,7 +1052,7 @@
   {
     "MEASURE NAME": "Closing the Referral Loop: Receipt of Specialist Report",
     "MEASURE DESCRIPTION": "Percentage of patients with referrals, regardless of age, for which the referring provider receives a report from the provider to whom the patient was referred",
-    "eMEASURE ID": "CMS50v7",
+    "eMEASURE ID": "50",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 374,
@@ -1080,7 +1080,7 @@
   {
     "MEASURE NAME": "Colorectal Cancer Screening",
     "MEASURE DESCRIPTION": "Percentage of patients 50-75 years of age who had appropriate screening for colorectal cancer",
-    "eMEASURE ID": "CMS130v7",
+    "eMEASURE ID": "130",
     "eMEASURE NQF": "None",
     "NQF": "0034",
     "QUALITY ID": 113,
@@ -1122,7 +1122,7 @@
   {
     "MEASURE NAME": "Controlling High Blood Pressure",
     "MEASURE DESCRIPTION": "Percentage of patients 18 - 85 years of age who had a diagnosis of hypertension and whose blood pressure was adequately controlled (< 140/90 mmHg) during the measurement period",
-    "eMEASURE ID": "CMS165v7",
+    "eMEASURE ID": "165",
     "eMEASURE NQF": "None",
     "NQF": "0018",
     "QUALITY ID": 236,
@@ -1248,7 +1248,7 @@
   {
     "MEASURE NAME": "Coronary Artery Disease (CAD): Beta-Blocker Therapy - Prior Myocardial Infarction (MI) or Left Ventricular Systolic Dysfunction (LVEF < 40%)",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of coronary artery disease seen within a 12-month period who also have a prior MI or a current or prior LVEF < 40% who were prescribed beta-blocker therapy",
-    "eMEASURE ID": "CMS145v7",
+    "eMEASURE ID": "145",
     "eMEASURE NQF": "None",
     "NQF": "0070",
     "QUALITY ID": "007",
@@ -1276,7 +1276,7 @@
   {
     "MEASURE NAME": "Dementia: Cognitive Assessment",
     "MEASURE DESCRIPTION": "Percentage of patients, regardless of age, with a diagnosis of dementia for whom an assessment of cognition is performed and the results reviewed at least once within a 12-month period",
-    "eMEASURE ID": "CMS149v7",
+    "eMEASURE ID": "149",
     "eMEASURE NQF": "None",
     "NQF": 2872,
     "QUALITY ID": 281,
@@ -1346,7 +1346,7 @@
   {
     "MEASURE NAME": "Depression Remission at Twelve Months",
     "MEASURE DESCRIPTION": "The percentage of adolescent patients 12 to 17 years of age and adult patients 18 years of age or older with major depression or dysthymia who reached remission 12 months (+/- 60 days) after an index event",
-    "eMEASURE ID": "CMS159v7",
+    "eMEASURE ID": "159",
     "eMEASURE NQF": "0710e",
     "NQF": "0710",
     "QUALITY ID": 370,
@@ -1360,7 +1360,7 @@
   {
     "MEASURE NAME": "Depression Utilization of the PHQ-9 Tool",
     "MEASURE DESCRIPTION": "The percentage of adolescent patients 12 to 17 years of age and adult patients age 18 and older with the diagnosis of major depression or dysthymia who have a completed PHQ-9 during each applicable 4 month period in which there was a qualifying depression encounter",
-    "eMEASURE ID": "CMS160v7",
+    "eMEASURE ID": "160",
     "eMEASURE NQF": "0712e",
     "NQF": "None",
     "QUALITY ID": 371,
@@ -1416,7 +1416,7 @@
   {
     "MEASURE NAME": "Diabetes: Eye Exam",
     "MEASURE DESCRIPTION": "Percentage of patients 18 - 75 years of age with diabetes who had a retinal or dilated eye exam by an eye care professional during the measurement period or a negative retinal or dilated eye exam (no evidence of retinopathy) in the 12 months prior to the measurement period",
-    "eMEASURE ID": "CMS131v7",
+    "eMEASURE ID": "131",
     "eMEASURE NQF": "None",
     "NQF": "0055",
     "QUALITY ID": 117,
@@ -1430,7 +1430,7 @@
   {
     "MEASURE NAME": "Diabetes: Hemoglobin A1c (HbA1c) Poor Control (>9%)",
     "MEASURE DESCRIPTION": "Percentage of patients 18-75 years of age with diabetes who had hemoglobin A1c > 9.0% during the measurement period",
-    "eMEASURE ID": "CMS122v7",
+    "eMEASURE ID": "122",
     "eMEASURE NQF": "None",
     "NQF": "0059",
     "QUALITY ID": "001",
@@ -1444,7 +1444,7 @@
   {
     "MEASURE NAME": "Diabetes: Medical Attention for Nephropathy",
     "MEASURE DESCRIPTION": "The percentage of patients 18-75 years of age with diabetes who had a nephropathy screening test or evidence of nephropathy during the measurement period",
-    "eMEASURE ID": "CMS134v7",
+    "eMEASURE ID": "134",
     "eMEASURE NQF": "None",
     "NQF": "0062",
     "QUALITY ID": 119,
@@ -1458,7 +1458,7 @@
   {
     "MEASURE NAME": "Diabetic Retinopathy: Communication with the Physician Managing Ongoing Diabetes Care",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of diabetic retinopathy who had a dilated macular or fundus exam performed with documented communication to the physician who manages the ongoing care of the patient with diabetes mellitus regarding the findings of the macular or fundus exam at least once within 12 months",
-    "eMEASURE ID": "CMS142v7",
+    "eMEASURE ID": "142",
     "eMEASURE NQF": "None",
     "NQF": "0089",
     "QUALITY ID": "019",
@@ -1472,7 +1472,7 @@
   {
     "MEASURE NAME": "Documentation of Current Medications in the Medical Record",
     "MEASURE DESCRIPTION": "Percentage of visits for patients aged 18 years and older for which the eligible professional or eligible clinician attests to documenting a list of current medications using all immediate resources available on the date of the encounter. This list must include ALL known prescriptions, over-the-counters, herbals, and vitamin/mineral/dietary (nutritional) supplements AND must contain the medications' name, dosage, frequency and route of administration",
-    "eMEASURE ID": "CMS68v8",
+    "eMEASURE ID": "68",
     "eMEASURE NQF": "None",
     "NQF": "0419",
     "QUALITY ID": 130,
@@ -1612,7 +1612,7 @@
   {
     "MEASURE NAME": "Falls: Screening for Future Fall Risk",
     "MEASURE DESCRIPTION": "Percentage of patients 65 years of age and older who were screened for future fall risk during the measurement period",
-    "eMEASURE ID": "CMS139v7",
+    "eMEASURE ID": "139",
     "eMEASURE NQF": "None",
     "NQF": "0101",
     "QUALITY ID": 318,
@@ -1640,7 +1640,7 @@
   {
     "MEASURE NAME": "Follow-Up Care for Children Prescribed ADHD Medication (ADD)",
     "MEASURE DESCRIPTION": "Percentage of children 6-12 years of age and newly dispensed a medication for attention-deficit/hyperactivity disorder (ADHD) who had appropriate follow-up care.  Two rates are reported.  a. Percentage of children who had one follow-up visit with a practitioner with prescribing authority during the 30-Day Initiation Phase b. Percentage of children who remained on ADHD medication for at least 210 days and who, in addition to the visit in the Initiation Phase, had at least two additional follow-up visits with a practitioner within 270 days (9 months) after the Initiation Phase ended",
-    "eMEASURE ID": "CMS136v8",
+    "eMEASURE ID": "136",
     "eMEASURE NQF": "None",
     "NQF": "0108",
     "QUALITY ID": 366,
@@ -1668,7 +1668,7 @@
   {
     "MEASURE NAME": "Functional Status Assessment for Total Hip Replacement",
     "MEASURE DESCRIPTION": "Percentage of patients 18 years of age and older who received an elective primary total hip arthroplasty (THA) and completed a functional status assessment within 90 days prior to the surgery and in the 270-365 days after the surgery",
-    "eMEASURE ID": "CMS56v7",
+    "eMEASURE ID": "56",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 376,
@@ -1682,7 +1682,7 @@
   {
     "MEASURE NAME": "Functional Status Assessment for Total Knee Replacement",
     "MEASURE DESCRIPTION": "Percentage of patients 18 years of age and older who received an elective primary total knee arthroplasty (TKA) and completed a functional status assessment within 90 days prior to the surgery and in the 270-365 days after the surgery",
-    "eMEASURE ID": "CMS66v7",
+    "eMEASURE ID": "66",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 375,
@@ -1696,7 +1696,7 @@
   {
     "MEASURE NAME": "Functional Status Assessments for Congestive Heart Failure",
     "MEASURE DESCRIPTION": "Percentage of patients 18 years of age and older with congestive heart failure who completed initial and follow-up patient-reported functional status assessments",
-    "eMEASURE ID": "CMS90v8",
+    "eMEASURE ID": "90",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 377,
@@ -1808,7 +1808,7 @@
   {
     "MEASURE NAME": "Heart Failure (HF): Angiotensin-Converting Enzyme (ACE) Inhibitor or Angiotensin Receptor Blocker (ARB) Therapy for Left Ventricular Systolic Dysfunction (LVSD)",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of heart failure (HF) with a current or prior left ventricular ejection fraction (LVEF) < 40% who were prescribed ACE inhibitor or ARB therapy either within a 12-month period when seen in the outpatient setting OR at each hospital discharge",
-    "eMEASURE ID": "CMS135v7",
+    "eMEASURE ID": "135",
     "eMEASURE NQF": "0081e",
     "NQF": "0081",
     "QUALITY ID": "005",
@@ -1822,7 +1822,7 @@
   {
     "MEASURE NAME": "Heart Failure (HF): Beta-Blocker Therapy for Left Ventricular Systolic Dysfunction (LVSD)",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of heart failure (HF) with a current or prior left ventricular ejection fraction (LVEF) < 40% who were prescribed beta-blocker therapy either within a 12-month period when seen in the outpatient setting OR at each hospital discharge",
-    "eMEASURE ID": "CMS144v7",
+    "eMEASURE ID": "144",
     "eMEASURE NQF": "0083e",
     "NQF": "0083",
     "QUALITY ID": "008",
@@ -1948,7 +1948,7 @@
   {
     "MEASURE NAME": "HIV Screening",
     "MEASURE DESCRIPTION": "Percentage of patients 15-65 years of age who have been tested for HIV within that age range",
-    "eMEASURE ID": "CMS349v1",
+    "eMEASURE ID": "349",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 475,
@@ -1976,7 +1976,7 @@
   {
     "MEASURE NAME": "HIV/AIDS: Pneumocystis Jiroveci Pneumonia (PCP) Prophylaxis",
     "MEASURE DESCRIPTION": "Percentage of patients aged 6 weeks and older with a diagnosis of HIV/AIDS who were prescribed Pneumocystis jiroveci pneumonia (PCP) prophylaxis",
-    "eMEASURE ID": "CMS52v7",
+    "eMEASURE ID": "52",
     "eMEASURE NQF": "None",
     "NQF": "0405",
     "QUALITY ID": 160,
@@ -2102,7 +2102,7 @@
   {
     "MEASURE NAME": "Initiation and Engagement of Alcohol and Other Drug Dependence Treatment",
     "MEASURE DESCRIPTION": "Percentage of patients 13 years of age and older with a new episode of alcohol or other drug abuse or (AOD) dependence who received the following. Two rates are reported. a. Percentage of patients who initiated treatment within 14 days of the diagnosis b. Percentage of patients who initiated treatment and who had two or more additional services with an AOD diagnosis within 30 days of the initiation visit",
-    "eMEASURE ID": "CMS137v7",
+    "eMEASURE ID": "137",
     "eMEASURE NQF": "None",
     "NQF": "0004",
     "QUALITY ID": 305,
@@ -2158,7 +2158,7 @@
   {
     "MEASURE NAME": "Maternal Depression Screening",
     "MEASURE DESCRIPTION": "The percentage of children who turned 6 months of age during the measurement year, who had a face-to-face visit between the clinician and the child during child's first 6 months, and who had a maternal depression screening for the mother at least once between 0 and 6 months of life",
-    "eMEASURE ID": "CMS82v6",
+    "eMEASURE ID": "82",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 372,
@@ -2298,7 +2298,7 @@
   {
     "MEASURE NAME": "Oncology: Medical and Radiation - Pain Intensity Quantified",
     "MEASURE DESCRIPTION": "Percentage of patient visits, regardless of patient age, with a diagnosis of cancer currently receiving chemotherapy or radiation therapy in which pain intensity is quantified",
-    "eMEASURE ID": "CMS157v7",
+    "eMEASURE ID": "157",
     "eMEASURE NQF": "None",
     "NQF": "0384",
     "QUALITY ID": 143,
@@ -2788,7 +2788,7 @@
   {
     "MEASURE NAME": "Pneumococcal Vaccination Status for Older Adults",
     "MEASURE DESCRIPTION": "Percentage of patients 65 years of age and older who have ever received a pneumococcal vaccine",
-    "eMEASURE ID": "CMS127v7",
+    "eMEASURE ID": "127",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 111,
@@ -2844,7 +2844,7 @@
   {
     "MEASURE NAME": "Preventive Care and Screening: Body Mass Index (BMI) Screening and Follow-Up Plan",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a BMI documented during the current encounter or during the previous twelve months AND with a BMI outside of normal parameters, a follow-up plan is documented during the encounter or during the previous twelve months of the current encounterNormal Parameters: Age 18 years and older BMI => 18.5 and < 25 kg/m2",
-    "eMEASURE ID": "CMS69v7",
+    "eMEASURE ID": "69",
     "eMEASURE NQF": "None",
     "NQF": "0421",
     "QUALITY ID": 128,
@@ -2858,7 +2858,7 @@
   {
     "MEASURE NAME": "Preventive Care and Screening: Influenza Immunization",
     "MEASURE DESCRIPTION": "Percentage of patients aged 6 months and older seen for a visit between October 1 and March 31 who received an influenza immunization OR who reported previous receipt of an influenza immunization",
-    "eMEASURE ID": "CMS147v8",
+    "eMEASURE ID": "147",
     "eMEASURE NQF": "None",
     "NQF": "0041",
     "QUALITY ID": 110,
@@ -2872,7 +2872,7 @@
   {
     "MEASURE NAME": "Preventive Care and Screening: Screening for Depression and Follow-Up Plan",
     "MEASURE DESCRIPTION": "Percentage of patients aged 12 years and older screened for depression on the date of the encounter using an age appropriate standardized depression screening tool AND if positive, a follow-up plan is documented on the date of the positive screen",
-    "eMEASURE ID": "CMS2v8",
+    "eMEASURE ID": "2",
     "eMEASURE NQF": "None",
     "NQF": "0418",
     "QUALITY ID": 134,
@@ -2886,7 +2886,7 @@
   {
     "MEASURE NAME": "Preventive Care and Screening: Screening for High Blood Pressure and Follow-Up Documented",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older seen during the submitting period who were screened for high blood pressure AND a recommended follow-up plan is documented based on the current blood pressure (BP) reading as indicated",
-    "eMEASURE ID": "CMS22v7",
+    "eMEASURE ID": "22",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 317,
@@ -2900,7 +2900,7 @@
   {
     "MEASURE NAME": "Preventive Care and Screening: Tobacco Use: Screening and Cessation Intervention",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older who were screened for tobacco use one or more times within 24 months AND who received tobacco cessation intervention if identified as a tobacco user",
-    "eMEASURE ID": "CMS138v7",
+    "eMEASURE ID": "138",
     "eMEASURE NQF": "None",
     "NQF": "0028",
     "QUALITY ID": 226,
@@ -2928,7 +2928,7 @@
   {
     "MEASURE NAME": "Primary Caries Prevention Intervention as Offered by Primary Care Providers, including Dentists",
     "MEASURE DESCRIPTION": "Percentage of children, age 0-20 years, who received a fluoride varnish application during the measurement period",
-    "eMEASURE ID": "CMS74v8",
+    "eMEASURE ID": "74",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 379,
@@ -2942,7 +2942,7 @@
   {
     "MEASURE NAME": "Primary Open-Angle Glaucoma (POAG): Optic Nerve Evaluation",
     "MEASURE DESCRIPTION": "Percentage of patients aged 18 years and older with a diagnosis of primary open-angle glaucoma (POAG) who have an optic nerve head evaluation during one or more office visits within 12 months",
-    "eMEASURE ID": "CMS143v7",
+    "eMEASURE ID": "143",
     "eMEASURE NQF": "None",
     "NQF": "0086",
     "QUALITY ID": "012",
@@ -3012,7 +3012,7 @@
   {
     "MEASURE NAME": "Prostate Cancer: Avoidance of Overuse of Bone Scan for Staging Low Risk Prostate Cancer Patients",
     "MEASURE DESCRIPTION": "Percentage of patients, regardless of age, with a diagnosis of prostate cancer at low (or very low) risk of recurrence receiving interstitial prostate brachytherapy, OR external beam radiotherapy to the prostate, OR radical prostatectomy, OR cryotherapy who did not have a bone scan performed at any time since diagnosis of prostate cancer",
-    "eMEASURE ID": "CMS129v8",
+    "eMEASURE ID": "129",
     "eMEASURE NQF": "None",
     "NQF": "0389",
     "QUALITY ID": 102,
@@ -3488,7 +3488,7 @@
   {
     "MEASURE NAME": "Statin Therapy for the Prevention and Treatment of Cardiovascular Disease",
     "MEASURE DESCRIPTION": "Percentage of the following patients - all considered at high risk of cardiovascular events - who were prescribed or were on statin therapy during the measurement period:*Adults aged >= 21 years who were previously diagnosed with or currently have an active diagnosis of clinical atherosclerotic cardiovascular disease (ASCVD); OR*Adults aged >= 21 years who have ever had a fasting or direct low-density lipoprotein cholesterol (LDL-C) level >= 190 mg/dL or were previously diagnosed with or currently have an active diagnosis of familial or pure hypercholesterolemia; OR*Adults aged 40-75 years with a diagnosis of diabetes with a fasting or direct LDL-C level of 70-189 mg/dL",
-    "eMEASURE ID": "CMS347v2",
+    "eMEASURE ID": "347",
     "eMEASURE NQF": "None",
     "NQF": "None",
     "QUALITY ID": 438,
@@ -3684,7 +3684,7 @@
   {
     "MEASURE NAME": "Use of High-Risk Medications in the Elderly",
     "MEASURE DESCRIPTION": "Percentage of patients 65 years of age and older who were ordered high-risk medications. Two rates are submitted.1) Percentage of patients who were ordered at least one high-risk medication2) Percentage of patients who were ordered at least two of the same high-risk medication",
-    "eMEASURE ID": "CMS156v7",
+    "eMEASURE ID": "156",
     "eMEASURE NQF": "None",
     "NQF": "0022",
     "QUALITY ID": 238,
@@ -3726,7 +3726,7 @@
   {
     "MEASURE NAME": "Weight Assessment and Counseling for Nutrition and Physical Activity for Children and Adolescents",
     "MEASURE DESCRIPTION": "Percentage of patients 3-17 years of age who had an outpatient visit with a Primary Care Physician (PCP) or Obstetrician/Gynecologist (OB/GYN) and who had evidence of the following during the measurement period. Three rates are reported.- Percentage of patients with height, weight, and body mass index (BMI) percentile documentation- Percentage of patients with counseling for nutrition- Percentage of patients with counseling for physical activity",
-    "eMEASURE ID": "CMS155v7",
+    "eMEASURE ID": "155",
     "eMEASURE NQF": "None",
     "NQF": "0024",
     "QUALITY ID": 239,

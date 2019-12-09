@@ -6,10 +6,14 @@ import qualityMeasures from '../json/qualityMeasures.json';
 import Client from "fhir-kit-client";
 import Config from '../globalConfiguration.json';
 import { createToken } from '../components/Authentication';
+import { findAndReplace } from 'find-and-replace-anything'
+
+
 
 
 
 var smart = new Client({ baseUrl: "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir" });
+var payerSmart = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir" });
 
 // console.log(smart.search({ resourceType: "Patient", searchParams: { _count: '100' } }));
 
@@ -101,13 +105,16 @@ export default class QualityImprovement extends Component {
       specialtyMeasureSetOptions: specificMeasureTypeOptions,
       filteredMeasures: [],
       measureObj: {},
-      reporting: props.getStore().qualityImprovement.reporting,
+      // reporting: props.getStore().qualityImprovement.reporting,
+      reporting: (!props.getStore().improvementActivity.group) ? 'individual' : "group",
       practice: props.getStore().qualityImprovement.practice,
       submissionType: props.getStore().qualityImprovement.submissionType,
       saving: false,
       costMeasures: props.getStore().costMeasures,
       promotingInteroperability: props.getStore().promotingInteroperability,
-      improvementActivity: props.getStore().improvementActivity
+      improvementActivity: props.getStore().improvementActivity,
+      group: props.getStore().improvementActivity.group,
+
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
@@ -134,13 +141,16 @@ export default class QualityImprovement extends Component {
   componentDidMount() {
     var measureOptions = []
     for (var i = 0; i < qualityMeasures.length; i++) {
-      push(measureOptions, {
-        key: qualityMeasures[i]["QUALITY ID"],
-        text: qualityMeasures[i]["MEASURE NAME"],
-        value: qualityMeasures[i]["QUALITY ID"],
-        highpriority: qualityMeasures[i]["HIGH PRIORITY MEASURE"].toString(),
-        measuretype: qualityMeasures[i]["MEASURE TYPE"]
-      }, true)
+      if (qualityMeasures[i]['eMEASURE ID'] !== 'None') {
+        push(measureOptions, {
+          key: qualityMeasures[i]["eMEASURE ID"],
+          text: qualityMeasures[i]["MEASURE NAME"],
+          value: qualityMeasures[i]["eMEASURE ID"],
+          highpriority: qualityMeasures[i]["HIGH PRIORITY MEASURE"].toString(),
+          measuretype: qualityMeasures[i]["MEASURE TYPE"]
+        }, true)
+      }
+
     }
     this.setState({ measureOptions: measureOptions })
   }
@@ -258,7 +268,9 @@ export default class QualityImprovement extends Component {
     }
 
     for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: filteredMeasures[i]["QUALITY ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] }, true)
+      if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+      }
     }
 
 
@@ -331,7 +343,9 @@ export default class QualityImprovement extends Component {
     }
     console.log(filteredMeasures, 'oh yeha')
     for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: filteredMeasures[i]["QUALITY ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] }, true)
+      if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+      }
     }
     let qualityImprovement = this.state.qualityImprovement
     this.setState({ measureOptions: measureOptions })
@@ -401,7 +415,12 @@ export default class QualityImprovement extends Component {
     }
 
     for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: filteredMeasures[i]["QUALITY ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["QUALITY ID"] })
+
+      if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+
+      }
+
     }
 
     let qualityImprovement = this.state.qualityImprovement
@@ -468,7 +487,7 @@ export default class QualityImprovement extends Component {
     }
   }
 
-  async getSummaryBundle(dataRequirements) {
+  async getSummaryBundle(dataRequirements, measureId) {
     let summaryBundle = {
       "resourceType": "Bundle",
       "type": "transaction",
@@ -487,7 +506,7 @@ export default class QualityImprovement extends Component {
         }
       }
       // console.log(Config.operationPayload,'operationpayload in reconcile',patient)
-      let resource = await this.reconcile(patient, dataRequirements);
+      let resource = await this.reconcile(patient, dataRequirements, measureId);
 
       // console.log(resource,'what is the value')
       if (resource !== '') {
@@ -533,12 +552,13 @@ export default class QualityImprovement extends Component {
         .toString(16)
         .substring(1);
     };
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return 'mettles-' + s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
 
 
+
   // generatePayload = async (patientResource, practitionerResource, organizationResource, locationResource, coverageResource, conditionResource, procedureResource, encounterResource) => {
-  generatePayload = async (resourceArray) => {
+  generatePayload = async (resourceArray, measureId) => {
     let date = new Date();
     let timestamp = date.toISOString();
     let obj = JSON.stringify(Config.operationPayload)
@@ -547,7 +567,7 @@ export default class QualityImprovement extends Component {
     let measurereport = obj2.parameter.find(e => e.name === "measure-report");
 
     // TODO: consider generating using descrete templates instead of extracting from sample
-    let task = obj2.parameter.find(e => e.name === "resource" && e.resource.resourceType === "Task");
+    // let task = obj2.parameter.find(e => e.name === "resource" && e.resource.resourceType === "Task");
     // let patient = obj2.parameter.find(e => e.name === "resource" && e.resource.resourceType === "Patient");
     // let location = obj2.parameter.find(e => e.name === "resource" && e.resource.resourceType === "Location");
     // let practitioner = obj2.parameter.find(e => e.name === "resource" && e.resource.resourceType === "Practitioner");
@@ -567,16 +587,16 @@ export default class QualityImprovement extends Component {
       if (resourceArray[j].resourceType === 'Organization') {
         organization = resourceArray[j]
       }
-      else if (resourceArray[j] === 'Practitioner') {
+      else if (resourceArray[j].resourceType === 'Practitioner') {
         practitioner = resourceArray[j]
       }
-      else if (resourceArray[j] === 'Patient') {
+      else if (resourceArray[j].resourceType === 'Patient') {
         patientResource = resourceArray[j]
       }
     }
     obj2.id = this.getGUID();
     measurereport.resource.id = this.getGUID();
-    task.resource.id = this.getGUID();
+    // task.resource.id = this.getGUID();
     // encounter.resource.id = MRP.getGUID();
     // patient.resource = patientResource;
     // console.log(patient.resource.id,'wttf2')
@@ -588,19 +608,26 @@ export default class QualityImprovement extends Component {
     // encounter.resource = encounterResource;
     // location.resource = locationResource;
     // coverage.resource = coverageResource;
-
+    let list_of_ids = []
+    let res = payerSmart.search({ resourceType: "Measure", searchParams: { identifier: measureId } })
+    list_of_ids.push(res)
+    let result = await Promise.all(list_of_ids)
+    let id = ''
+    if ('entry' in result[0]) {
+      id= result[0].entry[0].resource.id
+     }
     // TODO: look into a more elegant resource generation approach
-    measurereport.resource.patient.reference = "Patient/" + patientResource.id;
+    measurereport.resource.subject.reference = "Patient/" + patientResource.id;
     measurereport.resource.date = timestamp;
+    measurereport.resource.measure = "Measure/"+id;
     measurereport.resource.period.start = timestamp;
     measurereport.resource.period.end = timestamp;
-    measurereport.resource.reportingOrganization.reference = "Organization/" + organization.id;
-    measurereport.resource.evaluatedResources.extension[0].valueReference.reference = "Task/" + task.resource.id;
-    task.resource.for.reference = "Patient/" + patientResource.id;
-    task.resource.authoredOn = timestamp;
-    task.resource.executionPeriod.start = timestamp;
-    task.resource.executionPeriod.end = timestamp;
-    task.resource.owner.reference = "Practitioner/" + practitioner.id;
+    measurereport.resource.reporter.reference = "Organization/" + organization.id;
+    // task.resource.for.reference = "Patient/" + patientResource.id;
+    // task.resource.authoredOn = timestamp;
+    // task.resource.executionPeriod.start = timestamp;
+    // task.resource.executionPeriod.end = timestamp;
+    // task.resource.owner.reference = "Practitioner/" + practitioner.id;
     // encounter.resource.period.start = timestamp;
     // encounter.resource.period.end = timestamp;
     // encounter.resource.subject.reference = "Patient/" + patient.resource.id;
@@ -614,21 +641,79 @@ export default class QualityImprovement extends Component {
 
     let arr = []
     arr.push(measurereport)
-    arr.push(task)
+    // arr.push(task)
+    // function checkFn (foundVal) {
+    //   console.log(foundVal,'pleaseeeee')
+    //   var val = foundVal.split('-')
+    //   let replaceValue=''
+    //   if(val[0]!=='mettles'){
+    //     replaceValue = 'mettles-'+foundVal
+    //     return replaceValue
+    //   }
+    //   return foundVal
+    //   // always return original foundVal when no replacement occurs
+    // }
+    // var red = findAndReplace(resourceArray,resourceArray[i].id,'mettles-'+resourceArray[i].id)
+    // console.log(red,'like this')
+
     for (var i = 0; i < resourceArray.length; i++) {
+      // if(resourceArray[i].hasOwnProperty('id')){
+      //   var split=resourceArray[i].split('-')
+      //   if(split[0] !=='mettles'){
+      //     resourceArray[i].id = 'mettles-'+resourceArray[i].id
+      //   }
+      // //   // findAndReplaceIf(resourceArray[i], checkFn)
+      // // var red = findAndReplace(resourceArray,resourceArray[i].id,'mettles-'+resourceArray[i].id)
+      // // console.log(red,'like this')
+      // } 
+      // if(resourceArray[i].resourceType==='Patient'){
+      //   if(resourceArray[i].hasOwnProperty('generalPractitioner')){
+      //     var ref=resourceArray[i].generalPractitioner.reference.split('/')
+      //     var val=ref[1].split('-')
+      //     if(val[0]!=='mettles'){
+      //       resourceArray[i].generalPractitioner.reference=ref[0]+'/mettles-'+ref[1]
+      //     }
+      //   }
+      //   if(resourceArray[i].hasOwnProperty('managingOrganization')){
+      //     var ref=resourceArray[i].managingOrganization.reference.split('/')
+      //     var val=ref[1].split('-')
+      //     if(val[0]!=='mettles'){
+      //       resourceArray[i].managingOrganization.reference=ref[0]+'/mettles-'+ref[1]
+      //     }
+      //   }
+      // }
+      // if(resourceArray[i].resourceType==='Procedure' || resourceArray[i].resourceType==='Condition' || resourceArray[i].resourceType==='Observation'|| resourceArray[i].resourceType==='MedicationRequest'){
+      //   if(resourceArray[i].hasOwnProperty('subject')){
+      //     var ref=resourceArray[i].subject.reference.split('/')
+      //     var val=ref[1].split('-')
+      //     if(val[0]!=='mettles'){
+      //       resourceArray[i].subject.reference=ref[0]+'/mettles-'+ref[1]
+      //     }
+      //   }
+      // }
+      // if(resourceArray[i].resourceType==='Encounter'||resourceArray[i].resourceType==='AllergyIntolerance'){
+      //   if(resourceArray[i].hasOwnProperty('patient')){
+      //     var ref=resourceArray[i].patient.reference.split('/')
+      //     var val=ref[1].split('-')
+      //     if(val[0]!=='mettles'){
+      //       resourceArray[i].patient.reference=ref[0]+'/mettles-'+ref[1]
+      //     }
+      //   }
+      // }
+
       arr.push({
         "name": "resource",
         "resource": resourceArray[i]
       })
     }
-    console.log('patient1234', patientResource, obj2)
+    console.log('patient1234', patientResource, arr)
     // obj2.parameter = [measurereport, task, patient, location, practitioner, organization, encounter, coverage, condition, procedure];
     obj2.parameter = arr;
     console.log(obj2, 'operation payload')
     return obj2;
   }
 
-  reconcile = async (patient, mlibDR) => {
+  reconcile = async (patient, mlibDR, measureId) => {
     console.log('in reconcile method')
     let libDR = mlibDR
     // console.log(patient,'patient organization',smart,'client')
@@ -661,38 +746,46 @@ export default class QualityImprovement extends Component {
         }
         else {
           let identifier = ''
+          console.log(libDR.dataRequirement[i].codeFilter[0], 'data req')
           if (libDR.dataRequirement[i].codeFilter[0].hasOwnProperty('valueSet')) {
             identifier = libDR.dataRequirement[i].codeFilter[0].valueSet.substring(8)
           }
-          else if (libDR.dataRequirement[i].codeFilter[2].hasOwnProperty('valueSet')) {
-            identifier = libDR.dataRequirement[i].codeFilter[2].valueSet.substring(8)
-          }
+          // else if (libDR.dataRequirement[i].codeFilter[2].hasOwnProperty('valueSet')) {
+          //   identifier = libDR.dataRequirement[i].codeFilter[2].valueSet.substring(8)
+          // }
+
           console.log(identifier, 'oooooo')
-          let valueSet = []
-          let res = smart.search({ resourceType: "ValueSet", searchParams: { identifier: identifier } })
-          valueSet.push(res)
-          let result = await Promise.all(valueSet)
-          // console.log('inside procedure if', JSON.stringify(result))
-          // console.log('inside procedure if')
-          let codes = []
-          if ('entry' in result[0]) {
-            for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
-              for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
-                codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
+          if (identifier !== '') {
+            let valueSet = []
+            let res = payerSmart.search({ resourceType: "ValueSet", searchParams: { identifier: identifier } })
+            valueSet.push(res)
+            let result = await Promise.all(valueSet)
+            console.log('inside procedure if', result)
+            // console.log('inside procedure if')
+            let codes = []
+            if ('entry' in result[0]) {
+              for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
+                for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
+                  codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
+                }
               }
+            }
+
+
+            // console.log(codes.toString(), 'please dear god')
+            if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
+            }
+            else if (libDR.dataRequirement[i].type === 'Encounter') {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, type: codes.toString() } }))
+            }
+            else {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
             }
           }
 
-          // console.log(codes.toString(), 'please dear god')
-          if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
-            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
-          }
-          else if (libDR.dataRequirement[i].type === 'Encounter') {
-            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, type: codes.toString() } }))
-          }
-          else {
-            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
-          }
+
+
 
         }
       }
@@ -784,7 +877,7 @@ export default class QualityImprovement extends Component {
     let payload = ''
     if (count > 0) {
       // payload = await this.generatePayload(patient, practitioner, organization, location, coverage, condition, procedure, encounter);
-      payload = await this.generatePayload(resultArray);
+      payload = await this.generatePayload(resultArray, measureId);
       return payload
 
     }
@@ -818,7 +911,7 @@ export default class QualityImprovement extends Component {
     measureList.map((measure, i) => {
       this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
         if (result.hasOwnProperty("dataRequirement")) {
-          this.getSummaryBundle(result).then((res) => {
+          this.getSummaryBundle(result, measure.measureId).then((res) => {
             measure.measureData = res
             // measureList.push(measure);
             measure.loading = false
@@ -847,64 +940,15 @@ export default class QualityImprovement extends Component {
     return Promise.resolve(response)
   }
 
-  // async  submitAndSave() {
-  //   console.log(this.props);
-  //   let qualityImprovement = this.state.qualityImprovement
-  //   let promotingInteroperability = this.state.promotingInteroperability
-  //   let improvementActivity = this.state.improvementActivity
-  //   let qualityMeasureList = [];
-  //   await this.getDataByCategory(qualityImprovement.measureList).then((result) => {
-  //     console.log("QIIIII", result)
-  //     qualityMeasureList = result;
-  //   });
-  //   // let qualityMeasureList =
-  //   let promotingMeasureList = await this.getDataByCategory(promotingInteroperability.measureList);
-  //   let improvementMeasureList = await this.getDataByCategory(improvementActivity.measureList);
-  //   let costMeasureList = await this.getDataByCategory(this.state.measureList);
-
-  //   console.log("doneeeeee----", costMeasureList, improvementMeasureList, promotingMeasureList)
-  //   qualityImprovement.measureList = qualityMeasureList;
-  //   promotingInteroperability.measureList = promotingMeasureList;
-  //   improvementActivity.measureList = improvementMeasureList;
-  //   let costMeasures = this.state.costMeasures;
-  //   costMeasures.measureList = costMeasureList
-  //   this.setState({
-  //     qualityImprovement: qualityImprovement,
-  //     promotingInteroperability: promotingInteroperability,
-  //     improvementActivity: improvementActivity,
-  //     costMeasures: costMeasures
-  //   })
-
-  //   this.props.updateStore({
-  //     qualityImprovement: qualityImprovement,
-  //     promotingInteroperability: promotingInteroperability,
-  //     improvementActivity: improvementActivity,
-  //     costMeasures: costMeasures,
-  //     savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-  //   });
-  //   console.log("--------qualityImprovement", "promotingInteroperability", "improvementActivity", "costMeasures");
-
-  //   console.log(qualityImprovement, promotingInteroperability, improvementActivity, costMeasures);
-
-  //   this.props.jumpToStep(5);
-
-  // }
 
 
-  delay() {
-    // `delay` returns a promise
-    return new Promise(function (resolve, reject) {
-      // Only `delay` is able to resolve or reject the promise
-      setTimeout(function () {
-        resolve(42); // After 3 seconds, resolve the promise with value 42
-      }, 3000);
-    });
-  }
+
   async test() {
     let qualityImprovement = this.state.qualityImprovement
     const result = await this.getDataByCategory(qualityImprovement.measureList);
     return result;
   }
+  //SAVe Method is named Validated. SAve button has a defualt method named isValidated
   async isValidated() {
     console.log(this.props);
     let qualityImprovement = this.state.qualityImprovement
@@ -915,7 +959,7 @@ export default class QualityImprovement extends Component {
       qualityImprovement.measureList = result
       qualityImprovement.loading = false
       this.setState({ qualityImprovement: qualityImprovement })
-      this.props.updateStore({qualityImprovement:qualityImprovement})
+      this.props.updateStore({ qualityImprovement: qualityImprovement })
       console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
     })
 
@@ -956,7 +1000,9 @@ export default class QualityImprovement extends Component {
   render() {
     return (
       <div>
-        <p className="text-center"><b>Quality</b> - worth 45% of the total. Must report on 6 measures worth up to 10 points each and scored against benchmarks.  Bonus points for reporting an additional outcome or high-priority measure and for end-to-end reporting.</p>
+        <p className="text-center"><b>Quality</b> - 45% OF FINAL SCORE
+. Quality category carries the maximum weight towards final MIPS score and requires data to be reported for the full calendar year (Jan 1, 2019 – Dec 31, 2019). Quality category weight has been set to 45%  for 2019 unless you apply for PI hardship exception . In that case, the PI category weight of 25% is assigned to Quality category making the Quality category weight 70%.
+Submit collected data for at least 6 measures, or a complete specialty measure set. One of these 6 measures should be an outcome measure (if you have no applicable outcome measure, you can submit another high priority measure instead).</p>
         <div className="form-row">
           <div className="form-group col-3 offset-1">
             <span className="title-small">Type of Reporting</span>
@@ -967,6 +1013,7 @@ export default class QualityImprovement extends Component {
               search
               selection
               fluid
+              disabled
               value={this.state.reporting}
               onChange={this.handleReportingChange}
             />
