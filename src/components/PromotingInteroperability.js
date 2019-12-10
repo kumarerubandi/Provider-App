@@ -5,6 +5,10 @@ import { Dropdown } from 'semantic-ui-react';
 import Promise from 'promise';
 import promotingInteroperabilityMeasures from '../json/promotingInteroperabilityMeasures.json'
 import Switch from "react-switch";
+import DisplayQuestionnarie from './DisplayQuestionnarie.js';
+import { createToken } from '../components/Authentication';
+import { async } from 'q';
+// import { FlatList } from 'react-native';
 
 var objectiveOptions = []
 var scoreWeightOptions = []
@@ -73,6 +77,9 @@ export default class PromotingInteroperability extends Component {
     this.handleQ7 = this.handleQ7.bind(this);
     this.handleQ8 = this.handleQ8.bind(this);
     this.handleQ9 = this.handleQ9.bind(this);
+    this.getQuestionnarieByIdentifier = this.getQuestionnarieByIdentifier.bind(this);
+    this.displayQuestionnarie = this.displayQuestionnarie.bind(this);
+    this.showMeasureQuestionnarie = this.showMeasureQuestionnarie.bind(this);
   }
 
   componentDidMount() {
@@ -85,7 +92,7 @@ export default class PromotingInteroperability extends Component {
 
   componentWillUnmount() { }
 
- 
+
   handleQ1(Q1) {
     this.setState({ Q1 });
     let promotingInteroperability = this.state.promotingInteroperability
@@ -179,7 +186,7 @@ export default class PromotingInteroperability extends Component {
         return measure["OBJECTIVE NAME"]
       })
     }
-    else  {
+    else {
       filteredMeasures = promotingInteroperabilityMeasures.filter((measure) => {
         return measure["OBJECTIVE NAME"].includes(data.value) > 0
       })
@@ -294,27 +301,115 @@ export default class PromotingInteroperability extends Component {
     let promotingInteroperability = this.state.promotingInteroperability
     promotingInteroperability.measureList = measureList
     this.props.updateStore({
-      promotingInteroperability: promotingInteroperability,
-      // measureList:measureList,
-      savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+      promotingInteroperability: promotingInteroperability
+    });
+  }
+  setQuestionnarieResponse(measureId, questionnarieResponse) {
+    let measureList = this.state.measureList;
+    console.log("In set question res--", questionnarieResponse, measureId);
+    let measureObj = measureList.find((m) => {
+      return m.measureId === measureId
+    })
+    console.log(measureObj, measureList);
+    measureObj["questionnarieResponse"] = questionnarieResponse;
+    this.setState({ measureList });
+    console.log("Measure List---", this.state.measureList);
+    let promotingInteroperability = this.state.promotingInteroperability
+    promotingInteroperability.measureList = measureList
+    this.props.updateStore({
+      promotingInteroperability: promotingInteroperability
     });
 
   }
-  addMeasure() {
+  showMeasureQuestionnarie(measureId) {
+    let measureList = this.state.measureList;
+    let measureObj = measureList.find((m) => {
+      return m.measureId === measureId
+    })
+    console.log(measureObj, measureList);
+    measureObj.showQuestionnarie = !measureObj.showQuestionnarie
+    this.setState({ measureList });
+  }
+  displayQuestionnarie(data, measureId) {
+    return (
+      <DisplayQuestionnarie finaldata={data.item} updateCallback={this.setQuestionnarieResponse.bind(this, measureId)} />
+    )
+  }
+
+  getQuestionnarieByIdentifier = async (identifier) => {
+    let token = await createToken("client_credentials", 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    token = "Bearer " + token;
+    let fhir_url = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir";
+    var myHeaders = new Headers({
+      "Content-Type": "application/json",
+      "authorization": token,
+    });
+    var url = fhir_url + "/Measure?identifier=" + identifier;
+    let questionnarie = await fetch(url, {
+      method: "GET",
+      headers: myHeaders
+    }).then(response => {
+      return response.json();
+    }).then(async (response) => {
+      console.log("----------response", response.entry);
+      if (response.hasOwnProperty('entry')) {
+        console.log("url----" + response.entry);
+        let measure = response.entry[0].resource
+        if (measure.hasOwnProperty('relatedArtifact')) {
+          var url = fhir_url + "/" + measure.relatedArtifact[0].resource;
+          console.log("url----" + url);
+          let questionnarieResource = await fetch(url, {
+            method: "GET",
+            headers: myHeaders
+          }).then(res => {
+            console.log("response----------", res);
+            return res.json();
+          }).then((res) => {
+            console.log("---------Questionnarie-response", res);
+            return res;
+          }).catch(reason => {
+            console.log("No Questionnarie response recieved from the server", reason)
+            return false;
+          }
+          );
+          return questionnarieResource;
+        }
+      }
+    }).catch(reason => {
+      console.log("No response recieved from the server", reason)
+      return false;
+    }
+    );
+    return questionnarie;
+  }
+  async addMeasure() {
     if (this.state.measure !== '') {
       if (!this.state.measureObj.hasOwnProperty(this.state.measure)) {
         let measureObj = this.state.measureObj
         let Obj = this.state.measureOptions.find((m) => {
           return m.key === this.state.measure
         })
+        let questionnarie = await this.getQuestionnarieByIdentifier(this.state.measure);
+        let showQues = true;
+        if (!questionnarie) {
+          showQues = false
+        }
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false, loading: true }]
+          measureList: [...prevState.measureList, {
+            measureId: this.state.measure, measureName: Obj.text,
+            objectivename: Obj.objectivename, measureweight: Obj.measureweight,
+            showData: false, loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+          }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false, loading: true });
+        tempArr.push({
+          measureId: this.state.measure, measureName: Obj.text,
+          objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false,
+          loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+        });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
@@ -333,7 +428,7 @@ export default class PromotingInteroperability extends Component {
 </p>
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Hospital-based MIPS eligible clinician?
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Hospital-based MIPS eligible clinician?
           </div>
           <div className="form-group col-2">
             <label>
@@ -344,7 +439,7 @@ export default class PromotingInteroperability extends Component {
         {!this.state.group &&
           <div className="form-row">
             <div className="form-group col-8 offset-1">
-            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Non-Patient-Facing clinicians?(Reporting as individual)
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a Non-Patient-Facing clinicians?(Reporting as individual)
             </div>
             <div className="form-group col-2">
               <label>
@@ -356,7 +451,7 @@ export default class PromotingInteroperability extends Component {
         {this.state.group &&
           <div className="form-row">
             <div className="form-group col-8 offset-1">
-            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a  group with greater than seventy five percent NPF clinicians?(Reporting as group)
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a  group with greater than seventy five percent NPF clinicians?(Reporting as group)
           </div>
             <div className="form-group col-2">
               <label>
@@ -367,7 +462,7 @@ export default class PromotingInteroperability extends Component {
         }
         <div className="form-row">
           <div className="form-group col-8 offset-1">
-          <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you an Ambulatory Surgical Center (ASC) based MIPS eligible clinician?
+            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you an Ambulatory Surgical Center (ASC) based MIPS eligible clinician?
           </div>
           <div className="form-group col-2">
             <label>
@@ -378,7 +473,7 @@ export default class PromotingInteroperability extends Component {
         {this.state.group &&
           <div className="form-row">
             <div className="form-group col-8 offset-1">
-            <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinician in small practice ( less than or equal to 15) ?(Reporting as group)
+              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinician in small practice ( less than or equal to 15) ?(Reporting as group)
           </div>
             <div className="form-group col-2">
               <label>
@@ -391,7 +486,7 @@ export default class PromotingInteroperability extends Component {
           <div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinicians using decertified EHR technology?
+                <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you MIPS-eligible clinicians using decertified EHR technology?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -401,7 +496,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you Lack control over the availability of CEHRT?
+                <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you Lack control over the availability of CEHRT?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -411,7 +506,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you have Insufficient Internet connectivity?
+                <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Do you have Insufficient Internet connectivity?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -421,7 +516,7 @@ export default class PromotingInteroperability extends Component {
             </div>
             <div className="form-row">
               <div className="form-group col-8 offset-1">
-              <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a victim of Extreme and uncontrollable circumstances (Natural Disasters, Practice Closure, Severe Financial Distress, or Vendor Issues)?
+                <span><i aria-hidden="true" className="ui caret right small icon"></i></span> Are you a victim of Extreme and uncontrollable circumstances (Natural Disasters, Practice Closure, Severe Financial Distress, or Vendor Issues)?
           </div>
               <div className="form-group col-2">
                 <label>
@@ -492,7 +587,52 @@ export default class PromotingInteroperability extends Component {
             </div>
 
             <div className="form-row ">
-              <table className="table col-10 offset-1">
+              <div style={{ width: "100%", margin: "10px" }}>
+                <div className="form-row">
+                  <div className="form-group col-md-4">
+                    <span className="title-small">Measure ID</span>
+                  </div>
+                  <div className="form-group col-md-5">
+                    <span className="title-small">Measure Name</span>
+                  </div>
+                  <div className="form-group col-md-2">
+                    <span className="title-small">Measure Questionnarie</span>
+                  </div>
+                  <div className="form-group col-md-1">
+                  </div>
+                </div>
+                {this.state.measureList.map((measure, i) => {
+                  return (<div key={i}>
+                    <div className="form-row">
+                      <div className="form-group col-md-4">
+                        <span>{measure.measureId}</span>
+                      </div>
+                      <div className="form-group col-md-5">
+                        <span>{measure.measureName}</span>
+                      </div>
+                      {measure.showQuestionnarie &&
+                        <div className="form-group col-md-2">
+                          <a style={{ color: "#18d26e", cursor: "pointer" }} onClick={() => this.showMeasureQuestionnarie(measure.measureId)}>Show Questionnarie</a>
+                        </div>
+                      }
+                      <div className="form-group col-md-1">
+                        <button className="btn list-btn" onClick={() => this.clearMeasure(i)}>
+                          x
+                           </button>
+                      </div>
+                    </div>
+                    {measure.showQuestionnarie &&
+                      <div className="form-row">
+                        <div className="form-group col-12">
+                          {this.displayQuestionnarie(measure.questionnarie, measure.measureId)}
+                        </div>
+                      </div>
+                    }
+                  </div>)
+                })
+                }
+              </div>
+              {/* <table className="table col-10 offset-1">
                 <thead>
                   <tr>
                     <th>Measure ID</th>
@@ -530,7 +670,7 @@ export default class PromotingInteroperability extends Component {
                   }
 
                 </tbody>
-              </table>
+              </table> */}
             </div>
           </div>
         }

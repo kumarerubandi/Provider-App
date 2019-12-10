@@ -175,11 +175,7 @@ class DisplayBox extends Component {
       } else {
         link.url += '&';
       }
-      link.url += `iss=` + this.props.config.provider.fhir_url;
-      if (link.hasOwnProperty('appContext')) {
-        link.url += `&launch=${link.appContext.launchContext}`;
-        link.url += `&launchContextId=${link.appContext.launchContext}`;
-      }
+      link.url += `client_id=` + this.props.config.provider.client_id;
       console.log("link----", link);
       return resolve(link);
     })
@@ -321,7 +317,7 @@ class DisplayBox extends Component {
             let linksSection;
             if (card.links) {
               console.log("Smart launch url --1---", this.modifySmartLaunchUrls(card));
-              // card.links = this.modifySmartLaunchUrls(card) || card.links;
+              card.links = this.modifySmartLaunchUrls(card) || card.links;
               console.log("Smart launch url -----", card.links);
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>

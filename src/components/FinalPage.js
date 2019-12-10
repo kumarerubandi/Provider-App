@@ -49,6 +49,7 @@ export default class FinalPage extends Component {
         clearInterval(interval);
       }
       console.log('how many??', this.props.getStore().qualityImprovement.measureList)
+      console.log('PI how many??', this.props.getStore().promotingInteroperability.measureList)
     }, 3000)
   }
   getGUID = () => {
@@ -175,13 +176,13 @@ export default class FinalPage extends Component {
       this.setState({ qualityImprovement: QI });
     }
     if (category === "PI") {
-      let QI = this.state.promotingInteroperability;
-      let measureObj = QI.measureList.find((m) => {
+      let PI = this.state.promotingInteroperability;
+      let measureObj = PI.measureList.find((m) => {
         return m.measureId === measureId
       })
-      console.log(measureObj, QI.measureList);
+      console.log(measureObj, PI.measureList);
       measureObj.showData= !measureObj.showData;
-      this.setState({ promotingInteroperability: QI });
+      this.setState({ promotingInteroperability: PI });
     }
     if (category === "IA") {
       let QI = this.state.improvementActivity;
@@ -192,7 +193,6 @@ export default class FinalPage extends Component {
       measureObj.showData= !measureObj.showData;
       this.setState({ improvementActivity: QI });
     }
-
   }
   displayPatientwiseInfo(data) {
     var finaldata = []
@@ -219,7 +219,8 @@ export default class FinalPage extends Component {
           <div>
             <section id="call-to-action" className="call-to-action wow fadeIn">
               <div className="container text-center">
-                <h3>Your Calculated Mips Score is {parseFloat((this.state.score).toFixed(4))}<small><a href="#" >Show details</a></small></h3>
+                <h3>Your Calculated Mips Score is {parseFloat((this.state.score).toFixed(4))}</h3>
+                {/* <small><a href="#" >Show details</a></small> */}
               </div>
             </section>
           </div>

@@ -144,7 +144,7 @@ export default class QualityImprovement extends Component {
       if (qualityMeasures[i]['eMEASURE ID'] !== 'None') {
         push(measureOptions, {
           key: qualityMeasures[i]["eMEASURE ID"],
-          text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ qualityMeasures[i]["MEASURE NAME"],
+          text: "(" + qualityMeasures[i]["eMEASURE ID"] + ") " + qualityMeasures[i]["MEASURE NAME"],
           value: qualityMeasures[i]["eMEASURE ID"],
           highpriority: qualityMeasures[i]["HIGH PRIORITY MEASURE"].toString(),
           measuretype: qualityMeasures[i]["MEASURE TYPE"]
@@ -269,7 +269,7 @@ export default class QualityImprovement extends Component {
 
     for (var i = 0; i < filteredMeasures.length; i++) {
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: "(" + qualityMeasures[i]["eMEASURE ID"] + ") " + filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
       }
     }
 
@@ -344,7 +344,7 @@ export default class QualityImprovement extends Component {
     console.log(filteredMeasures, 'oh yeha')
     for (var i = 0; i < filteredMeasures.length; i++) {
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: "(" + qualityMeasures[i]["eMEASURE ID"] + ") " + filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
       }
     }
     let qualityImprovement = this.state.qualityImprovement
@@ -417,7 +417,7 @@ export default class QualityImprovement extends Component {
     for (var i = 0; i < filteredMeasures.length; i++) {
 
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: "(" + qualityMeasures[i]["eMEASURE ID"] + ") " + filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
 
       }
 
@@ -614,12 +614,12 @@ export default class QualityImprovement extends Component {
     let result = await Promise.all(list_of_ids)
     let id = ''
     if ('entry' in result[0]) {
-      id= result[0].entry[0].resource.id
-     }
+      id = result[0].entry[0].resource.id
+    }
     // TODO: look into a more elegant resource generation approach
     measurereport.resource.subject.reference = "Patient/" + patientResource.id;
     measurereport.resource.date = timestamp;
-    measurereport.resource.measure = "Measure/"+id;
+    measurereport.resource.measure = "Measure/" + id;
     measurereport.resource.period.start = timestamp;
     measurereport.resource.period.end = timestamp;
     measurereport.resource.reporter.reference = "Organization/" + organization.id;
@@ -735,7 +735,7 @@ export default class QualityImprovement extends Component {
     }
     for (var i = 0; i < libDR.dataRequirement.length; i++) {
       if (libDR.dataRequirement[i].type !== "Patient") {
-        
+
 
         if (libDR.dataRequirement[i].type === 'Location' && orgID != null) {
           console.log('inside Lcoation if')
@@ -766,38 +766,38 @@ export default class QualityImprovement extends Component {
             // console.log('inside procedure if')
             if ('entry' in result[0]) {
               // for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
-                // for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
-                //   if(codes.indexOf(result[0].entry[0].resource.compose.include[k].concept[j].code)===-1){
-                //     codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
-                //   }
-            // }
-            // }
-            for (var j = 0; j < result[0].entry[0].resource.compose.include[0].concept.length; j++) {
-                if(codes.indexOf(result[0].entry[0].resource.compose.include[0].concept[j].code)===-1){
-                      codes.push(result[0].entry[0].resource.compose.include[0].concept[j].code)
-                    }
+              // for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
+              //   if(codes.indexOf(result[0].entry[0].resource.compose.include[k].concept[j].code)===-1){
+              //     codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
+              //   }
+              // }
+              // }
+              for (var j = 0; j < result[0].entry[0].resource.compose.include[0].concept.length; j++) {
+                if (codes.indexOf(result[0].entry[0].resource.compose.include[0].concept[j].code) === -1) {
+                  codes.push(result[0].entry[0].resource.compose.include[0].concept[j].code)
+                }
               }
             }
           }
-          else{
-            if(codes.indexOf(libDR.dataRequirement[i].codeFilter[0].code[0].code)===-1){
+          else {
+            if (codes.indexOf(libDR.dataRequirement[i].codeFilter[0].code[0].code) === -1) {
               codes.push(libDR.dataRequirement[i].codeFilter[0].code[0].code)
             }
-            }
+          }
 
 
-            // console.log(codes.toString(), 'please dear god')
-            if(codes.length>0){
-              if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
-                dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
-              }
-              else if (libDR.dataRequirement[i].type === 'Encounter') {
-                dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, type: codes.toString() } }))
-              }
-              else {
-                  dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
-              }
+          // console.log(codes.toString(), 'please dear god')
+          if (codes.length > 0) {
+            if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
             }
+            else if (libDR.dataRequirement[i].type === 'Encounter') {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, type: codes.toString() } }))
+            }
+            else {
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
+            }
+          }
         }
       }
 
@@ -912,47 +912,61 @@ export default class QualityImprovement extends Component {
     let improvementActivity = this.state.improvementActivity
     if (type === 'qi') {
       measureList = qualityImprovement.measureList
+      measureList.map((measure, i) => {
+        this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
+          if (result.hasOwnProperty("dataRequirement")) {
+            this.getSummaryBundle(result, measure.measureId).then((res) => {
+              measure.measureData = res
+              // measureList.push(measure);
+              measure.loading = false
+              if (type === 'qi') {
+                this.props.updateStore({ qualityImprovement: qualityImprovement })
+              }
+              else if (type === 'pi') {
+                this.props.updateStore({ promotingInteroperability: promotingInteroperability })
+              }
+              else if (type === 'ia') {
+                this.props.updateStore({ improvementActivity: improvementActivity })
+              }
+            });
+
+          }
+          else {
+            measure.data = null;
+          }
+          response.push(measure);
+          // measure.dataRequirements = result
+          // qualityMeasureList.push(measure);
+        }).catch((error) => { console.log(error); });
+      });
     }
     else if (type === 'pi') {
       measureList = promotingInteroperability.measureList
+      console.log("PI list", measureList);
+      measureList.map((measure, i) => {
+        let measureDataBundle = {
+          "resourceType": "Bundle",
+          "type": "transaction",
+          "entry": []
+        }
+        if (measure.hasOwnProperty("questionnarieResponse")) {
+          measureDataBundle.entry.push({
+            "resource": measure.questionnarieResponse,
+            "request": "POST",
+            "url": "QuestionnarieResponse"
+          })
+        }
+        console.log(measureDataBundle);
+        measure.measureData = measureDataBundle;
+        response.push(measure);
+      });
+      
     }
     else if (type === 'ia') {
       measureList = improvementActivity.measureList
     }
-    measureList.map((measure, i) => {
-      this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
-        if (result.hasOwnProperty("dataRequirement")) {
-          this.getSummaryBundle(result, measure.measureId).then((res) => {
-            measure.measureData = res
-            // measureList.push(measure);
-            measure.loading = false
-            if (type === 'qi') {
-              this.props.updateStore({ qualityImprovement: qualityImprovement })
-            }
-            else if (type === 'pi') {
-              this.props.updateStore({ promotingInteroperability: promotingInteroperability })
-            }
-            else if (type === 'ia') {
-              this.props.updateStore({ improvementActivity: improvementActivity })
-            }
-          });
-
-
-        }
-        else {
-          measure.data = null;
-        }
-        response.push(measure);
-        // measure.dataRequirements = result
-        // qualityMeasureList.push(measure);
-      }).catch((error) => { console.log(error); });
-    });
-
     return Promise.resolve(response)
   }
-
-
-
 
   async test() {
     let qualityImprovement = this.state.qualityImprovement
@@ -981,7 +995,7 @@ export default class QualityImprovement extends Component {
       this.props.updateStore({
         promotingInteroperability: promotingInteroperability
       })
-
+        console.log("PI data added---",this.state.promotingInteroperability);
     })
     await this.getDataByCategory(improvementActivity.measureList, 'ia').then((result) => {
       improvementActivity.measureList = result;
