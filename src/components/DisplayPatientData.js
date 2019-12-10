@@ -259,16 +259,20 @@ export default class DisplayPatientData extends Component {
                                 </div>
                             </div>
                         }
+                        {this.state.patient.hasOwnProperty('address') &&
                         <div className="form-row">
+                            {this.state.organization.address[0].hasOwnProperty('state') &&
                             <div class="form-group col-md-6">
                                 <span className="title-small">State - </span>
                                 <span>{this.state.organization.address[0].state}</span>
                             </div>
+    }
                             <div class="form-group col-md-6">
                                 <span className="title-small">Postal Code - </span>
                                 <span>{this.state.organization.address[0].postalCode}</span>
                             </div>
                         </div>
+    }
 
                     </div>
                     {this.state.encounterArray.length > 0 &&

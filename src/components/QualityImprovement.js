@@ -144,7 +144,7 @@ export default class QualityImprovement extends Component {
       if (qualityMeasures[i]['eMEASURE ID'] !== 'None') {
         push(measureOptions, {
           key: qualityMeasures[i]["eMEASURE ID"],
-          text: qualityMeasures[i]["MEASURE NAME"],
+          text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ qualityMeasures[i]["MEASURE NAME"],
           value: qualityMeasures[i]["eMEASURE ID"],
           highpriority: qualityMeasures[i]["HIGH PRIORITY MEASURE"].toString(),
           measuretype: qualityMeasures[i]["MEASURE TYPE"]
@@ -269,7 +269,7 @@ export default class QualityImprovement extends Component {
 
     for (var i = 0; i < filteredMeasures.length; i++) {
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
       }
     }
 
@@ -344,7 +344,7 @@ export default class QualityImprovement extends Component {
     console.log(filteredMeasures, 'oh yeha')
     for (var i = 0; i < filteredMeasures.length; i++) {
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
       }
     }
     let qualityImprovement = this.state.qualityImprovement
@@ -417,7 +417,7 @@ export default class QualityImprovement extends Component {
     for (var i = 0; i < filteredMeasures.length; i++) {
 
       if (filteredMeasures[i]['eMEASURE ID'] !== 'None') {
-        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text: filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
+        push(measureOptions, { key: filteredMeasures[i]["eMEASURE ID"], text:"("+qualityMeasures[i]["eMEASURE ID"]+") "+ filteredMeasures[i]["MEASURE NAME"], value: filteredMeasures[i]["eMEASURE ID"] }, true)
 
       }
 
@@ -727,14 +727,15 @@ export default class QualityImprovement extends Component {
       practitionerID = patient.generalPractitioner[0].reference.split('/')[1];
     }
     var dataToLoad = []
+    if (orgID !== null) {
+      dataToLoad.push(smart.read({ resourceType: "Organization", id: orgID }))
+    }
+    if (practitionerID !== null) {
+      dataToLoad.push(smart.read({ resourceType: "Practitioner", id: practitionerID }))
+    }
     for (var i = 0; i < libDR.dataRequirement.length; i++) {
       if (libDR.dataRequirement[i].type !== "Patient") {
-        if (orgID !== null) {
-          dataToLoad.push(smart.read({ resourceType: "Organization", id: orgID }))
-        }
-        if (practitionerID !== null) {
-          dataToLoad.push(smart.read({ resourceType: "Practitioner", id: practitionerID }))
-        }
+        
 
         if (libDR.dataRequirement[i].type === 'Location' && orgID != null) {
           console.log('inside Lcoation if')
@@ -753,6 +754,7 @@ export default class QualityImprovement extends Component {
           // else if (libDR.dataRequirement[i].codeFilter[2].hasOwnProperty('valueSet')) {
           //   identifier = libDR.dataRequirement[i].codeFilter[2].valueSet.substring(8)
           // }
+          let codes = []
 
           console.log(identifier, 'oooooo')
           if (identifier !== '') {
@@ -762,31 +764,40 @@ export default class QualityImprovement extends Component {
             let result = await Promise.all(valueSet)
             console.log('inside procedure if', result)
             // console.log('inside procedure if')
-            let codes = []
             if ('entry' in result[0]) {
-              for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
-                for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
-                  codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
-                }
+              // for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
+                // for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
+                //   if(codes.indexOf(result[0].entry[0].resource.compose.include[k].concept[j].code)===-1){
+                //     codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
+                //   }
+            // }
+            // }
+            for (var j = 0; j < result[0].entry[0].resource.compose.include[0].concept.length; j++) {
+                if(codes.indexOf(result[0].entry[0].resource.compose.include[0].concept[j].code)===-1){
+                      codes.push(result[0].entry[0].resource.compose.include[0].concept[j].code)
+                    }
               }
+            }
+          }
+          else{
+            if(codes.indexOf(libDR.dataRequirement[i].codeFilter[0].code[0].code)===-1){
+              codes.push(libDR.dataRequirement[i].codeFilter[0].code[0].code)
+            }
             }
 
 
             // console.log(codes.toString(), 'please dear god')
-            if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
+            if(codes.length>0){
+              if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
+                dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
+              }
+              else if (libDR.dataRequirement[i].type === 'Encounter') {
+                dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, type: codes.toString() } }))
+              }
+              else {
+                  dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
+              }
             }
-            else if (libDR.dataRequirement[i].type === 'Encounter') {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, type: codes.toString() } }))
-            }
-            else {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
-            }
-          }
-
-
-
-
         }
       }
 

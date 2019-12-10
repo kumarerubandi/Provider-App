@@ -51,7 +51,14 @@ export default class FinalPage extends Component {
       console.log('how many??', this.props.getStore().qualityImprovement.measureList)
     }, 3000)
   }
-
+  getGUID = () => {
+    let s4 = () => {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    };
+    return 'beryllium-' + s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
   componentWillUnmount() { }
 
   calculateMeasure = async () => {
@@ -63,6 +70,7 @@ export default class FinalPage extends Component {
     let token = await createToken('client_credentials', 'payer', 'john', 'john123');
     token = "Bearer " + token;
     let arr=[]
+    let identfiers=[]
     qualityImprovement.measureList.map(async (measure,key)=>{
       // let url = "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data"
       let measureUrl = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure?identifier="+measure.measureId
@@ -89,6 +97,27 @@ export default class FinalPage extends Component {
       //   console.log("No response recieved from the server", reason)
       // );
       // arr.push(requirements)
+      var identifier=this.getGUID()
+      qualityImprovement.identifiers.push(identifier)
+      this.props.updateStore({ qualityImprovement: qualityImprovement })
+
+      console.log(measure.measureData,'rowdy')
+      if(measure.measureData!==undefined && measure.measureData.hasOwnProperty('entry')){
+        for(var i=0;i<measure.measureData.entry.length;i++){
+          if(measure.measureData.entry[i].resource.hasOwnProperty('parameter')){
+            for(var j=0;j<measure.measureData.entry[i].resource.parameter.length;j++){
+             if( measure.measureData.entry[i].resource.parameter[j].resource.resourceType==='Patient'){
+              measure.measureData.entry[i].resource.parameter[j].resource.identifier.push({
+                "system": "http://www.affosoft.com/identifier",
+                "use": "usual",
+                "value": identifier
+              })
+             }
+            }
+          }
+        }
+      }
+
       var smart = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data-bundle" });
       var myHeaders = {
         "Content-Type": "application/json",

@@ -62,7 +62,8 @@ class Mips extends Component {
         submissionType: "",
         weightage: "45",
         loading:true,
-        group:false
+        group:false,
+        identifiers:[]
 
       },
       promotingInteroperability: {
