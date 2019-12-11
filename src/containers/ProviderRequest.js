@@ -94,7 +94,7 @@ class ProviderRequest extends Component {
       category_name: "",
       // device_code: "",
       // device_text: "",
-      // quantity:'',
+      quantity:1,
       unit: null,
       birthDate: '',
       patientState: '',
@@ -145,7 +145,7 @@ class ProviderRequest extends Component {
     this.onChangeLastName = this.onChangeLastName.bind(this);
     this.orderReviewButton = this.orderReviewButton.bind(this);
     this.medicationButton = this.medicationButton.bind(this);
-    // this.onQuantityChange = this.onQuantityChange.bind(this);
+    this.onQuantityChange = this.onQuantityChange.bind(this);
     this.onPractitionerChange = this.onPractitionerChange.bind(this);
     this.changeDosageAmount = this.changeDosageAmount.bind(this);
     this.changefrequency = this.changefrequency.bind(this);
@@ -469,9 +469,9 @@ class ProviderRequest extends Component {
   onChangeLastName(event) {
     this.setState({ lastName: event.target.value });
   }
-  // onQuantityChange(event) {
-  //   this.setState({ quantity: event.target.value });
-  // }
+  onQuantityChange(event) {
+    this.setState({ quantity: event.target.value });
+  }
   onPractitionerChange(event) {
     this.setState({ practitionerId: event.target.value });
   }
@@ -1022,6 +1022,15 @@ class ProviderRequest extends Component {
                 }
                 <div className="form-row">
                   <div className="form-group col-md-3 offset-1">
+                    <h4 className="title">Quantity</h4>
+                  </div>
+                  <div className="form-group col-md-8">
+                    <input type="text" name="quantity" className="form-control" id="name" placeholder="Quantity"
+                      value={this.state.quantity} onChange={this.onQuantityChange} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group col-md-3 offset-1">
                     <h4 className="title">NPI</h4>
                   </div>
                   <div className="form-group col-md-8">
@@ -1231,6 +1240,7 @@ class ProviderRequest extends Component {
       "subject": {
         "display": this.state.firstName + " " + this.state.lastName
       },
+      "quantity":{"value":this.state.quantity},
       // "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
       // "authoredOn": "2013-05-08T09:33:27+07:00",
       "requester": {
@@ -1252,6 +1262,9 @@ class ProviderRequest extends Component {
           ],
           "text": ""
         }
+      }
+      if (i == 0){
+        serviceRequest["code"] = obj.code;
       }
       serviceRequest.category.push(obj)
     }
