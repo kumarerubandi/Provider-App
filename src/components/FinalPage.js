@@ -72,6 +72,34 @@ export default class FinalPage extends Component {
     token = "Bearer " + token;
     let arr=[]
     let identfiers=[]
+    console.log(this.props.getStore())
+    let json = {}
+    json.qualityImprovement = qualityImprovement
+    json.promotingInteroperability = promotingInteroperability
+    json.improvementActivity = improvementActivity
+    json.costMeasures = costMeasures
+    json.resourceType = 'Measure'
+    // let token = await createToken('client_credentials', 'payer', 'john', 'john123');
+    const fhirClient = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/$calculate-score" });
+    fhirClient.bearerToken = token;
+    fhirClient.create({
+      resourceType: "Measure",
+      body: json,
+      headers: {
+        "Content-Type": "application/fhir+json",
+      }
+    }).then((result) => {
+      console.log("message def result", result);
+      this.setState({ showScore: true });
+      this.setState({ score: result.group[0].measureScore.value });
+
+      window.scrollTop(0);
+      // return reject(link);
+    }).catch((err) => {
+      console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
+      // link.error = true;
+      // return reject(link);
+    });
     qualityImprovement.measureList.map(async (measure,key)=>{
       // let url = "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data"
       let measureUrl = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure?identifier="+measure.measureId
@@ -133,34 +161,7 @@ export default class FinalPage extends Component {
     
 
 
-    console.log(this.props.getStore())
-    let json = {}
-    json.qualityImprovement = qualityImprovement
-    json.promotingInteroperability = promotingInteroperability
-    json.improvementActivity = improvementActivity
-    json.costMeasures = costMeasures
-    json.resourceType = 'Measure'
-    // let token = await createToken('client_credentials', 'payer', 'john', 'john123');
-    const fhirClient = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/$calculate-score" });
-    fhirClient.bearerToken = token;
-    fhirClient.create({
-      resourceType: "Measure",
-      body: json,
-      headers: {
-        "Content-Type": "application/fhir+json",
-      }
-    }).then((result) => {
-      console.log("message def result", result);
-      this.setState({ showScore: true });
-      this.setState({ score: result.group[0].measureScore.value });
-
-      window.scrollTop(0);
-      // return reject(link);
-    }).catch((err) => {
-      console.error('Cannot grab launch context from the FHIR server endpoint to launch the SMART app. See network calls to the Launch endpoint for more details', err);
-      // link.error = true;
-      // return reject(link);
-    });
+    
 
   }
 
