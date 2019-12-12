@@ -104,7 +104,7 @@ export default class QualityImprovement extends Component {
       measureTypeOptions: measureTypeOptions,
       specialtyMeasureSetOptions: specificMeasureTypeOptions,
       filteredMeasures: [],
-      measureObj: {},
+      measureObj: props.getStore().qualityImprovement.measureObj,
       // reporting: props.getStore().qualityImprovement.reporting,
       reporting: (!props.getStore().improvementActivity.group) ? 'individual' : "group",
       practice: props.getStore().qualityImprovement.practice,
@@ -480,6 +480,7 @@ export default class QualityImprovement extends Component {
         console.log(tempArr, 'tempArrs')
         let qualityImprovement = this.state.qualityImprovement
         qualityImprovement.measureList = tempArr
+        qualityImprovement.measureObj = measureObj
         this.props.updateStore({
           qualityImprovement: qualityImprovement
         });

@@ -571,6 +571,10 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 .logout{
   float:right;
 }
+.pad{
+  padding-top:0.5%
+}
+.p
 
 .logout-btn,.submenu-item{
   background: #3FB1CF;

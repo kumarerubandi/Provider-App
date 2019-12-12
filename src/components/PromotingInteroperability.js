@@ -50,7 +50,7 @@ export default class PromotingInteroperability extends Component {
       scoreWeightOptions: scoreWeightOptions,
       objectiveName: props.getStore().promotingInteroperability.objectiveName,
       filteredMeasures: [],
-      measureObj: {},
+      measureObj: props.getStore().promotingInteroperability.measureObj,
 
       scoreWeight: props.getStore().promotingInteroperability.scoreWeight,
       measureOptions: props.getStore().promotingInteroperability.measureOptions,
@@ -316,6 +316,7 @@ export default class PromotingInteroperability extends Component {
     console.log("Measure List---", this.state.measureList);
     let promotingInteroperability = this.state.promotingInteroperability
     promotingInteroperability.measureList = measureList
+    promotingInteroperability.measureObj = measureObj
     this.props.updateStore({
       promotingInteroperability: promotingInteroperability
     });
@@ -389,18 +390,18 @@ export default class PromotingInteroperability extends Component {
         let Obj = this.state.measureOptions.find((m) => {
           return m.key === this.state.measure
         })
-        let questionnarie = await this.getQuestionnarieByIdentifier(this.state.measure);
+        // let questionnarie = await this.getQuestionnarieByIdentifier(this.state.measure);
         let showQues = true;
-        if (!questionnarie) {
-          showQues = false
-        }
+        // if (!questionnarie) {
+        //   showQues = false
+        // }
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
           measureList: [...prevState.measureList, {
             measureId: this.state.measure, measureName: Obj.text,
             objectivename: Obj.objectivename, measureweight: Obj.measureweight,
-            showData: false, loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+            // showData: false, loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
           }]
         }))
         const { measureList } = this.state;
@@ -408,11 +409,12 @@ export default class PromotingInteroperability extends Component {
         tempArr.push({
           measureId: this.state.measure, measureName: Obj.text,
           objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false,
-          loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+          // loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
         });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
+        promotingInteroperability.measureObj = measureObj
         this.props.updateStore({
           promotingInteroperability: promotingInteroperability,
           savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again

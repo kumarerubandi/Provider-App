@@ -15,7 +15,7 @@ export default class Cost extends Component {
         measureList: props.getStore().costMeasures.measureList,
         costMeasures: props.getStore().costMeasures,
         measureOptions: props.getStore().costMeasures.measureOptions,
-        measureObj:{}
+        measureObj:props.getStore().costMeasures.measureObj
 
 
     };
@@ -81,6 +81,7 @@ export default class Cost extends Component {
         console.log(tempArr,'tempArrs')
         let costMeasures = this.state.costMeasures
         costMeasures.measureList = tempArr
+        costMeasures.measureObj = measureObj
         this.props.updateStore({
           costMeasures:costMeasures,
           savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
