@@ -69,10 +69,9 @@ export default class ImprovementActivities extends Component {
   componentDidMount() {
     var measureOptions = []
     for (var i = 0; i < improvementMeasures.length; i++) {
-      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"] }, true)
+      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"], activityWeight: improvementMeasures[i]["ACTIVITY WEIGHTING"] }, true)
     }
     this.setState({ measureOptions: measureOptions })
-    console.log(measureOptions,'opss')
   }
 
   componentWillUnmount() { }
@@ -175,8 +174,7 @@ export default class ImprovementActivities extends Component {
     this.setState({ activityWeight: data.value })
     let improvementActivity = this.state.improvementActivity
     var filteredMeasures = []
-    var measureOptions = this.state.measureOptions.splice()
-    console.log(measureOptions,'oiree')
+    var measureOptions = []
 
     if (data.value === 'all' && this.state.subCategoryName === 'all') {
       filteredMeasures = improvementMeasures.filter((measure) => {
@@ -184,9 +182,8 @@ export default class ImprovementActivities extends Component {
       })
     }
     else if (data.value !== 'all' && this.state.subCategoryName === 'all') {
-      
       filteredMeasures = improvementMeasures.filter((measure) => {
-        return measure["ACTIVITY WEIGHTING"].includes(data.value) >0
+        return measure["ACTIVITY WEIGHTING"].includes(data.value) > 0
       })
     }
     else if (data.value === 'all' && this.state.subCategoryName !== 'all') {
@@ -208,9 +205,7 @@ export default class ImprovementActivities extends Component {
     for (var i = 0; i < filteredMeasures.length; i++) {
       push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"] }, true)
     }
-    console.log(measureOptions,'oil')
-    this.setState({ measureOptions   },console.log(this.state.measureOptions,'oil2',data.value))
-    
+    this.setState({ measureOptions: measureOptions })
     improvementActivity.activityWeight = data.value
     improvementActivity.measureOptions = measureOptions
     this.setState({ improvementActivity: improvementActivity })

@@ -12,8 +12,8 @@ import { findAndReplace } from 'find-and-replace-anything'
 
 
 
-var smart = new Client({ baseUrl: "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir" });
-var payerSmart = new Client({ baseUrl: "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir" });
+var smart = new Client({ baseUrl: Config.provider.fhir_url });
+var payerSmart = new Client({ baseUrl: Config.payer.fhir_url });
 
 // console.log(smart.search({ resourceType: "Patient", searchParams: { _count: '100' } }));
 
@@ -480,7 +480,7 @@ export default class QualityImprovement extends Component {
         console.log(tempArr, 'tempArrs')
         let qualityImprovement = this.state.qualityImprovement
         qualityImprovement.measureList = tempArr
-        qualityImprovement.measureObj = measureObj
+        qualityImprovement.measureObj=measureObj
         this.props.updateStore({
           qualityImprovement: qualityImprovement
         });
@@ -525,7 +525,7 @@ export default class QualityImprovement extends Component {
   getDataRequirementsByIdentifier = async (identifier) => {
     let token = await createToken(Config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
     token = "Bearer " + token;
-    let fhir_url = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir";
+    let fhir_url = Config.payer.fhir_url;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
       "authorization": token,
@@ -989,24 +989,24 @@ export default class QualityImprovement extends Component {
       console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
     })
 
-    await this.getDataByCategory(promotingInteroperability.measureList, 'pi').then((result) => {
-      promotingInteroperability.measureList = result;
-      promotingInteroperability.loading = false;
-      this.setState({ promotingInteroperability: promotingInteroperability })
-      this.props.updateStore({
-        promotingInteroperability: promotingInteroperability
-      })
-        console.log("PI data added---",this.state.promotingInteroperability);
-    })
-    await this.getDataByCategory(improvementActivity.measureList, 'ia').then((result) => {
-      improvementActivity.measureList = result;
-      improvementActivity.loading = false;
-      this.setState({ improvementActivity: improvementActivity })
-      this.props.updateStore({
-        improvementActivity: improvementActivity
-      })
+    // await this.getDataByCategory(promotingInteroperability.measureList, 'pi').then((result) => {
+    //   promotingInteroperability.measureList = result;
+    //   promotingInteroperability.loading = false;
+    //   this.setState({ promotingInteroperability: promotingInteroperability })
+    //   this.props.updateStore({
+    //     promotingInteroperability: promotingInteroperability
+    //   })
+    //     console.log("PI data added---",this.state.promotingInteroperability);
+    // })
+    // await this.getDataByCategory(improvementActivity.measureList, 'ia').then((result) => {
+    //   improvementActivity.measureList = result;
+    //   improvementActivity.loading = false;
+    //   this.setState({ improvementActivity: improvementActivity })
+    //   this.props.updateStore({
+    //     improvementActivity: improvementActivity
+    //   })
 
-    })
+    // })
 
     console.log("--------qualityImprovement", "promotingInteroperability", "improvementActivity");
 

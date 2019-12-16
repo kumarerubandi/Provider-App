@@ -401,7 +401,9 @@ export default class PromotingInteroperability extends Component {
           measureList: [...prevState.measureList, {
             measureId: this.state.measure, measureName: Obj.text,
             objectivename: Obj.objectivename, measureweight: Obj.measureweight,
-            // showData: false, loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+            showData: false, loading: true,
+            //  questionnarie: questionnarie,
+              // showQuestionnarie: showQues
           }]
         }))
         const { measureList } = this.state;
@@ -409,12 +411,12 @@ export default class PromotingInteroperability extends Component {
         tempArr.push({
           measureId: this.state.measure, measureName: Obj.text,
           objectivename: Obj.objectivename, measureweight: Obj.measureweight, showData: false,
-          // loading: true, questionnarie: questionnarie, showQuestionnarie: showQues
+          loading: true, 
+          // questionnarie: questionnarie, showQuestionnarie: showQues
         });
         console.log(tempArr, 'tempArrs')
         let promotingInteroperability = this.state.promotingInteroperability
         promotingInteroperability.measureList = tempArr
-        promotingInteroperability.measureObj = measureObj
         this.props.updateStore({
           promotingInteroperability: promotingInteroperability,
           savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again

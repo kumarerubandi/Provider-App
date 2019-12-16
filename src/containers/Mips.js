@@ -64,7 +64,7 @@ class Mips extends Component {
         loading:true,
         group:false,
         identifiers:[],
-        measureObj:{}
+        measureObj:{},
 
       },
       promotingInteroperability: {
@@ -104,6 +104,7 @@ class Mips extends Component {
         group:false,
         measureObj:{}
 
+
       },
       costMeasures: {
         measure: '',
@@ -112,6 +113,7 @@ class Mips extends Component {
         weightage: "15",
         loading:true,
         measureObj:{}
+
 
       },
       savedToCloud: false
