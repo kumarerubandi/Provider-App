@@ -156,7 +156,7 @@ export default class ImprovementActivities extends Component {
 
     console.log(filteredMeasures, 'is it working')
     for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"] }, true)
+      push(measureOptions, { key: filteredMeasures[i]["ACTIVITY ID"], text: filteredMeasures[i]["ACTIVITY NAME"], value: filteredMeasures[i]["ACTIVITY ID"], activityWeight: filteredMeasures[i]["ACTIVITY WEIGHTING"] }, true)
     }
     this.setState({ measureOptions: measureOptions })
     improvementActivity.subCategoryName = data.value
@@ -203,7 +203,7 @@ export default class ImprovementActivities extends Component {
     // this.setState({filteredMeasures:filteredMeasures})
 
     for (var i = 0; i < filteredMeasures.length; i++) {
-      push(measureOptions, { key: improvementMeasures[i]["ACTIVITY ID"], text: improvementMeasures[i]["ACTIVITY NAME"], value: improvementMeasures[i]["ACTIVITY ID"] }, true)
+      push(measureOptions, { key: filteredMeasures[i]["ACTIVITY ID"], text: filteredMeasures[i]["ACTIVITY NAME"], value: filteredMeasures[i]["ACTIVITY ID"], activityWeight: filteredMeasures[i]["ACTIVITY WEIGHTING"] }, true)
     }
     this.setState({ measureOptions: measureOptions })
     improvementActivity.activityWeight = data.value

@@ -115,6 +115,7 @@ export default class QualityImprovement extends Component {
       improvementActivity: props.getStore().improvementActivity,
       group: props.getStore().improvementActivity.group,
 
+
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
@@ -472,20 +473,98 @@ export default class QualityImprovement extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false,loading:true }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false,loading:true });
         console.log(tempArr, 'tempArrs')
         let qualityImprovement = this.state.qualityImprovement
         qualityImprovement.measureList = tempArr
-        qualityImprovement.measureObj=measureObj
+        qualityImprovement.measureObj = measureObj
         this.props.updateStore({
           qualityImprovement: qualityImprovement
         });
       }
     }
+  }
+
+  async generateSummaryBundle(dataRequirements, measureId) {
+    let summaryBundle = {
+      "resourceType": "Bundle",
+      "type": "transaction",
+      "entry": []
+    }
+
+
+    // console.log(Config.operationPayload,'operationpayload in reconcile',patient)
+    // let resource = await this.reconcile(p, dataRequirements, measureId);
+    let resource = await this.getMeasureData(dataRequirements, measureId);
+    let promises = this.patientsList.map(async (patientEntry, key) => {
+      // for (let patientEntry of this.patientsList) {
+      let patient = patientEntry.resource;
+      let payload = {
+        "request": {
+          "method": "POST",
+          "url": "Measure/measure-col/$submit-data"
+        }
+      }
+      let practitionerID = null
+      let orgID = null
+      if (patient.hasOwnProperty("managingOrganization")) {
+        orgID = patient.managingOrganization.reference.split('/')[1];
+      }
+      if (patient.hasOwnProperty("generalPractitioner")) {
+        practitionerID = patient.generalPractitioner[0].reference.split('/')[1];
+      }
+      let practitioner = resource.find((r) => {
+        return r.id === practitionerID
+      })
+      let organization = resource.find((r) => {
+        return r.id === orgID
+      })
+      let filteredResources = []
+      console.log('resource without filter', resource)
+      filteredResources = resource.filter((r) => {
+        return (r.resourceType !== "Organization" && r.resourceType !== "Practitioner") && ((r.resourceType === 'AllergyIntolerance' && r.patient.reference === 'Patient/' + patient.id) || (r.resourceType !== 'AllergyIntolerance' && r.resourceType !== "Organization" && r.resourceType !== "Practitioner" && r.subject.reference === 'Patient/' + patient.id))
+      })
+      // let count=0
+      console.log(filteredResources, 'filtered resources')
+      let payloadResource;
+      if (filteredResources.length > 0) {
+        console.log('12341234')
+        filteredResources.push(practitioner)
+        filteredResources.push(patient)
+        filteredResources.push(organization)
+        payloadResource = await this.generatePayload(filteredResources, measureId);
+      }
+
+      if (filteredResources.length !== []) {
+        console.log(payloadResource, 'payloadREsource')
+        if (payloadResource !== undefined) {
+          payload['resource'] = payloadResource
+          // payload.resource.id = this.getGUID()
+          // summaryBundle.entry.push(payload)
+          // console.log('summaryBundle', summaryBundle)
+          
+          return payload
+        }
+
+      }
+
+    })
+    // console.log(promises, 'promises')
+    return await Promise.all(promises).then(data => {
+      data.map((e,k)=>{
+        if(e!==undefined){
+          summaryBundle.entry.push(e)
+          // console.log('summaryBundle', summaryBundle)
+        }
+      })
+      console.log("First handler", summaryBundle);
+      return summaryBundle;
+    })
+
   }
 
   async getSummaryBundle(dataRequirements, measureId) {
@@ -516,7 +595,6 @@ export default class QualityImprovement extends Component {
         // console.log('patload',payload)
         summaryBundle.entry.push(payload)
       }
-
     }
     console.log("\n\n --------Summary Bundle", summaryBundle);
     return summaryBundle
@@ -530,7 +608,8 @@ export default class QualityImprovement extends Component {
       "Content-Type": "application/json",
       "authorization": token,
     });
-    var url = fhir_url + "/Measure/$data-requirements-by-identfier?identifier=" + identifier + "&periodStart=2019-07-19&periodEnd=2020-10-25";
+    // var url = fhir_url + "/Measure/$data-requirements-by-identfier?identifier=" + identifier + "&periodStart=2019-07-19&periodEnd=2020-10-25";
+    var url = fhir_url + "/Measure/$data-requirements-by-identifier?identifier=" + identifier;
     let requirements = await fetch(url, {
       method: "GET",
       headers: myHeaders
@@ -609,36 +688,16 @@ export default class QualityImprovement extends Component {
     // encounter.resource = encounterResource;
     // location.resource = locationResource;
     // coverage.resource = coverageResource;
-    let list_of_ids = []
-    let res = payerSmart.search({ resourceType: "Measure", searchParams: { identifier: measureId } })
-    list_of_ids.push(res)
-    let result = await Promise.all(list_of_ids)
-    let id = ''
-    if ('entry' in result[0]) {
-      id = result[0].entry[0].resource.id
-    }
+
     // TODO: look into a more elegant resource generation approach
     measurereport.resource.subject.reference = "Patient/" + patientResource.id;
     measurereport.resource.date = timestamp;
-    measurereport.resource.measure = "Measure/" + id;
+    // measurereport.resource.measure = "Measure/" + id;
+    measurereport.resource.measure = "Measure/" + measureId;
     measurereport.resource.period.start = timestamp;
     measurereport.resource.period.end = timestamp;
     measurereport.resource.reporter.reference = "Organization/" + organization.id;
-    // task.resource.for.reference = "Patient/" + patientResource.id;
-    // task.resource.authoredOn = timestamp;
-    // task.resource.executionPeriod.start = timestamp;
-    // task.resource.executionPeriod.end = timestamp;
-    // task.resource.owner.reference = "Practitioner/" + practitioner.id;
-    // encounter.resource.period.start = timestamp;
-    // encounter.resource.period.end = timestamp;
-    // encounter.resource.subject.reference = "Patient/" + patient.resource.id;
-    // encounter.resource.location[0].location.reference = "Location/" + location.resource.id;
-    // encounter.resource.participant[0].individual.reference = "Practitioner/" + practitioner.resource.id;
-    // encounter.resource.serviceProvider.reference = "Organization/" + organization.resource.id;
-    // patient.resource.managingOrganization.reference = "Organization/" + organization.resource.id;
-    // coverage.resource.policyHolder.reference = "Patient/" + patient.resource.id;
-    // coverage.resource.subscriber.reference = "Patient/" + patient.resource.id;
-    // coverage.resource.beneficiary.reference = "Patient/" + patient.resource.id;
+
 
     let arr = []
     arr.push(measurereport)
@@ -714,6 +773,86 @@ export default class QualityImprovement extends Component {
     return obj2;
   }
 
+  getMeasureData = async (mlibDR, measureId) => {
+    console.log('in get MEasure Data method')
+    let libDR = mlibDR
+    // console.log(patient,'patient organization',smart,'client')
+    let orgID = null
+    let practitionerID = null
+
+    // if (patient.hasOwnProperty("managingOrganization")) {
+    //   orgID = patient.managingOrganization.reference.split('/')[1];
+    // }
+    // if (patient.hasOwnProperty("generalPractitioner")) {
+    //   practitionerID = patient.generalPractitioner[0].reference.split('/')[1];
+    // }
+    var dataToLoad = []
+    dataToLoad.push(smart.search({ resourceType: "Organization" }))
+    dataToLoad.push(smart.search({ resourceType: "Practitioner" }))
+    // if (orgID !== null) {
+
+    // }
+    // if (practitionerID !== null) {
+    //   dataToLoad.push(smart.search({ resourceType: "Practitioner" }))
+    // }
+    for (var i = 0; i < libDR.dataRequirement.length; i++) {
+      if (libDR.dataRequirement[i].type !== "Patient") {
+        let codes;
+        if (libDR.dataRequirement[i].codeFilter[0].hasOwnProperty('valueSet')) {
+          codes = libDR.dataRequirement[i].codeFilter[0].valueSet
+        }
+        else {
+          codes = libDR.dataRequirement[i].codeFilter[0].code[0].code
+        }
+        if (codes.length > 0) {
+          if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
+            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { code: codes } }))
+          }
+          else if (libDR.dataRequirement[i].type === 'Encounter') {
+            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { type: codes } }))
+          }
+          else if (libDR.dataRequirement[i].type === 'Immunization') {
+            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { 'reason-code': codes } }))
+          }
+          else {
+            dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { code: codes } }))
+          }
+        }
+      }
+
+      // else if(libDR.dataRequirement[i].type='Location')    
+
+    }
+
+    let res = await Promise.all(dataToLoad);
+    console.log(JSON.stringify(res), 'what res');
+
+    let count = 0
+    let resultArray = []
+    for (var j = 0; j < res.length; j++) {
+      // var arr = Object.keys(res[j])
+      // console.log(arr,'arr')
+      // if(arr.indexOf('entry') !== -1)
+      if ('entry' in res[j]) {
+        if (res[j].entry.length > 0) {
+          for (var i = 0; i < res[j].entry.length; i++) {
+            resultArray.push(res[j].entry[i].resource)
+            count = count + 1
+          }
+        }
+        else {
+          resultArray.push(res[j].entry[0].resource)
+          count = count + 1
+        }
+      }
+
+    }
+    // resultArray[]
+
+    return resultArray
+
+  }
+
   reconcile = async (patient, mlibDR, measureId) => {
     console.log('in reconcile method')
     let libDR = mlibDR
@@ -747,56 +886,63 @@ export default class QualityImprovement extends Component {
           dataToLoad.push(smart.search({ resourceType: "Coverage", searchParams: { subscriber: patient.id } }))
         }
         else {
-          let identifier = ''
-          console.log(libDR.dataRequirement[i].codeFilter[0], 'data req')
-          if (libDR.dataRequirement[i].codeFilter[0].hasOwnProperty('valueSet')) {
-            identifier = libDR.dataRequirement[i].codeFilter[0].valueSet.substring(8)
-          }
+          // let identifier = ''
+          // console.log(libDR.dataRequirement[i].codeFilter[0], 'data req')
+          // if (libDR.dataRequirement[i].codeFilter[0].hasOwnProperty('valueSet')) {
+          //   identifier = libDR.dataRequirement[i].codeFilter[0].valueSet.substring(8)
+          // }
           // else if (libDR.dataRequirement[i].codeFilter[2].hasOwnProperty('valueSet')) {
           //   identifier = libDR.dataRequirement[i].codeFilter[2].valueSet.substring(8)
           // }
-          let codes = []
+          // let codes = []
 
-          console.log(identifier, 'oooooo')
-          if (identifier !== '') {
-            let valueSet = []
-            let res = payerSmart.search({ resourceType: "ValueSet", searchParams: { identifier: identifier } })
-            valueSet.push(res)
-            let result = await Promise.all(valueSet)
-            console.log('inside procedure if', result)
-            // console.log('inside procedure if')
-            if ('entry' in result[0]) {
-              // for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
-              // for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
-              //   if(codes.indexOf(result[0].entry[0].resource.compose.include[k].concept[j].code)===-1){
-              //     codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
-              //   }
-              // }
-              // }
-              for (var j = 0; j < result[0].entry[0].resource.compose.include[0].concept.length; j++) {
-                if (codes.indexOf(result[0].entry[0].resource.compose.include[0].concept[j].code) === -1) {
-                  codes.push(result[0].entry[0].resource.compose.include[0].concept[j].code)
-                }
-              }
-            }
-          }
-          else {
-            if (codes.indexOf(libDR.dataRequirement[i].codeFilter[0].code[0].code) === -1) {
-              codes.push(libDR.dataRequirement[i].codeFilter[0].code[0].code)
-            }
-          }
+          // console.log(identifier, 'oooooo')
+          // if (identifier !== '') {
+          //   let valueSet = []
+          //   let res = payerSmart.search({ resourceType: "ValueSet", searchParams: { identifier: identifier } })
+          //   valueSet.push(res)
+          //   let result = await Promise.all(valueSet)
+          //   console.log('inside procedure if', result)
+          //   // console.log('inside procedure if')
+          //   if ('entry' in result[0]) {
+          //     // for (var k = 0; k < result[0].entry[0].resource.compose.include.length; k++) {
+          //     // for (var j = 0; j < result[0].entry[0].resource.compose.include[k].concept.length; j++) {
+          //     //   if(codes.indexOf(result[0].entry[0].resource.compose.include[k].concept[j].code)===-1){
+          //     //     codes.push(result[0].entry[0].resource.compose.include[k].concept[j].code)
+          //     //   }
+          //     // }
+          //     // }
+          //     for (var j = 0; j < result[0].entry[0].resource.compose.include[0].concept.length; j++) {
+          //       if (codes.indexOf(result[0].entry[0].resource.compose.include[0].concept[j].code) === -1) {
+          //         codes.push(result[0].entry[0].resource.compose.include[0].concept[j].code)
+          //       }
+          //     }
+          //   }
+          // }
+          // else {
+          //   if (codes.indexOf(libDR.dataRequirement[i].codeFilter[0].code[0].code) === -1) {
+          //     codes.push(libDR.dataRequirement[i].codeFilter[0].code[0].code)
+          //   }
+          // }
 
 
           // console.log(codes.toString(), 'please dear god')
+          let codes;
+          if (libDR.dataRequirement[i].codeFilter[0].hasOwnProperty('valueSet')) {
+            codes = libDR.dataRequirement[i].codeFilter[0].valueSet
+          }
+          else {
+            codes = libDR.dataRequirement[i].codeFilter[0].code[0].code
+          }
           if (codes.length > 0) {
             if (libDR.dataRequirement[i].type === 'AllergyIntolerance') {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes.toString() } }))
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { patient: patient.id, code: codes } }))
             }
             else if (libDR.dataRequirement[i].type === 'Encounter') {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, type: codes.toString() } }))
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, type: codes } }))
             }
             else {
-              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes.toString() } }))
+              dataToLoad.push(smart.search({ resourceType: libDR.dataRequirement[i].type, searchParams: { subject: patient.id, code: codes } }))
             }
           }
         }
@@ -825,7 +971,6 @@ export default class QualityImprovement extends Component {
       // var arr = Object.keys(res[j])
       // console.log(arr,'arr')
       // if(arr.indexOf('entry') !== -1)
-
       if ('entry' in res[j]) {
         if (res[j].entry.length > 0) {
           for (var i = 0; i < res[j].entry.length; i++) {
@@ -837,30 +982,6 @@ export default class QualityImprovement extends Component {
           resultArray.push(res[j].entry[0].resource)
           count = count + 1
         }
-        // if (res[j].entry[0].resource.resourceType === "Location") {
-        //   location = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Coverage") {
-        //   console.assert(res[j].total <= 1, "No more than 1 Coverage resources found");
-        //   console.assert(res[j].total === 1, "Matching Coverage resource found");
-        //   coverage = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Condition") {
-        //   condition = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Procedure") {
-        //   procedure = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Encounter") {
-        //   encounter = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Organization") {
-        //   organization = res[j].entry[0].resource
-        // }
-        // else if (res[j].entry[0].resource.resourceType === "Practitioner") {
-        //   practitioner = res[j].entry[0].resource
-        // }
-
       }
 
     }
@@ -883,6 +1004,29 @@ export default class QualityImprovement extends Component {
     //     flag = true
     //   }
     // }
+
+    //new code
+    // var data=[]
+    // for(var p=0;p<this.patientsList.length;p++){
+    //   if (this.patientsList[p].hasOwnProperty("managingOrganization")) {
+    //     orgID = this.patientsList[p].managingOrganization.reference.split('/')[1];
+    //   }
+    //   if (this.patientsList[p].hasOwnProperty("generalPractitioner")) {
+    //     practitionerID = this.patientsList[p].generalPractitioner[0].reference.split('/')[1];
+    //   }
+
+    //   if (orgID !== null) {
+    //     data.push(smart.read({ resourceType: "Organization", id: orgID }))
+    //   }
+    //   if (practitionerID !== null) {
+    //     data.push(smart.read({ resourceType: "Practitioner", id: practitionerID }))
+    //   }
+    // }
+    // let result = await Promise.all(data);
+    // console.log(JSON.stringify(result), 'what result');
+    // let organization = result[0]
+    // let practitioner = result[1]
+
     resultArray.push(patient)
     resultArray.push(organization)
     resultArray.push(practitioner)
@@ -905,7 +1049,33 @@ export default class QualityImprovement extends Component {
     // }
 
   }
+  async getMeasureId(identifier) {
+    return new Promise(function (resolve, reject) {
+      var url = Config.payer.fhir_url + '/Measure?identifier=' + identifier
+      // let token;
+      // token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
+      let headers = {
+        "Content-Type": "application/json",
+        // 'Authorization': 'Bearer ' + token
+      }
 
+      let measure = fetch(url, {
+        method: "GET",
+        headers: headers
+      }).then(response => {
+        return response.json();
+      }).then((response) => {
+        let measureId = response.entry[0].resource.id
+        resolve(measureId);
+      }).catch(reason => {
+        console.log("No Measure found", reason)
+        reject('No Measure found')
+      }
+      );
+      // return measure;
+
+    })
+  }
   async getDataByCategory(measureList, type) {
     let response = [];
     let qualityImprovement = this.state.qualityImprovement
@@ -916,21 +1086,24 @@ export default class QualityImprovement extends Component {
       measureList.map((measure, i) => {
         this.getDataRequirementsByIdentifier(measure.measureId).then((result) => {
           if (result.hasOwnProperty("dataRequirement")) {
-            this.getSummaryBundle(result, measure.measureId).then((res) => {
-              measure.measureData = res
-              // measureList.push(measure);
-              measure.loading = false
-              if (type === 'qi') {
-                this.props.updateStore({ qualityImprovement: qualityImprovement })
-              }
-              else if (type === 'pi') {
-                this.props.updateStore({ promotingInteroperability: promotingInteroperability })
-              }
-              else if (type === 'ia') {
-                this.props.updateStore({ improvementActivity: improvementActivity })
-              }
-            });
+            this.getMeasureId(measure.measureId).then((mid) => {
 
+              this.generateSummaryBundle(result, mid).then((res) => {
+                measure.measureData = res
+                console.log(res, 'here in generate summary bujndle')
+                // measureList.push(measure);
+                measure.loading = false
+                if (type === 'qi') {
+                  this.props.updateStore({ qualityImprovement: qualityImprovement })
+                }
+                else if (type === 'pi') {
+                  this.props.updateStore({ promotingInteroperability: promotingInteroperability })
+                }
+                else if (type === 'ia') {
+                  this.props.updateStore({ improvementActivity: improvementActivity })
+                }
+              })
+            })
           }
           else {
             measure.data = null;
@@ -961,7 +1134,7 @@ export default class QualityImprovement extends Component {
         measure.measureData = measureDataBundle;
         response.push(measure);
       });
-      
+
     }
     else if (type === 'ia') {
       measureList = improvementActivity.measureList
@@ -1027,7 +1200,7 @@ export default class QualityImprovement extends Component {
     return (
       <div>
         <p className="text-center"><b>Quality</b> - 45% OF FINAL SCORE
-. Quality category carries the maximum weight towards final MIPS score and requires data to be reported for the full calendar year (Jan 1, 2019 – Dec 31, 2019). Quality category weight has been set to 45%  for 2019 unless you apply for PI hardship exception . In that case, the PI category weight of 25% is assigned to Quality category making the Quality category weight 70%.
+  . Quality category carries the maximum weight towards final MIPS score and requires data to be reported for the full calendar year (Jan 1, 2019 – Dec 31, 2019). Quality category weight has been set to 45%  for 2019 unless you apply for PI hardship exception . In that case, the PI category weight of 25% is assigned to Quality category making the Quality category weight 70%.
 Submit collected data for at least 6 measures, or a complete specialty measure set. One of these 6 measures should be an outcome measure (if you have no applicable outcome measure, you can submit another high priority measure instead).</p>
         <div className="form-row">
           <div className="form-group col-3 offset-1">
