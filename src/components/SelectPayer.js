@@ -68,7 +68,6 @@ export class SelectPayer extends Component {
       "Content-Type": "application/json",
       // 'Authorization': 'Bearer ' + token
     }
-
     let payersList = await fetch(url, {
       method: "GET",
       headers: headers

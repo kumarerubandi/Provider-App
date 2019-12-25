@@ -15,58 +15,7 @@ class Configuration extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            config: {
-                user_profiles: [
-                    {
-                        username: props.config.user_profiles[0].username,
-                        name: props.config.user_profiles[0].name,
-                        npi: props.config.user_profiles[0].npi
-                    },
-                    {
-                        username: props.config.user_profiles[1].username,
-                        name: props.config.user_profiles[1].name,
-                        npi: props.config.user_profiles[1].npi
-                    }
-                ],
-                dtr: {
-                    dtr_fhir: props.config.dtr.dtr_fhir
-                },
-                crd: {
-                    crd_url: props.config.crd.crd_url,
-                    coverage_decision_path: props.config.crd.coverage_decision_path,
-                    coverage_requirement_path: props.config.crd.coverage_requirement_path,
-                    patient_view_path: props.config.crd.patient_view_path
-                },
-                payer: {
-                    fhir_url: props.config.payer.fhir_url,
-                    grant_type: props.config.payer.grant_type,
-                    client_id: props.config.payer.client_id,
-                    client_secret: props.config.payer.client_secret,
-                    authorizedPayerFhir: props.config.payer.authorizedPayerFhir
-                },
-                provider: {
-                    fhir_url: props.config.provider.fhir_url,
-                    grant_type: props.config.provider.grant_type,
-                    client_secret: props.config.provider.client_secret,
-                    client_id: props.config.provider.client_id,
-                    authorized_fhir: props.config.provider.authorized_fhir
-                },
-                authorization_service: {
-                    auth_token_url: props.config.authorization_service.auth_token_url,
-                    token_verification_url: props.config.authorization_service.token_verification_url,
-                    token_type: props.config.authorization_service.token_type,
-                    token_expires_in: props.config.authorization_service.token_expires_in,
-                    scope: props.config.authorization_service.scope,
-                    subject: props.config.authorization_service.subject
-                },
-                cds_service: {
-                    vsac_user: props.config.cds_service.vsac_user,
-                    vsac_password: props.config.cds_service.vsac_password,
-                    get_payers: props.config.cds_service.get_payers,
-                    get_codes: props.config.cds_service.get_codes
-                },
-                xmlx12_url: props.config.xmlx12_url,
-            },
+            config: sessionStorage.getItem('config') !== undefined ? JSON.parse(sessionStorage.getItem('config')) : {},
         }
         this.onChangeTokenExpiry = this.onChangeTokenExpiry.bind(this);
         this.onChangeCrdUrl = this.onChangeCrdUrl.bind(this);
@@ -87,7 +36,14 @@ class Configuration extends Component {
         this.onChangeTokenType = this.onChangeTokenType.bind(this);
         this.onSaveConfiguration = this.onSaveConfiguration.bind(this);
         this.resetToDefaults = this.resetToDefaults.bind(this);
+        this.onClickLogout = this.onClickLogout.bind(this);
         this.goTo = this.goTo.bind(this);
+    }
+
+    onClickLogout() {
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('fhir_url');
+        this.props.history.push('/home');
     }
 
     onChangeTokenExpiry(event) {
@@ -97,7 +53,7 @@ class Configuration extends Component {
     }
     onChangeCrdUrl(event) {
         let config = this.state.config;
-        config.crd.crd_url = event.target.value
+        config.crd_url = event.target.value
         this.setState({ config })
     }
     onChangeCoverageDecisionPath(event) {
@@ -112,58 +68,58 @@ class Configuration extends Component {
     }
     onChangePayerFhirUrl(event) {
         let config = this.state.config;
-        config.payer.fhir_url = event.target.value
+        config.payer_fhir_url = event.target.value
         this.setState({ config })
     }
     onChangePayerGrantType(event) {
         let config = this.state.config;
-        config.payer.grant_type = event.target.value
+        config.payer_grant_type = event.target.value
         this.setState({ config })
     }
     onChangePayerClientId(event) {
         let config = this.state.config;
-        config.payer.client_id = event.target.value
+        config.payer_client_id = event.target.value
         this.setState({ config })
     }
     onChangePayerClientSecret(event) {
         let config = this.state.config;
-        config.payer.client_secret = event.target.value
+        config.payer_client_secret = event.target.value
         this.setState({ config })
     }
     handleAPFChange(event) {
         let config = this.state.config;
-        config.payer.authorizedPayerFhir = event.target.checked
+        config.payer_authorised = event.target.checked
         console.log(event.target.checked, 'check')
         this.setState({ config })
     }
     onChangeProviderFhirUrl(event) {
         let config = this.state.config;
-        config.provider.fhir_url = event.target.value
+        config.provider_fhir_url = event.target.value
         this.setState({ config })
     }
     onChangeProviderGrantType(event) {
         let config = this.state.config;
-        config.provider.grant_type = event.target.value
+        config.provider_grant_type = event.target.value
         this.setState({ config })
     }
     onChangeProviderClientId(event) {
         let config = this.state.config;
-        config.provider.client_id = event.target.value
+        config.provider_client_id = event.target.value
         this.setState({ config })
     }
     onChangeProviderClientSecret(event) {
         let config = this.state.config;
-        config.provider.client_secret = event.target.value
+        config.provider_client_secret = event.target.value
         this.setState({ config })
     }
     onChangeAuthorizedFhir(event) {
         let config = this.state.config;
-        config.provider.authorized_fhir = event.target.checked
+        config.provider_authorised = event.target.checked
         this.setState({ config })
     }
     onChangeAuthTokenUrl(event) {
         let config = this.state.config;
-        config.authorization_service.auth_token_url = event.target.value
+        config.token_url = event.target.value
         this.setState({ config })
     }
     onChangeTokenVerificationUrl(event) {
@@ -176,16 +132,53 @@ class Configuration extends Component {
         config.authorization_service.token_type = event.target.value
         this.setState({ config })
     }
-    onSaveConfiguration() {
+    async onSaveConfiguration() {
         let config = this.state.config;
-        this.props.saveConfiguration(config);
-        NotificationManager.success('Your changes have been updated successfully', 'Success');
+        var url = "http://cdex.mettles.com/cds/updateConfig";
+        config["user_name"] = sessionStorage.getItem("username");
+        console.log(config['id']);
+        delete config["last_updated"];
+        delete config["id"];
+        console.log(config);
+        let self = this;
+        await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(config)
+        }).then(response => {
+            return response.json();
+        }).then((configuration) => {
+            console.log("Configuartion response---", configuration);
+            self.setState({"config":config})
+            sessionStorage.setItem('config', JSON.stringify(config))
+            NotificationManager.success('Your changes have been updated successfully', 'Success');
+        }).catch((reason) => {
+            self.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
+            console.log("Configuartion not recieved from the server", reason)
+        });
+        // this.props.saveConfiguration(config);
     }
-    resetToDefaults() {
-        this.props.saveConfiguration(config_default);
-        window.location.reload();
-        NotificationManager.success('Your changes have been updated successfully', 'Reset Successfull');
-
+    async resetToDefaults() {
+        var url = "http://cdex.mettles.com/cds/resetConfig";
+        let body = {"user_name": sessionStorage["username"]}
+        console.log(body);
+        let self = this;
+        await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(body)
+        }).then(response => {
+            return response.json();
+        }).then((configuration) => {
+            console.log("Configuartion response---", configuration);
+            configuration["user_name"] = sessionStorage.getItem("username")
+            self.setState({"config":configuration})
+            sessionStorage.setItem('config', JSON.stringify(configuration))
+            NotificationManager.success('Your changes have been set to defaults successfully', 'Reset Successfull');
+        }).catch((reason) => {
+            self.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
+            console.log("Configuartion not recieved from the server", reason)
+        });
+        // this.props.saveConfiguration(config_default);
+        // window.location.reload();
     }
     goTo(title) {
         window.location = window.location.protocol + "//" + window.location.host + "/" + title;
@@ -250,7 +243,7 @@ class Configuration extends Component {
                                     </div>
                                     <div className="form-group col-md-6">
                                         <input type="text" name="payer_fhir_url" className="form-control" id="name" placeholder="URL"
-                                            onChange={this.onChangePayerFhirUrl} value={this.state.config.payer.fhir_url}
+                                            onChange={this.onChangePayerFhirUrl} value={this.state.config.payer_fhir_url}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -262,7 +255,7 @@ class Configuration extends Component {
                                     <div className="form-group col-md-3">
                                         <input type="text" name="payer_grant_type" className="form-control" id="name" placeholder="Grant Type"
                                             onChange={this.onChangePayerGrantType}
-                                            value={this.state.config.payer.grant_type}
+                                            value={this.state.config.payer_grant_type}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -271,8 +264,8 @@ class Configuration extends Component {
                                             name="authorize_payer_fhir"
                                             type="checkbox"
                                             className="input-checkbox"
-                                            value={this.state.config.payer.authorizedPayerFhir}
-                                            checked={this.state.config.payer.authorizedPayerFhir}
+                                            value={this.state.config.payer_authorised}
+                                            checked={this.state.config.payer_authorised}
                                             onChange={this.handleAPFChange} /></div>
                                     </div>
                                 </div>
@@ -283,14 +276,14 @@ class Configuration extends Component {
                                     <div className="form-group col-md-3">
                                         <input type="text" name="payer_client_id" className="form-control" id="name" placeholder="Client Id"
                                             onChange={this.onChangePayerClientId}
-                                            value={this.state.config.payer.client_id}
+                                            value={this.state.config.payer_client_id}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
                                     <div className="form-group col-md-3">
                                         <input type="text" name="payer_client_secret" className="form-control" id="name" placeholder="Client Secret"
                                             onChange={this.onChangePayerClientSecret} fluid
-                                            value={this.state.config.payer.client_secret}
+                                            value={this.state.config.payer_client_secret}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -302,7 +295,7 @@ class Configuration extends Component {
                                     <div className="form-group col-md-6">
                                         <input type="text" name="provider_fhir_url" className="form-control" id="name" placeholder="URL"
                                             onChange={this.onChangeProviderFhirUrl}
-                                            value={this.state.config.provider.fhir_url}
+                                            value={this.state.config.provider_fhir_url}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -314,17 +307,17 @@ class Configuration extends Component {
                                     <div className="form-group col-md-3">
                                         <input type="text" name="provider_grant_type" className="form-control" id="name" placeholder="Grant Type"
                                             onChange={this.onChangeProviderGrantType} fluid
-                                            defaultValue={this.state.config.provider.grant_type}
+                                            defaultValue={this.state.config.provider_grant_type}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
                                     <div className="form-group col-md-3">
-                                    <div className="form-control">Authorized <input
+                                        <div className="form-control">Authorized <input
                                             name="authorize_fhir"
                                             className="input-checkbox"
                                             type="checkbox"
-                                            value={this.state.config.provider.authorized_fhir}
-                                            checked={this.state.config.provider.authorized_fhir}
+                                            value={this.state.config.provider_authorised}
+                                            checked={this.state.config.provider_authorised}
                                             onChange={this.onChangeAuthorizedFhir} /></div>
                                     </div>
                                 </div>
@@ -336,7 +329,7 @@ class Configuration extends Component {
                                         <input type="text" name="provider_client_id" className="form-control"
                                             id="name" placeholder="Client Id"
                                             onChange={this.onChangeProviderClientId}
-                                            defaultValue={this.state.config.provider.client_id}
+                                            defaultValue={this.state.config.provider_client_id}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -344,7 +337,7 @@ class Configuration extends Component {
                                         <input type="text" name="provider_client_secret" className="form-control"
                                             id="name" placeholder="Client Secret"
                                             onChange={this.onChangeProviderClientSecret}
-                                            defaultValue={this.state.config.provider.client_secret}
+                                            defaultValue={this.state.config.provider_client_secret}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -353,22 +346,22 @@ class Configuration extends Component {
                                     <div className="form-group col-md-2 offset-2">
                                         <h4 className="title">CRD</h4>
                                     </div>
-                                    <div className="form-group col-md-3">
+                                    <div className="form-group col-md-6">
                                         <input type="text" name="crd_url" className="form-control"
                                             id="name" placeholder="URL"
                                             onChange={this.onChangeCrdUrl}
-                                            value={this.state.config.crd.crd_url}
+                                            value={this.state.config.crd_url}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
-                                    <div className="form-group col-md-3">
+                                    {/* <div className="form-group col-md-3">
                                         <input type="text" name="coverage_requirements_path" className="form-control"
                                             id="name" placeholder="Requirements Path"
                                             onChange={this.onChangeCoverageRequirementPath}
                                             value={this.state.config.crd.coverage_requirement_path}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group col-md-2 offset-2">
@@ -378,7 +371,7 @@ class Configuration extends Component {
                                         <input type="text" name="auth_token_url" className="form-control"
                                             id="name" placeholder="Token URL"
                                             onChange={this.onChangeAuthTokenUrl}
-                                            defaultValue={this.state.config.authorization_service.auth_token_url}
+                                            defaultValue={this.state.config.token_url}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
@@ -443,7 +436,7 @@ class Configuration extends Component {
                             <div className="dropdown">
                                 <Input className='ui fluid input' type="text" fluid name="crd_url"
                                     onChange={this.onChangeCrdUrl}
-                                    defaultValue={this.state.config.crd.crd_url}>
+                                    defaultValue={this.state.config.crd_url}>
                                 </Input>
                             </div>
 
@@ -474,7 +467,7 @@ class Configuration extends Component {
                             <div className="dropdown">
                                 <Input className='ui fluid input' type="text" fluid name="auth_token_url"
                                     onChange={this.onChangeAuthTokenUrl}
-                                    defaultValue={this.state.config.authorization_service.auth_token_url}>
+                                    defaultValue={this.state.config.token_url}>
                                 </Input>
                             </div>
                             <div className='header-child'>Token Verification URL</div>

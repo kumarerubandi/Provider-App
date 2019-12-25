@@ -1,13 +1,12 @@
 import React from 'react';
 import $ from 'jquery';
 import { createToken } from '../components/Authentication';
-// import config from '../globalConfiguration.json';
+import config from '../globalConfiguration.json';
 import { Input } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Loader from 'react-loader-spinner';
 import adminClient from 'keycloak-admin-client'
-import properties from '../properties.json';
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -17,13 +16,13 @@ class LoginPage extends React.Component {
       password: '',
       fhir_url: '',
       login_error_msg: '',
-      success_msg:'',
+      success_msg: '',
       loading: false,
-      mode:'login',
-      confirmPassword:'',
+      mode: 'login',
+      confirmPassword: '',
       firstName: "",
       lastName: "",
-      user_created:false
+      user_created: false
     }
     this.handleName = this.handleName.bind(this);
     this.handlepassword = this.handlepassword.bind(this);
@@ -37,76 +36,86 @@ class LoginPage extends React.Component {
     this.registerUser = this.registerUser.bind(this);
   }
 
-  
 
-  registerUser(e){
-      console.log("register");
-      this.setState({ loading: true, login_error_msg: '' });
-      if(this.state.name == null || this.state.name == undefined || this.state.name == ""){
-        this.setState({ loading: false, login_error_msg: "Username is required !!" });
-        return false      
-      }
-      if(this.state.password == null || this.state.password == undefined || this.state.password == ""){
-        this.setState({ loading: false, login_error_msg: "Password is required !!" });
-        return false
-      }
-      if(this.state.firstName == null || this.state.firstName == undefined || this.state.firstName == ""){
-        this.setState({ loading: false, login_error_msg: "First Name is required !!" });
-        return false
-      }
-      if(this.state.lastName == null || this.state.lastName == undefined || this.state.lastName == ""){
-        this.setState({ lastName: "" });
-      }
 
-      if(this.state.password != this.state.confirmPassword){
-        this.setState({ loading: false, login_error_msg: "Passwords are not matching!" });
-        return false
-      }
+  registerUser(e) {
+    console.log("register");
+    this.setState({ loading: true, login_error_msg: '' });
+    if (this.state.name == null || this.state.name == undefined || this.state.name == "") {
+      this.setState({ loading: false, login_error_msg: "Username is required !!" });
+      return false
+    }
+    if (this.state.password == null || this.state.password == undefined || this.state.password == "") {
+      this.setState({ loading: false, login_error_msg: "Password is required !!" });
+      return false
+    }
+    if (this.state.firstName == null || this.state.firstName == undefined || this.state.firstName == "") {
+      this.setState({ loading: false, login_error_msg: "First Name is required !!" });
+      return false
+    }
+    if (this.state.lastName == null || this.state.lastName == undefined || this.state.lastName == "") {
+      this.setState({ lastName: "" });
+    }
 
-      let userJson = { "username": this.state.name,
-                       "credentials": [
-                           {
-                               "type": "password",
-                               "value": this.state.password,
-                               "temporary": false
-                           }
-                       ], 
-                       "enabled": true,
-                       "firstName":this.state.firstName,
-                       "lastName":this.state.lastName
-                      }
+    if (this.state.password != this.state.confirmPassword) {
+      this.setState({ loading: false, login_error_msg: "Passwords are not matching!" });
+      return false
+    }
 
-      adminClient(properties.keycloak_admin_settings).then((client) => {
-        console.log('client', client);
-        client.realms.find()
-          .then((realms) => {
+    let userJson = {
+      "username": this.state.name,
+      "credentials": [
+        {
+          "type": "password",
+          "value": this.state.password,
+          "temporary": false
+        }
+      ],
+      "enabled": true,
+      "firstName": this.state.firstName,
+      "lastName": this.state.lastName
+    }
+
+    adminClient(config.keycloak_admin_settings).then((client) => {
+      console.log('client', client);
+      client.realms.find()
+        .then((realms) => {
           console.log('realms', realms);
+        });
+      client.users.create(config.realm, userJson)
+        .then((msg) => {
+          var url = "http://cdex.mettles.com/cds/createConfig";
+          let body = { "user_name": this.state.name }
+          console.log(body);
+          let self = this;
+          fetch(url, {
+            method: "POST",
+            body: JSON.stringify(body)
+          }).then(response => {
+            return response.json();
+          }).then((configuration) => {
+            console.log("Configuartion response---", configuration);
+            console.log('create msg', msg);
+            if (msg.hasOwnProperty("id")) {
+              self.setState({ loading: false, success_msg: "User Created Sucessfully", user_created: true, mode: 'login' });
+            }
+          }).catch((reason) => {
+            self.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
+            console.log("Configuartion not recieved from the server", reason)
           });
-        client.users.create(properties.realm,userJson)
-          .then((msg) => {
-          console.log('create msg', msg);
-          if(msg.hasOwnProperty("id")){
-            this.setState({ loading: false, success_msg : "User Created Sucessfully",user_created:true, mode:'login' });
-          }
 
         });
-        // client.users.find("ProviderCredentials")
-        //   .then((users) => {
-        //   console.log('users', users);
-        //   });
-      })
+
+    })
       .catch((err) => {
         console.log('Error', err);
         this.setState({ loading: false, login_error_msg: "Internal Error !!" });
       });
-
-      this.setState({ loading: false, login_error_msg: "" });
-
   }
 
-  switchMode(mode){
+  switchMode(mode) {
 
-    this.setState({ mode: mode,user_created:false,"success_msg":"","login_error_msg":""});
+    this.setState({ mode: mode, user_created: false, "success_msg": "", "login_error_msg": "" });
   }
 
   componentDidMount() {
@@ -152,15 +161,32 @@ class LoginPage extends React.Component {
     if (tokenResponse !== null && tokenResponse !== undefined) {
       sessionStorage.setItem('username', this.state.name);
       sessionStorage.setItem('password', this.state.password);
-      console.log(this.props.config.user_profiles, 'user profiles')
-      for (var key in this.props.config.user_profiles) {
-        if (this.state.name === this.props.config.user_profiles[key].username) {
-          sessionStorage.setItem('npi', this.props.config.user_profiles[key].npi);
-          sessionStorage.setItem('name', this.props.config.user_profiles[key].name);
-        }
-      }
-      sessionStorage.setItem('isLoggedIn', true);
-      this.props.history.push(sessionStorage.getItem("redirectTo"));
+      var url = "http://cdex.mettles.com/cds/getConfig";
+      let body = { "user_name": this.state.name }
+      console.log(body);
+      let self = this;
+      await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(body)
+      }).then(response => {
+        return response.json();
+      }).then((configuration) => {
+        console.log("Configuartion response---", configuration);
+        // console.log(this.props.config.user_profiles, 'user profiles')
+        // for (var key in this.props.config.user_profiles) {
+        //   if (this.state.name === this.props.config.user_profiles[key].username) {
+        //     sessionStorage.setItem('npi', this.props.config.user_profiles[key].npi);
+        //     sessionStorage.setItem('name', this.props.config.user_profiles[key].name);
+        //   }
+        // }
+        sessionStorage.setItem('config', JSON.stringify(configuration))
+        sessionStorage.setItem('npi', config.npi);
+        sessionStorage.setItem('isLoggedIn', true);
+        this.props.history.push(sessionStorage.getItem("redirectTo"));
+      }).catch((reason) => {
+        self.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
+        console.log("Configuartion not recieved from the server", reason)
+      });
     }
     this.setState({ loading: false, login_error_msg: "Unable to login !! Please try again." });
   }
@@ -175,17 +201,17 @@ class LoginPage extends React.Component {
         <div className="form">
           <div className="container">
             <div className="col-5 ">
-              { this.state.mode == "login" &&
-              <div className="section-header">
-                <h3 style={{ paddingTop: "50%" }}>Login</h3>
-                <p>to the provider application</p>
-              </div>
+              {this.state.mode == "login" &&
+                <div className="section-header">
+                  <h3 style={{ paddingTop: "50%" }}>Login</h3>
+                  <p>to the provider application</p>
+                </div>
               }
-              { this.state.mode == "register" &&
-              <div className="section-header">
-                <h3 style={{ paddingTop: "50%" }}>Register User</h3>
-                <p>to the provider application</p>
-              </div>
+              {this.state.mode == "register" &&
+                <div className="section-header">
+                  <h3 style={{ paddingTop: "50%" }}>Register User</h3>
+                  <p>to the provider application</p>
+                </div>
               }
             </div>
             {this.state.login_error_msg !== "" &&
@@ -228,45 +254,45 @@ class LoginPage extends React.Component {
                 />
               </div>
             </div>
-            { this.state.mode == "register" &&
-            <div className="col-5 ">
-              <div className="form-group">
-                <Input
-                  placeholder='Confirm Password'
-                  icon='key' iconPosition='left'
-                  // label="Password"
-                  type="password"
-                  className='ui fluid   input'
-                  onChange={this.handleConfirmPassword.bind(this)}
-                  defaultValue={this.state.confirmPassword}
-                  fluid
-                  inputprops={{
-                    maxLength: 50,
-                  }}
-                />
-              </div>
-            </div>
-
-             }
-             { this.state.mode == "register" &&
-                <div className="col-5 ">
-                  <div className="form-group">
-                    <Input
-                      placeholder='First Name'
-                      // label="Password"
-                      type="text"
-                      className='ui fluid   input'
-                      onChange={this.handleFirstName.bind(this)}
-                      defaultValue={this.state.firstName}
-                      fluid
-                      inputprops={{
-                        maxLength: 50,
-                      }}
-                    />
-                  </div>
+            {this.state.mode == "register" &&
+              <div className="col-5 ">
+                <div className="form-group">
+                  <Input
+                    placeholder='Confirm Password'
+                    icon='key' iconPosition='left'
+                    // label="Password"
+                    type="password"
+                    className='ui fluid   input'
+                    onChange={this.handleConfirmPassword.bind(this)}
+                    defaultValue={this.state.confirmPassword}
+                    fluid
+                    inputprops={{
+                      maxLength: 50,
+                    }}
+                  />
                 </div>
+              </div>
+
             }
-            { 
+            {this.state.mode == "register" &&
+              <div className="col-5 ">
+                <div className="form-group">
+                  <Input
+                    placeholder='First Name'
+                    // label="Password"
+                    type="text"
+                    className='ui fluid   input'
+                    onChange={this.handleFirstName.bind(this)}
+                    defaultValue={this.state.firstName}
+                    fluid
+                    inputprops={{
+                      maxLength: 50,
+                    }}
+                  />
+                </div>
+              </div>
+            }
+            {
               this.state.mode == "register" &&
               <div className="col-5 ">
                 <div className="form-group">
@@ -285,27 +311,27 @@ class LoginPage extends React.Component {
                 </div>
               </div>
             }
-            
+
 
             <div className="col-5 text-center">
               <div>
                 {this.state.mode == "login" &&
-                <button type="button" onClick={this.onClickLoginSubmit}>
-                  Login
+                  <button type="button" onClick={this.onClickLoginSubmit}>
+                    Login
                 <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height="15"
-                      width="15"
-                    />
-                  </div>
-                </button>
-              }
+                      <Loader
+                        type="Oval"
+                        color="#fff"
+                        height="15"
+                        width="15"
+                      />
+                    </div>
+                  </button>
+                }
                 {this.state.mode == "login" &&
-                <div style={{ paddingTop: "10%" }}>
-                <p >Don't have a Login? <a href="#" onClick={e => this.switchMode("register")}>Register here</a></p>
-                {/* <button type="button" onClick={e => this.switchMode("register")}>
+                  <div style={{ paddingTop: "10%" }}>
+                    <p >Don't have a Login? <a href="#" onClick={e => this.switchMode("register")}>Register here</a></p>
+                    {/* <button type="button" onClick={e => this.switchMode("register")}>
                   Register
                 <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                     <Loader
@@ -316,22 +342,22 @@ class LoginPage extends React.Component {
                     />
                   </div>
                 </button> */}
-                </div>
-              }
-                 {this.state.mode == "register" &&
-
-                 <button type="button" onClick={this.registerUser}>
-                  Register
-                <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height="15"
-                      width="15"
-                    />
                   </div>
-                </button>
-                 }
+                }
+                {this.state.mode == "register" &&
+
+                  <button type="button" onClick={this.registerUser}>
+                    Register
+                <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
+                      <Loader
+                        type="Oval"
+                        color="#fff"
+                        height="15"
+                        width="15"
+                      />
+                    </div>
+                  </button>
+                }
               </div>
             </div>
           </div>

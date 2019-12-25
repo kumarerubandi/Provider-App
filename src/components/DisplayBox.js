@@ -52,6 +52,7 @@ class DisplayBox extends Component {
     this.retrieveLaunchContext = this.retrieveLaunchContext.bind(this);
 
     this.state = {
+      config: sessionStorage.getItem('config') !== undefined ? JSON.parse(sessionStorage.getItem('config')) : {},
       accessToken: '',
       messageJson: {
         "resourceType": "MessageDefinition",
@@ -151,7 +152,7 @@ class DisplayBox extends Component {
           return linkCopy;
         });
       }
-      console.log("final---",linkCopy);
+      console.log("final---", linkCopy);
       return linkCopy;
     });
   }
@@ -169,20 +170,20 @@ class DisplayBox extends Component {
 
 
   retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       if (link.url.indexOf('?') < 0) {
         link.url += '?';
       } else {
         link.url += '&';
       }
-	
-      link.url += `iss=` + this.props.config.provider.fhir_url;
-	if (link.appContext) {
-	 link.url += `&launch=` + link.appContext;
-	  link.url += `&launchContextId=` + link.appContext;
-	}
-	link.url += `&client_id=` + this.props.config.provider.client_id;
-      //link.url += `client_id=` + this.props.config.provider.client_id;
+
+      link.url += `iss=` + this.state.config.provider_fhir_url;
+      if (link.appContext) {
+        link.url += `&launch=` + link.appContext;
+        link.url += `&launchContextId=` + link.appContext;
+      }
+      link.url += `&client_id=` + this.state.config.provider_client_id;
+      //link.url += `client_id=` + this.state.config.provider_client_id;
       console.log("link----", link);
       return resolve(link);
     })
@@ -206,8 +207,8 @@ class DisplayBox extends Component {
     //   // May change when the launch context creation endpoint becomes a standard endpoint for all EHR providers
     //   let messageJson = this.state.messageJson;
     //   messageJson['description'] = encodeURIComponent(description);
-    //   console.log(this.props.config.provider.fhir_url, 'point')
-    //   const fhirClient = new Client({ baseUrl: this.props.config.provider.fhir_url });
+    //   console.log(this.state.config.provider_fhir_url, 'point')
+    //   const fhirClient = new Client({ baseUrl: this.state.config.provider_fhir_url });
     //   fhirClient.create({
     //     resourceType: "MessageDefinition",
     //     body: messageJson,
@@ -224,7 +225,7 @@ class DisplayBox extends Component {
     //         link.url += '&';
     //       }
     //       link.url += `launch=${result.id}`;
-    //       link.url += `&iss=` + this.props.config.provider.fhir_url;
+    //       link.url += `&iss=` + this.state.config.provider_fhir_url;
     //       return resolve(link);
     //     }
     //     console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
@@ -329,7 +330,7 @@ class DisplayBox extends Component {
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>
                   <div className="div-prior-auth">
-		      <p>Prior Authorization is  necessary </p>
+                    <p>Prior Authorization is  necessary </p>
                     {link.hasOwnProperty('appContext') && link.appContext.hasOwnProperty("prior_auth") &&
                       <ul className="prior_auth_ul">
                         {
@@ -364,8 +365,8 @@ class DisplayBox extends Component {
             const builtCard = (
               <section id="call-to-action" className="call-to-action wow fadeIn" key={cardInd}>
                 <div className="container text-center">
-                  
-                  
+
+
                   {detailSection}
                   <div className={styles['suggestions-section']}>
                     {suggestionsSection}

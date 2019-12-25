@@ -47,10 +47,9 @@ class ProviderRequest extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      config: sessionStorage.getItem('config') !== undefined ? JSON.parse(sessionStorage.getItem('config')) : {},
       patient: null,
-      fhirUrl: (sessionStorage.getItem('username') === 'john') ? this.props.config.provider.fhir_url : 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca',
       accessToken: '',
-      dtr_fhir: (this.props.config.dtr !== undefined) ? this.props.config.provider.fhir_url : "https://fhir-ehr.sandboxcerner.com/r4/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca" ,
       scope: '',
       payer: '',
       patientId: '',
@@ -100,7 +99,7 @@ class ProviderRequest extends Component {
       patientState: '',
       patientPostalCode: '',
       prefetch: false,
-      patientResource: '',
+      patientResource: {},
       gender: '',
       firstName: '',
       lastName: '',
@@ -211,13 +210,13 @@ class ProviderRequest extends Component {
     this.setState({ prefetch: true });
     // if (this.state.prefetch === false) {
       this.setState({ prefetchloading: true });
-      let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+      let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       token = "Bearer " + token;
       var myHeaders = new Headers({
         "Content-Type": "application/json",
         "authorization": token,
       });
-      var url = this.props.config.provider.fhir_url + '/' + 'Patient' + "/" + this.state.patientId;
+      var url = this.state.config.provider_fhir_url + '/' + 'Patient' + "/" + this.state.patientId;
       let sender = await fetch(url, {
         method: "GET",
         headers: myHeaders
@@ -325,7 +324,7 @@ class ProviderRequest extends Component {
   }
 
   async readFHIR(resourceType, resourceId) {
-    const fhirClient = new Client({ baseUrl: this.state.fhirUrl });
+    const fhirClient = new Client({ baseUrl: this.state.config.provider_fhir_url });
     fhirClient.bearerToken = this.state.accessToken;
     let readResponse = await fhirClient.read({ resourceType: resourceType, id: resourceId });
     // console.log('Read Rsponse', readResponse)
@@ -379,7 +378,7 @@ class ProviderRequest extends Component {
       'Authorization': "Bearer " + token
     }
     // console.log("Prefetch input--", JSON.stringify(prefectInput));
-    const url = this.props.config.crd.crd_url + "prefetch";
+    const url = this.state.config.crd_url + "prefetch";
     await fetch(url, {
       method: "POST",
       headers: headers,
@@ -644,7 +643,7 @@ class ProviderRequest extends Component {
   async submit_info() {
     // this.setState({ loadingSteps: false, stepsErrorString: undefined });
     // this.resetSteps();
-    let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
     token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
@@ -658,12 +657,12 @@ class ProviderRequest extends Component {
 
     let url = '';
     if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
-      url = this.props.config.crd.crd_url + '' + this.props.config.crd.coverage_requirement_path;
+      url = this.state.config.crd_url;
     }
     if (this.state.hook === 'patient-view') {
-      url = this.props.config.crd.crd_url + '' + this.props.config.crd.patient_view_path;
+      url = this.state.config.crd_url;
     }
-    console.log("json_request", json_request, this.props.config.crd.crd_url)
+    console.log("json_request", json_request, this.state.config.crd_url)
     try {
 
       const fhirResponse = await fetch(url, {
@@ -1122,7 +1121,7 @@ class ProviderRequest extends Component {
                       req_type="coverage_requirement"
                       userId={this.state.practitionerId}
                       fhirAccessToken={this.state.accessToken}
-                      fhirServerUrl={this.props.config.provider.fhir_url}
+                      fhirServerUrl={this.state.config.provider_fhir_url}
                       patientId={this.state.patientId} hook={this.state.hook} />
 
                   </div>
@@ -1141,7 +1140,7 @@ class ProviderRequest extends Component {
                       userId={this.state.practitionerId} patientId={this.state.patient}
                       hook={this.state.hook}
                       fhirAccessToken={this.state.accessToken}
-                      fhirServerUrl={this.props.config.provider.fhir_url} />
+                      fhirServerUrl={this.state.config.provider_fhir_url} />
                   </div>
                 }
               </div>
@@ -1170,12 +1169,12 @@ class ProviderRequest extends Component {
   }
 
   async getResources(token, resource, identifier) {
-    var url = this.props.config.payer.fhir_url + '/' + resource + "?identifier=" + identifier;
+    var url = this.state.config.payer_fhir_url + '/' + resource + "?identifier=" + identifier;
     // console.log("url-------",url,token);
     let headers = {
       "Content-Type": "application/json",
     }
-    if (this.props.config.payer.authorizedPayerFhir) {
+    if (this.state.config.payer_authorised) {
       headers['Authorization'] = "Bearer " + token
     }
     let sender = await fetch(url, {
@@ -1206,7 +1205,7 @@ class ProviderRequest extends Component {
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
-    let token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
     let coverage = {
       resource: {
         resourceType: "Coverage",
@@ -1275,7 +1274,7 @@ class ProviderRequest extends Component {
     //   "Content-Type": "application/json",
     //   "authorization": token,
     // });
-    // var url = this.props.config.provider.fhir_url +'/Encounter&subject='+patientId+'&peroid'
+    // var url = this.state.config.provider_fhir_url +'/Encounter&subject='+patientId+'&peroid'
     // const fhirResponse = await fetch(url, {
     //   method: "GET",
     //   headers: myHeaders,
@@ -1395,18 +1394,17 @@ class ProviderRequest extends Component {
     }
     // "99183": "Physician attendance and supervision of hyperbaric oxygen therapy, per session",
     // console.log("------------final device request", serviceRequest)
-    console.log(this.state.dtr_fhir, 'wedding')
     let request = {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
-      fhirServer: this.state.dtr_fhir,
+      fhirServer: this.state.config.provider_fhir_url,
       payerName: this.state.payer,
       // service_code: this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
-        "token_type": this.props.config.authorization_service.token_type, // json
-        "expires_in": this.props.config.authorization_service.expires_in, // json
-        "scope": this.props.config.authorization_service.scope,
-        "subject": this.props.config.authorization_service.subject,
+        // "token_type": this.props.config.authorization_service.token_type, // json
+        // "expires_in": this.props.config.authorization_service.expires_in, // json
+        // "scope": this.props.config.authorization_service.scope,
+        // "subject": this.props.config.authorization_service.subject,
       },
       userId: this.state.practitionerId,
       patientId: patientId,
@@ -1420,7 +1418,6 @@ class ProviderRequest extends Component {
     };
     let patientResource;
     if (this.state.prefetch === true) {
-
       patientResource = this.state.patientResource
       request.context.patientId = patientId
       request.context.patient = patientResource

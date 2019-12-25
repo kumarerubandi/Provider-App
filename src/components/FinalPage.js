@@ -24,6 +24,7 @@ export default class FinalPage extends Component {
     super(props);
 
     this.state = {
+      config: sessionStorage.getItem('config') !== undefined ? JSON.parse(sessionStorage.getItem('config')) : {},
       costMeasures: props.getStore().costMeasures,
       qualityImprovement: props.getStore().qualityImprovement,
       promotingInteroperability: props.getStore().promotingInteroperability,
@@ -74,7 +75,6 @@ export default class FinalPage extends Component {
     let promotingInteroperability = this.props.getStore().promotingInteroperability
     let improvementActivity = this.props.getStore().improvementActivity
     let costMeasures = this.props.getStore().costMeasures
-    // let token = await createToken(Config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
     let token = await createToken('client_credentials', 'payer', 'john', 'john123');
     token = "Bearer " + token;
     let arr = []
@@ -87,7 +87,7 @@ export default class FinalPage extends Component {
     json.costMeasures = costMeasures
     json.resourceType = 'Measure'
     // let token = await createToken('client_credentials', 'payer', 'john', 'john123');
-    const fhirClient = new Client({ baseUrl: Config.payer.fhir_url + "/Measure/$calculate-score" });
+    const fhirClient = new Client({ baseUrl: this.state.config.payer_fhir_url + "/Measure/$calculate-score" });
     fhirClient.bearerToken = token;
     fhirClient.create({
       resourceType: "Measure",
@@ -109,7 +109,7 @@ export default class FinalPage extends Component {
     });
     qualityImprovement.measureList.map(async (measure, key) => {
       // let url = "http://cdex.mettles.com:8080/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data"
-      let measureUrl = Config.payer.fhir_url + "/Measure?identifier=" + measure.measureId
+      let measureUrl = this.state.config.payer_fhir_url + "/Measure?identifier=" + measure.measureId
 
 
       // let fhir_url = "http://cdex.mettles.com:8180/hapi-fhir-jpaserver/fhir/Measure/"+measure.measureId+"/$submit-data";
@@ -154,7 +154,7 @@ export default class FinalPage extends Component {
         }
       }
 
-      var smart = new Client({ baseUrl: Config.payer.fhir_url + "/Measure/" + measure.measureId + "/$submit-data-bundle" });
+      var smart = new Client({ baseUrl: this.state.config.payer_fhir_url + "/Measure/" + measure.measureId + "/$submit-data-bundle" });
       var myHeaders = {
         "Content-Type": "application/json",
         "authorization": token,
