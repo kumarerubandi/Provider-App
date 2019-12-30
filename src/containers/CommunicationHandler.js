@@ -20,6 +20,8 @@ import Loader from 'react-loader-spinner';
 import { KEYUTIL } from 'jsrsasign';
 import { createToken } from '../components/Authentication';
 import { connect } from 'react-redux';
+import config from '../globalConfiguration.json';
+
 
 
 const types = {
@@ -89,6 +91,7 @@ class CommunicationHandler extends Component {
       received: [],
       payer_org: '',
       provider_org: '',
+      requesterPayer: JSON.parse(sessionStorage.getItem('requesterPayer')),
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -175,8 +178,9 @@ class CommunicationHandler extends Component {
 
   async componentDidMount() {
     try {
-      // console.log("this.props.config.::",this.props.config,this.props.config.payer.fhir_url)
-      const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
+      // console.log("this.props.config.::",this.props.config,this.state.requesterPayer.payer_end_point)
+      const fhirClient = new Client({ baseUrl: this.state.requesterPayer.payer_end_point });
+      // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
       // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
       // this.setState({ accessToken: token });
       // console.log('The token is : ', token);
@@ -186,17 +190,47 @@ class CommunicationHandler extends Component {
       // console.log("Seacrjh ress",communicationBundle)
       let comm = [];
       if (communicationBundle.total > 0) {
-        let items = communicationBundle.entry.map((item, key) =>
-          comm.push(item.resource)
-        );
+        if (communicationBundle.hasOwnProperty('entry')) {
+          Object.keys(communicationBundle.entry).forEach((key) => {
+            if (communicationBundle.entry[key].resource != undefined) {
+              if (communicationBundle.entry[key].resource.hasOwnProperty('payload')) {
+                if (communicationBundle.entry[key].resource.payload[0].extension[0].hasOwnProperty('valueCodeableConcept')) {
+                  console.log(communicationBundle.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code, '----------')
+                  if (communicationBundle.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code === 'pcde') {
+                    comm.push(communicationBundle.entry[key].resource);
+                  }
+                }
+              }
+
+            }
+          });
+        }
+        // let items = communicationBundle.entry.map((item, key) =>
+        //   comm.push(item.resource)
+        // );
         this.setState({ communicationList: comm });
       }
       let communicationReqBundle = await this.getCommunicationReq()
       let comm_req = [];
       if (communicationReqBundle.total > 0) {
-        let items = communicationReqBundle.entry.map((item, key) =>
-          comm_req.push(item.resource)
-        );
+        if (communicationReqBundle.hasOwnProperty('entry')) {
+          Object.keys(communicationReqBundle.entry).forEach((key) => {
+            if (communicationReqBundle.entry[key].resource != undefined) {
+              if (communicationReqBundle.entry[key].resource.hasOwnProperty('payload')) {
+                if (communicationReqBundle.entry[key].resource.payload[0].extension[0].hasOwnProperty('valueCodeableConcept')) {
+                  console.log(communicationReqBundle.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code, '----------')
+                  if (communicationReqBundle.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code === 'pcde') {
+                    comm_req.push(communicationReqBundle.entry[key].resource);
+                  }
+                }
+              }
+
+            }
+          });
+        }
+        // let items = communicationReqBundle.entry.map((item, key) =>
+        //   comm_req.push(item.resource)
+        // );
         this.setState({ communicationReqList: comm_req });
       }
       this.sortCommunications(comm_req, comm);
@@ -251,7 +285,7 @@ class CommunicationHandler extends Component {
   }
   /*Not using this Method Anywhere*/
   // async getAllRecords(resourceType) {
-  //   const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
+  //   const fhirClient = new Client({ baseUrl: this.state.requesterPayer.payer_end_point });
   //   // if (this.props.config.payer.authorized_fhir) {
   //   //   fhirClient.bearerToken = this.state.accessToken;
   //   // }
@@ -263,17 +297,57 @@ class CommunicationHandler extends Component {
   //   return readResponse;
 
   // }
+  async getToken(grant_type, client_id, client_secret) {
+    let params = {}
+    const tokenUrl = config.token_url;
+    params['grant_type'] = grant_type
+    params['client_id'] = client_id
+    params['client_secret'] = client_secret
+    const searchParams = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }).join('&');
+    const tokenResponse = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: searchParams
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((response) => {
+        const token = response ? response.access_token : null;
+        if (token) {
+          console.log("Successfully retrieved token", types.info);
+        } else {
+          console.log("Failed to get token", types.warning);
+          if (response.error_description) {
+            console.log(response.error_description, types.error);
+          }
+        }
+        return token;
+
+      })
+      .catch(reason => {
+        console.log("Failed to get token", types.error, reason);
+        console.log("Bad request");
+      });
+    //    let t = await tokenResponse
+    // console.log("tokenResponse:",t)
+    return tokenResponse;
+  }
 
   async getCommunications() {
-    var tempUrl = this.props.config.payer.fhir_url;
-    const token = await createToken(this.props.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    var tempUrl = this.state.requesterPayer.payer_end_point;
+    // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
     // console.log('The token is : ', token, tempUrl);
     let headers = {
       "Content-Type": "application/json",
     }
-    if (this.props.config.payer.authorizedPayerFhir) {
-      headers['Authorization'] = 'Bearer ' + token
-    }
+    // if (this.props.config.payer.authorizedPayerFhir) {
+    //   headers['Authorization'] = 'Bearer ' + token
+    // }
     const fhirResponse = await fetch(tempUrl + "/Communication?_count=100000", {
       method: "GET",
       headers: headers,
@@ -290,15 +364,15 @@ class CommunicationHandler extends Component {
   }
 
   async getCommunicationReq() {
-    var tempUrl = this.props.config.payer.fhir_url;
-    const token = await createToken(this.props.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-    // console.log('The token is : ', token, tempUrl);
+    var tempUrl = this.state.requesterPayer.payer_end_point;
+    // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+
     let headers = {
       "Content-Type": "application/json",
     }
-    if (this.props.config.payer.authorizedPayerFhir) {
-      headers['Authorization'] = 'Bearer ' + token
-    }
+    // if (this.props.config.payer.authorizedPayerFhir) {
+    //   headers['Authorization'] = 'Bearer ' + token
+    // }
     const fhirResponse = await fetch(tempUrl + "/CommunicationRequest?_count=100000", {
       method: "GET",
       headers: headers
@@ -315,11 +389,11 @@ class CommunicationHandler extends Component {
   }
 
   async readFHIR(resourceType, resourceId) {
-    const fhirClient = new Client({ baseUrl: this.props.config.payer.fhir_url });
-    let token = await createToken(this.props.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-    if (this.props.config.payer.authorizedPayerFhir) {
-      fhirClient.bearerToken = token;
-    }
+    const fhirClient = new Client({ baseUrl: this.state.requesterPayer.payer_end_point });
+    // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+    // if (this.props.config.payer.authorizedPayerFhir) {
+    //   fhirClient.bearerToken = token;
+    // }
     let readResponse = await fhirClient.read({ resourceType: resourceType, id: resourceId });
     // console.log('Read Rsponse', readResponse)
     return readResponse;
@@ -373,7 +447,7 @@ class CommunicationHandler extends Component {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "authorization": "Bearer " + token,
+        // "authorization": "Bearer " + token,
       },
       body: JSON.stringify(prefectInput),
     }).then((response) => {
@@ -519,14 +593,15 @@ class CommunicationHandler extends Component {
   async submit_info() {
     this.setState({ loadingSteps: false, stepsErrorString: undefined });
     this.resetSteps();
-    let token = await createToken('password', 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'), true);
-    token = "Bearer " + token;
+    // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+
+    // token = "Bearer " + token;
     let headers = {
       "Content-Type": "application/json",
     }
-    if (this.props.config.payer.authorizedPayerFhir) {
-      headers["authorization"] = token
-    }
+    // if (this.props.config.payer.authorizedPayerFhir) {
+    //   headers["authorization"] = token
+    // }
     let json_request = await this.getJson();
     // let accessToken = this.state.accessToken;
     // accessToken = token;
@@ -609,14 +684,16 @@ class CommunicationHandler extends Component {
         this.setState({ payer_org: "" });
         this.setState({ contentStrings: [] });
         // console.log("patient_id---------", patient_id, communication_request);
-        var tempUrl = this.props.config.payer.fhir_url + "/Patient/" + patientId;
-        var grant_type = this.props.config.payer.grant_type
-        const token = await createToken(grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        var tempUrl = this.state.requesterPayer.payer_end_point + "/Patient/" + patientId;
+        // var grant_type = this.props.config.payer.grant_type
+        let token;
+        // token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+
         let headers = {
           "Content-Type": "application/json",
         }
         // if (this.props.config.provider.authorized_fhir) {
-        headers['Authorization'] = 'Bearer ' + token
+        // headers['Authorization'] = 'Bearer ' + token
         // }
         let patient = await fetch(tempUrl, {
           method: "GET",
@@ -732,10 +809,10 @@ class CommunicationHandler extends Component {
       }
     }
 
-    var tempUrl = this.props.config.payer.fhir_url;
+    var tempUrl = this.state.requesterPayer.payer_end_point;
     let headers = {
       "Content-Type": "application/json",
-      'Authorization': 'Bearer ' + token
+      // 'Authorization': 'Bearer ' + token
     }
 
     const fhirResponse = await fetch(tempUrl + "/Organization/" + payer_org, {
@@ -761,7 +838,7 @@ class CommunicationHandler extends Component {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        'Authorization': 'Bearer ' + token
+        // 'Authorization': 'Bearer ' + token
       }
     }).then(response => {
       // console.log("Recieved response", response);
@@ -782,7 +859,8 @@ class CommunicationHandler extends Component {
   }
 
   async getJson() {
-    let token = await createToken('password', 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'), true)
+    // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+    // let token = await createToken('password', 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'), true)
     var patientId = null;
     patientId = this.state.patientId;
     let coverage = {
@@ -853,7 +931,7 @@ class CommunicationHandler extends Component {
       payerName: this.state.payer,
       service_code: this.state.service_code,
       fhirAuthorization: {
-        "access_token": token,
+        // "access_token": token,
         "token_type": this.props.config.authorization_service.token_type, // json
         "expires_in": this.props.config.authorization_service.expires_in, // json
         "scope": this.props.config.authorization_service.scope,
@@ -908,186 +986,198 @@ class CommunicationHandler extends Component {
       }
     });
     return (
-//       let creceivedDate;
-//       if (d['communication'].hasOwnProperty('received')) {
-//         creceivedDate = d['communication']["received"]
-//       }
-//       // console.log(startDate.substring(0, 10), 'stdate')
-//       if (d['communication_request'].hasOwnProperty("subject")) {
-//         // console.log("-------------------");
-//         // let patientId = d['communication_request']['subject']['reference'].replace('#','');
-//         let patientId;
-//         if (d['communication_request']['subject']['reference'].charAt(0) == '#') {
-//           patientId = d['communication_request']['subject']['reference'].replace('#', '')
-//         }
-//         else if (d['communication_request']['subject']['reference'].includes('/')) {
-//           let a = d['communication_request']['subject']['reference'].split('/')
-//           if (a.length > 0) {
-//             patientId = a[a.length - 1];
+      //       let creceivedDate;
+      //       if (d['communication'].hasOwnProperty('received')) {
+      //         creceivedDate = d['communication']["received"]
+      //       }
+      //       // console.log(startDate.substring(0, 10), 'stdate')
+      //       if (d['communication_request'].hasOwnProperty("subject")) {
+      //         // console.log("-------------------");
+      //         // let patientId = d['communication_request']['subject']['reference'].replace('#','');
+      //         let patientId;
+      //         if (d['communication_request']['subject']['reference'].charAt(0) == '#') {
+      //           patientId = d['communication_request']['subject']['reference'].replace('#', '')
+      //         }
+      //         else if (d['communication_request']['subject']['reference'].includes('/')) {
+      //           let a = d['communication_request']['subject']['reference'].split('/')
+      //           if (a.length > 0) {
+      //             patientId = a[a.length - 1];
 
-//           }
-// }
-// let endDate;
-//       let startDate;
-//       let recievedDate;
-//       if (d.hasOwnProperty('occurrencePeriod')) {
-//         startDate = d["occurrencePeriod"]['start']
+      //           }
+      // }
+      // let endDate;
+      //       let startDate;
+      //       let recievedDate;
+      //       if (d.hasOwnProperty('occurrencePeriod')) {
+      //         startDate = d["occurrencePeriod"]['start']
 
-//         if (d['occurrencePeriod'].hasOwnProperty("end")) {
-//           endDate = d["occurrencePeriod"]['end']
-//         }
-//         else {
-//           endDate = "No End Date"
-//         }
-//       }
-//       if (d.hasOwnProperty('authoredOn')) {
-//         recievedDate = d["authoredOn"]
-//       }
+      //         if (d['occurrencePeriod'].hasOwnProperty("end")) {
+      //           endDate = d["occurrencePeriod"]['end']
+      //         }
+      //         else {
+      //           endDate = "No End Date"
+      //         }
+      //       }
+      //       if (d.hasOwnProperty('authoredOn')) {
+      //         recievedDate = d["authoredOn"]
+      //       }
 
-//       // console.log(startDate.substring(0, 10), 'stdate')
-//       if (d.hasOwnProperty("subject")) {
-//         // let patientId = d['subject']['reference'].replace('#', '');
-//         let patientId;
-//         if (d['subject']['reference'].charAt(0) == '#') {
-//           patientId = d['subject']['reference'].replace('#', '')
-//         }
-//         else if (d['subject']['reference'].includes('/')) {
-//           let a = d['subject']['reference'].split('/');
-//           if (a.length > 0) {
-//             patientId = a[a.length - 1];
+      //       // console.log(startDate.substring(0, 10), 'stdate')
+      //       if (d.hasOwnProperty("subject")) {
+      //         // let patientId = d['subject']['reference'].replace('#', '');
+      //         let patientId;
+      //         if (d['subject']['reference'].charAt(0) == '#') {
+      //           patientId = d['subject']['reference'].replace('#', '')
+      //         }
+      //         else if (d['subject']['reference'].includes('/')) {
+      //           let a = d['subject']['reference'].split('/');
+      //           if (a.length > 0) {
+      //             patientId = a[a.length - 1];
 
-//           }
-// }
+      //           }
+      // }
       <React.Fragment>
         <div>
-          <div className="main_heading">
-            <span style={{ lineHeight: "35px" }}>Payer App - Communications</span>
-            <div className="menu">
-              <button className="menubtn"><i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-user-circle" aria-hidden="true"></i>
-                {sessionStorage.getItem('name')}<i style={{ paddingLeft: "7px", paddingRight: "3px" }} className="fa fa-caret-down"></i>
-              </button>
-              <div className="menu-content">
-                <button className="logout-btn" onClick={this.onClickLogout}>
-                  <i style={{ paddingLeft: "3px", paddingRight: "7px" }} className="fa fa-sign-out" aria-hidden="true"></i>Logout</button>
+          <header id="inpageheader">
+            <div className="container">
+
+              <div id="logo" className="pull-left">
+                <h1><a href="#intro" className="scrollto">Payer A</a></h1>
+                {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
               </div>
-            </div>
-            <div className="menu_conf" onClick={() => this.redirectTo('request_for_documentation')}>
-              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-comments"></i>
-              Request For Documentation</div>
-            <div className="menu_conf" onClick={() => this.setRequestType('config-view')}>
-              <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
-              Configuration
-            </div>
 
-          </div>
-          <div className="attributes mdl-grid">
-            {/* {this.renderCommunications()} */}
-            <div className="content">
-              <div className="left-form">
-                <div><h2>Communications Received</h2></div>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Communication Request ID</th>
-                      <th>Communication Request Identifier</th>
-                      <th>Communication ID</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      data.map((d, i) => (
-                        <tr key={i}>
-                          <td>
-                            <span>{d['communication_request']['id']}</span>
-                          </td>
-                          <td>
-                            {d['communication_request']['identifier'] != undefined &&
-                              <span>{d['communication_request']['identifier'][0]['value']}</span>
-                            }
-                          </td>
-                          <td>
-                            <span>{d['communication']['id']}</span>
-                          </td>
-                          <td>
-                            <button className="btn list-btn" onClick={() => this.getPatientDetails(d['communication_request'], d['communication'])}>
-                              Review
-                            </button>
-                          </td>
+              <nav id="nav-menu-container">
+                <ul className="nav-menu">
+                  <li><a href={window.location.protocol + "//" + window.location.host + "/payerA"}>Request for CTD</a></li>
+                  {/* <li><a href={window.location.protocol + "//" + window.location.host + "/pdex"}>PDEX</a></li> */}
+                  {/* <li className="menu-active menu-has-children"><a href="">Services</a>
+                    <ul>
+                      <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
+                      <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
+                    </ul>
+                  </li> */}
+                  {/* <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li> */}
+                  {/* <li className="menu-has-children"><a href="">{sessionStorage.getItem('username')}</a>
+                    <ul>
+                      <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
+                    </ul>
+                  </li> */}
+                </ul>
+              </nav>
+            </div>
+          </header>
+          <main id="main" style={{ marginTop: "92px" }}>
+            <div className="form">
+
+                <div className="left-form">
+                  <div><h2>List of Coverage Transition documents Received</h2></div>
+
+                  <div className="form-row">
+                    {/* <table className="table col-10 offset-1"> */}
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Request for Document ID</th>
+                          <th>Request for Document Identifier</th>
+                          <th>ID for information transmitted from a sender to a receiver</th>
+                          <th></th>
                         </tr>
-                      ))
-                    }
-                  </tbody>
-                </table>
-                <div></div>
-                <div><h2>Communications Not Received</h2></div>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Communication Request ID</th>
-                      <th>Communication Request Identifier</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      requests.map((d, i) => (
-                        <tr key={i}>
-                          <td>
-                            <span>{d['id']}</span>
-                          </td>
-                          <td>
-                            {d['identifier'] != undefined &&
-                              <span>{d['identifier'][0]['value']}</span>
-                            }
-                          </td>
-                          <td>
-                            <button className="btn list-btn" onClick={() => this.getPatientDetails(d, '')}>
-                              Review
+                      </thead>
+                      <tbody>
+                        {
+                          data.map((d, i) => (
+                            <tr key={i}>
+                              <td>
+                                <span>{d['communication_request']['id']}</span>
+                              </td>
+                              <td>
+                                {d['communication_request']['identifier'] != undefined &&
+                                  <span>{d['communication_request']['identifier'][0]['value']}</span>
+                                }
+                              </td>
+                              <td>
+                                <span>{d['communication']['id']}</span>
+                              </td>
+                              <td>
+                                <button className="btn list-btn" onClick={() => this.getPatientDetails(d['communication_request'], d['communication'])}>
+                                  Review
                             </button>
-                          </td>
-                        </tr>
-                      ))
-                    }
-                  </tbody>
-                </table>
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <div></div>
+                  <div><h2>List of Coverage Transition documents Not Received</h2></div>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Request for Document ID</th>
+                        <th>Request for Document Identifier</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        requests.map((d, i) => (
+                          <tr key={i}>
+                            <td>
+                              <span>{d['id']}</span>
+                            </td>
+                            <td>
+                              {d['identifier'] != undefined &&
+                                <span>{d['identifier'][0]['value']}</span>
+                              }
+                            </td>
+                            <td>
+                              <button className="btn list-btn" onClick={() => this.getPatientDetails(d, '')}>
+                                Review
+                            </button>
+                            </td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                </div>
+                {this.state.form_load &&
+                  <div className="right-form" style={{ paddingTop: "2%" }} >
+                    {this.state.patient_name &&
+                      <div className="data-label">
+                        Patient : <span className="data1"><strong>{this.state.patient_name}</strong></span>
+                      </div>}
+                    {this.state.gender &&
+                      <div className="data-label">
+                        Patient Gender : <span className="data1"><strong>{this.state.gender}</strong></span>
+                      </div>}
+                    {this.state.ident &&
+                      <div className="data-label">
+                        Patient Identifier : <span className="data1"><strong>{this.state.ident}</strong></span>
+                      </div>}
+                    {this.state.birthDate &&
+                      <div className="data-label">
+                        Patient Date of Birth : <span className="data1"><strong>{this.state.birthDate}</strong></span>
+                      </div>}
+                    {this.state.payer_org &&
+                      <div className="data-label">
+                        Requester Payer : <span className="data1"><strong>{this.state.payer_org}</strong></span>
+                      </div>}
+                    {this.state.provider_org &&
+                      <div className="data-label">
+                        Sender Payer : <span className="data1"><strong>{this.state.provider_org}</strong></span>
+                      </div>}
+                    {this.state.contentStrings.length > 0 &&
+                      <div className="data-label">
+                        Requests Sent : <span className="data1"><strong>{docs}</strong></span>
+                      </div>}
+
+                  </div>}
               </div>
-              {this.state.form_load &&
-                <div className="right-form" style={{ paddingTop: "2%" }} >
-                  {this.state.patient_name &&
-                    <div className="data-label">
-                      Patient : <span className="data1"><strong>{this.state.patient_name}</strong></span>
-                    </div>}
-                  {this.state.gender &&
-                    <div className="data-label">
-                      Patient Gender : <span className="data1"><strong>{this.state.gender}</strong></span>
-                    </div>}
-                  {this.state.ident &&
-                    <div className="data-label">
-                      Patient Identifier : <span className="data1"><strong>{this.state.ident}</strong></span>
-                    </div>}
-                  {this.state.birthDate &&
-                    <div className="data-label">
-                      Patient Date of Birth : <span className="data1"><strong>{this.state.birthDate}</strong></span>
-                    </div>}
-                  {this.state.payer_org &&
-                    <div className="data-label">
-                      Payer Organization : <span className="data1"><strong>{this.state.payer_org}</strong></span>
-                    </div>}
-                  {this.state.provider_org &&
-                    <div className="data-label">
-                      Provider Organization : <span className="data1"><strong>{this.state.provider_org}</strong></span>
-                    </div>}
-                  {this.state.contentStrings.length > 0 &&
-                    <div className="data-label">
-                      Requests Sent : <span className="data1"><strong>{docs}</strong></span>
-                    </div>}
-
-                </div>}
-            </div>
 
 
-          </div>
+          </main>
         </div>
       </React.Fragment >
     )

@@ -56,7 +56,9 @@ export class SelectPatient extends Component {
 
     async getResources() {
         // var url = this.props.config.payer.fhir_url+'/Patient';
-        var url = 'http://localhost:8080/hapi-fhir-jpaserver/fhir/Patient';
+        let req = JSON.parse(sessionStorage.getItem('requesterPayer'))
+        console.log(req.payer_end_point,'request sessions')
+        var url = req.payer_end_point+'/Patient'
         let token;
         // token = await createToken(this.props.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
         let headers = {

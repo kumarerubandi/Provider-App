@@ -69,7 +69,7 @@ class PDEX extends Component {
             documentList: [],
             selectedDocs: [],
             compositionJson: '',
-            carePlanResources: [],
+            carePlanResources: '',
             selectedPlans: [],
             bundle: {
                 "resourceType": "Bundle",
@@ -82,7 +82,9 @@ class PDEX extends Component {
                 "timestamp": currentDateTime,
                 "entry": []
             },
-            communicationIdentifier: this.randomString()
+            communicationIdentifier: this.randomString(),
+            fhir_url: '',
+            endpoint: '',
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -148,9 +150,34 @@ class PDEX extends Component {
     goTo(title) {
         window.location = window.location.protocol + "//" + window.location.host + "/" + title;
     }
-
+    async getPayerList() {
+        //var url = this.props.config.cds_service.get_payers;
+        var url = "http://cdex.mettles.com/cds/getPayers";
+        // let token;
+        // token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
+        let headers = {
+            "Content-Type": "application/json",
+            // 'Authorization': 'Bearer ' + token
+        }
+        let payersList = await fetch(url, {
+            method: "GET",
+            headers: headers
+        }).then(response => {
+            return response.json();
+        }).then((response) => {
+            return response;
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        return payersList;
+    }
     async componentDidMount() {
         let resources = [];
+        let payersList = await this.getPayerList()
+        let payer = payersList.find(payer => payer.id === config.current_payer_id);
+        console.log(payer, "requesterPayer")
+        this.setState({ fhir_url: payer.payer_end_point })
+        // sessionStorage.setItem('requesterPayer', JSON.stringify(requesterPayer))
         let resp = await this.getCommunicationRequests();
         // console.log("resp------", resp);
         if (resp != undefined) {
@@ -238,7 +265,7 @@ class PDEX extends Component {
     }
 
     async getResources(searchParams) {
-        var tempUrl = config.payerB.fhir_url;
+        var tempUrl = this.state.fhir_url;
         let headers = {
             "Content-Type": "application/json",
         }
@@ -265,7 +292,8 @@ class PDEX extends Component {
     }
 
     async getCommunicationRequests() {
-        var tempUrl = config.payerB.fhir_url;
+        console.log(this.state.fhir_url, 'fhir_url')
+        var tempUrl = this.state.fhir_url;
         let headers = {
             "Content-Type": "application/json",
         }
@@ -319,8 +347,13 @@ class PDEX extends Component {
         this.setState({ comm_req: resources });
     }
     async getCarePlans() {
-        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id)
-        console.log(carePlanResources, 'resources')
+        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id).then((resource) => {
+            if (resource.hasOwnProperty('entry')) {
+                this.setState({ carePlanResources: resource.entry })
+            }
+
+        })
+        // console.log(carePlanResources, 'resources')
     }
     async getPatientDetails(patient_id, communication_request, identifier) {
         this.setState({ patient_name: "" });
@@ -343,7 +376,7 @@ class PDEX extends Component {
         // f = null;
         // this.setState({ files: f });
         // console.log(this.state.files)
-        var tempUrl = config.payerB.fhir_url + "/" + patient_id;
+        var tempUrl = this.state.fhir_url + "/" + patient_id;
         let token;
         // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
 
@@ -400,6 +433,9 @@ class PDEX extends Component {
         //     // console.log("patient name----------", this.state.patient_name);
         // }
         // console.log("state patient-------", this.state.patient);
+        await this.getCarePlans().then(() => {
+
+        })
         if (communication_request.hasOwnProperty('sender')) {
             let s = await this.getSenderDetails(communication_request, token);
         }
@@ -426,12 +462,12 @@ class PDEX extends Component {
         //     }
         // })
 
-        // await this.getObservationDetails().then(() => {
-        //     // this.showError()
-        // })
-        await this.getCarePlans().then(() => {
-
+        await this.getObservationDetails().then(() => {
+            // this.showError()
         })
+        // await this.getCarePlans().then(() => {
+
+        // })
         // await this.getObservationDetails().then(() => {
         //     // this.showError()
         // })
@@ -603,10 +639,19 @@ class PDEX extends Component {
         var claims = ''
         let claim = ''
         let claimResponse = ''
-        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id)
-        console.log(carePlanResources, 'resources')
-        if (carePlanResources.hasOwnProperty('entry')) {
-            carePlanResources.entry.map(async (c, key) => {
+        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id).then((response) => {
+            if (response.hasOwnProperty('entry')) {
+                this.setState({ carePlanResources: response.entry })
+
+            }
+        })
+        // let carePlanResources = this.state.carePlanResources
+        // this.setState({carePlanResources:carePlanResources})
+        // console.log(carePlanResources.entry[0], 'resources')
+        if (this.state.carePlanResources !== '') {
+
+            this.state.carePlanResources.map(async (c, key) => {
+                console.log(c, 'police')
                 if (c.resource.hasOwnProperty('activity')) {
                     c.resource.activity.map((act) => {
                         if (act.hasOwnProperty('detial')) {
@@ -715,6 +760,7 @@ class PDEX extends Component {
                 Bundle.entry.push({ resource: conditionResource })
                 Bundle.entry.push({ resource: claim })
                 Bundle.entry.push({ resource: claimResponse })
+                Bundle.entry.push({ resource: this.state.endpoint })
 
             })
             this.setState({ compositionJson: compositionJson })
@@ -814,14 +860,26 @@ class PDEX extends Component {
 
     renderCarePlans(item, key) {
         let resource = item.resource
+        let categoryName = ''
+        if (resource.hasOwnProperty('category')) {
+            if (resource.category[0].hasOwnProperty('text')) {
+                categoryName = resource.category[0].text
+            }
+        }
+        console.log('oh ueah')
         return (<div key={key}>
             <div key={key} style={{ padding: "15px", paddingTop: "0px", paddingBottom: "0px" }}>
                 <label>
                     <input type="checkbox" name={resource.id}
                         onChange={this.onPlanSelect} />
                 </label>
+                {categoryName !== '' &&
+                    <span>{resource.resourceType}-{categoryName}</span>
+                }
+                {categoryName === '' &&
+                    <span>{resource.resourceType}-{resource.id}</span>
+                }
 
-                <span>{resource.resourceType}</span>
 
             </div>
         </div>
@@ -882,7 +940,7 @@ class PDEX extends Component {
 
     async submit_info() {
         let randomString = this.randomString()
-        // let comp = await this.createFhirResource(this.state.compositionJson, 'Composition', config.payerB.fhir_url)
+        // let comp = await this.createFhirResource(this.state.compositionJson, 'Composition', this.state.fhir_url)
         // console.log(comp, 'composition Resource has been Created')
 
         let objJsonStr = JSON.stringify(this.state.bundle);
@@ -985,7 +1043,7 @@ class PDEX extends Component {
         // if (config.payerA.authorizedPayerFhir) {
         //     headers['Authorization'] = 'Bearer ' + token
         // }
-        var communicationUrl = config.payerA.fhir_url;
+        var communicationUrl = this.state.endpoint.address;
 
         let requesterCommunication = await fetch(communicationUrl, {
             method: "POST",
@@ -1012,7 +1070,7 @@ class PDEX extends Component {
             console.log("No response recieved from the server", reason)
         );
 
-        let senderCommunication = await this.createFhirResource(commJson, '', config.payerB.fhir_url)
+        let senderCommunication = await this.createFhirResource(commJson, '', this.state.fhir_url)
         console.log(senderCommunication, 'Sender Communication has been Created')
 
 
@@ -1135,7 +1193,7 @@ class PDEX extends Component {
         //         sender_obj = c;
         //     }
         // });
-        var tempUrl = config.payerB.fhir_url;
+        var tempUrl = this.state.fhir_url;
         // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
         // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers = {
@@ -1159,7 +1217,7 @@ class PDEX extends Component {
         // return fhirResponse;
         console.log(fhirResponse, 'respo')
         if (fhirResponse) {
-            this.setState({ requesterOrganization: fhirResponse })
+            this.setState({ senderOrganization: fhirResponse })
             this.setState({ sender_name: fhirResponse.name });
             // this.setState({ sender_resource: fhirResponse['resourceType'] });
             // const sender_res = await this.getSenderResource(sender_obj);
@@ -1201,14 +1259,33 @@ class PDEX extends Component {
         // return fhirResponse;
         console.log(recipientResponse, 'rest')
         if (recipientResponse) {
-            this.setState({ senderOrganization: recipientResponse })
+            if (recipientResponse.hasOwnProperty('endpoint')) {
+                const endpoint = await fetch(tempUrl + "/" + recipientResponse.endpoint[0].reference, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        // 'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                    console.log("Recieved response", response);
+                    return response.json();
+                }).then((response) => {
+                    console.log("----------response", response);
+                    this.setState({ endpoint: response })
+                    return response;
+                }).catch(reason =>
+                    console.log("No response recieved from the server", reason)
+                );
+            }
+
+            this.setState({ requesterOrganization: recipientResponse })
         }
 
 
     }
 
     async getSenderResource(c) {
-        var sender_url = config.payerB.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
+        var sender_url = this.state.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
         console.log("url---------", sender_url);
         // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
         let headers = {
@@ -1327,7 +1404,7 @@ class PDEX extends Component {
                     </main>
                     <div className="content">
                         <div className="left-form" style={{ paddingLeft: "2%", paddingTop: "1%" }}>
-                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> Communication Requests </strong></div>
+                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> List of Requests for Coverage Transition document </strong></div>
                             <div>{content}</div>
                         </div>
                         {this.state.form_load &&
@@ -1335,8 +1412,20 @@ class PDEX extends Component {
                                 <div className="data-label">
                                     Patient : <span className="data1">{this.state.patient_name}</span>
                                 </div>
+                                {this.state.patient.hasOwnProperty('gender') &&
+                                    <div className="data-label">
+                                        Patient Gender : <span className="data1">{this.state.patient.gender}</span>
+                                    </div>}
+                                {/* {this.state.ident &&
+                                    <div className="data-label">
+                                        Patient Identifier : <span className="data1">{this.state.ident}</span>
+                                    </div>} */}
+                                {this.state.patient.hasOwnProperty('birthDate') &&
+                                    <div className="data-label">
+                                        Patient Date of Birth : <span className="data1">{this.state.patient.birthDate}</span>
+                                    </div>}
                                 <div className="data-label">
-                                    Requester Organization {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
+                                    Requester Payer {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
                                 </div>
                                 {/* <div className="data-label">
                                     Start Date : <span className="data1">{moment(this.state.startDate).format(" YYYY-MM-DD, hh:mm a")}</span>
@@ -1384,11 +1473,14 @@ class PDEX extends Component {
                                     Select Care Plans to submit :
 
                                 </div>
-                                <div>
-                                    {this.state.carePlanResources.map((item, key) => {
-                                        return this.renderCarePlans(item, key);
-                                    })}
-                                </div>
+                                {this.state.carePlanResources.length > 0 &&
+                                    <div>
+                                        {this.state.carePlanResources.map((item, key) => {
+                                            return this.renderCarePlans(item, key);
+                                        })}
+                                    </div>
+                                }
+
 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR

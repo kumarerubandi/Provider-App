@@ -94,6 +94,7 @@ export class SelectPayer extends Component {
     this.setState({payers});
   }
   handlePayerChange = (e, { value }) => {
+    console.log(value,'payerNAme')
     this.props.updateCB(this.props.elementName, value)
     this.setState({ currentValue: value })
   }

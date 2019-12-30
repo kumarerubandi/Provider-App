@@ -20,6 +20,7 @@ import CDEX from '../containers/CDEX';
 import Home from '../containers/Home';
 import PayerCommunicationRequest from '../containers/PayerCommunicationRequest';
 import PDEX from '../containers/PDEX';
+import CommunicationHandler from '../containers/CommunicationHandler';
 
 library.add(faIgloo,faNotesMedical)
 export default class App extends Component {
@@ -38,6 +39,7 @@ export default class App extends Component {
                     <Route path={"/provider_request"} component={ProviderRequest} />                    
                     <Route path={"/mips"} component={Mips} />                    
                     <Route path={"/payerA"} component={PayerCommunicationRequest} />                    
+                    <Route path={"/pdex_documents"} component={CommunicationHandler} />                    
                     {/* <Route path={"/review"} component={Review} /> */}
                     <Route exact path="/index" component={Main} />
                     <Route exact path="/home" component={Home} />

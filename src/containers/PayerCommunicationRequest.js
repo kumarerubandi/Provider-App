@@ -18,6 +18,7 @@ import { connect } from 'react-redux';
 import moment from "moment";
 import { SelectPatient } from '../components/SelectPatient';
 import { DropdownPurpose } from '../components/DropdownPurpose';
+import { SelectPayerWithEndpoint } from '../components/SelectPayerWithEndpoint';
 
 
 let now = new Date();
@@ -37,6 +38,7 @@ const types = {
   debug: "debugClass",
   warning: "warningClass"
 }
+
 
 class CommunicationRequest extends Component {
   constructor(props) {
@@ -117,11 +119,11 @@ class CommunicationRequest extends Component {
       senderOrganizationResource: '',
       communicationRequestIdentifier: this.getGUID(),
       payer: '',
-      requesterOrganizationIdentifier: "b1ddf812-1fdd-3adf-b1d5-32cc8bd07ebb",
+      requesterPayer: JSON.parse(sessionStorage.getItem('requesterPayer')),
       requesterCommRequest: '',
-      purpose:'',
-      note:''
-        }
+      purpose: '',
+      note: ''
+    }
 
 
     this.requirementSteps = [
@@ -165,7 +167,7 @@ class CommunicationRequest extends Component {
   //   this.setState({queries:queries})
   //   console.log("qState queries--,",this.state.queries)
   updateStateElement = (elementName, value) => {
-    console.log("event----------", value, elementName)
+    // console.log("event----------", value, elementName)
     this.setState({ [elementName]: value })
     // console.log(this.state.vitalSigns, 'yooopo')
     // if (value.hasOwnProperty('value')) {
@@ -246,29 +248,31 @@ class CommunicationRequest extends Component {
 
   async componentDidMount() {
 
-    let token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
-    token = "Bearer " + token;
+    // let token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+    // token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
-      "authorization": token,
+      // "authorization": token,
     });
     // var url = this.props.config.provider.fhir_url + '/' + 'Patient' + "/" + this.state.patientId;
-    var url = config.payerA.fhir_url + "/Organization/2"
-    let organization = await fetch(url, {
-      method: "GET",
-      headers: myHeaders
-    }).then(response => {
-      // console.log("response----------",response);
-      return response.json();
-    }).then((response) => {
-      // console.log("----------response", response);
-      this.setState({ senderOrganizationIdentifier: response.identifier[0].value })
-      this.setState({ senderOrganizationResource: response })
-      this.setState({ prefetchloading: false });
-      return response;
-    }).catch(reason =>
-      console.log("No response recieved from the server", reason)
-    );
+    // var url = this.state.requesterPayer.payer_end_point + "/Organization?identifeir="
+    // let organization = await fetch(url, {
+    //   method: "GET",
+    //   headers: myHeaders
+    // }).then(response => {
+    //   // console.log("response----------",response);
+    //   return response.json();
+    // }).then((response) => {
+    //   // console.log("----------response", response);
+
+
+    //   this.setState({ senderOrganizationIdentifier: response.identifier[0].value })
+    //   this.setState({ senderOrganizationResource: response })
+    //   this.setState({ prefetchloading: false });
+    //   return response;
+    // }).catch(reason =>
+    //   console.log("No response recieved from the server", reason)
+    // );
 
 
   }
@@ -279,15 +283,15 @@ class CommunicationRequest extends Component {
   }
 
   async getResources(resource, identifier) {
-    var url = config.payerA.fhir_url + "/" + resource + "?identifier=" + identifier;
-    let token;
+    var url = this.state.requesterPayer.payer_end_point + "/" + resource + "?identifier=" + identifier;
+    // let token;
     let headers = {
       "Content-Type": "application/json",
     }
-    token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
-    if (config.payerA.authorizedPayerFhir) {
-      headers['Authorization'] = 'Bearer ' + token
-    }
+    // token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+    // if (config.payerA.authorizedPayerFhir) {
+    //   headers['Authorization'] = 'Bearer ' + token
+    // }
     let sender = await fetch(url, {
       method: "GET",
       headers: headers
@@ -318,7 +322,7 @@ class CommunicationRequest extends Component {
   async createFhirResource(json, resourceName, url, user, claim = false) {
     //  console.log("this.state.procedure_code")
     // console.log(this.state.procedure_code)
-    this.setState({ loading: true });
+    // this.setState({ loading: true });
 
     try {
       // if (claim == true) {
@@ -354,8 +358,8 @@ class CommunicationRequest extends Component {
       //     fhirClient.bearerToken = token;
       //   }
       // }
-      token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
-      fhirClient.bearerToken = token;
+      // token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
+      // fhirClient.bearerToken = token;
 
       console.log('The json is : ', json);
       let data = fhirClient.create({
@@ -370,16 +374,16 @@ class CommunicationRequest extends Component {
           var commReqId = data.entry[0].response.location.split('/')[1]
           this.setState({ reqId: commReqId })
         }
-        this.setState({ loading: false });
+        // this.setState({ loading: false });
         return data;
       }).catch((err) => {
         console.log(err);
-        this.setState({ loading: false });
+        // this.setState({ loading: false });
       })
       return data
     } catch (error) {
       console.error('Unable to create resource', error.message);
-      this.setState({ loading: false });
+      // this.setState({ loading: false });
       this.setState({ dataLoaded: false })
     }
   }
@@ -397,14 +401,21 @@ class CommunicationRequest extends Component {
   async submit_info() {
 
     try {
-      let requesterOrganizationBundle = await this.getResources('Organization', this.state.requesterOrganizationIdentifier)
+      this.setState({ loading: true });
+
+      let requesterOrganizationBundle = await this.getResources('Organization', this.state.requesterPayer.payer_identifier)
+      let senderOrganizationBundle = await this.getResources('Organization', this.state.payer.payer_identifier)
+      let senderOrganization = ''
       let requesterOrganization = ''
       if (requesterOrganizationBundle.hasOwnProperty('entry')) {
         requesterOrganization = requesterOrganizationBundle.entry[0].resource
       }
-      console.log(requesterOrganization, 'pleasssssssss', requesterOrganization.id)
+      if (senderOrganizationBundle.hasOwnProperty('entry')) {
+        senderOrganization = senderOrganizationBundle.entry[0].resource
+      }
       // var request_identifier = 
       this.setState({ dataLoaded: false, reqId: '' })
+      let communicationRequestIdentifier = this.state.communicationRequestIdentifier
       // let request_identifier = await this.getGUID();
       // this.setState({communicationRequestIdentifier:request_identifier})
       let communicationRequestBundle = {
@@ -425,7 +436,7 @@ class CommunicationRequest extends Component {
         "identifier": [
           {
             "system": "http://www.jurisdiction.com/insurer/123456",
-            "value": this.state.communicationRequestIdentifier
+            "value": communicationRequestIdentifier
           }
         ],
         "authoredOn": currentDateTime,
@@ -456,35 +467,67 @@ class CommunicationRequest extends Component {
           }
         ],
         "sender": {
-          "reference": "Organization/" + this.state.senderOrganizationResource.id
+          "reference": "Organization/" + senderOrganization.id
         }
+      }
+      if (this.state.note !== '') {
+        let string = commRequest.payload[0].contentString + " " + this.state.note
+        commRequest.payload[0].contentString = string
       }
       communicationRequestBundle.entry.push({
         resource: commRequest,
         'request': {
           "method": "POST",
           "url": "CommunicationRequest",
-          "ifNoneExist": "identifier=" + this.state.communicationRequestIdentifier
+          "ifNoneExist": "identifier=" + communicationRequestIdentifier
         }
 
       })
 
 
-      let requesterCommRequest = await this.createFhirResource(commRequest, 'CommunicationRequest', config.payerA.fhir_url, 'payer', true)
+      let requesterCommRequest = await this.createFhirResource(commRequest, 'CommunicationRequest', this.state.requesterPayer.payer_end_point, 'payer', true)
       console.log()
-
+      let requester_endPoint_identifier = this.getGUID()
       let bundle = {
         "resourceType": "Bundle",
         "id": 'bundle-transaction',
         "type": "transaction",
         "entry": []
       }
+      requesterOrganization['endpoint']=[]
+      requesterOrganization['endpoint'][0] = {'reference':"Endpoint/Requester-Endpoint-Id"}
+
       bundle.entry.push({
-        'resource': requesterCommRequest,
+        'resource': commRequest,
         'request': {
           "method": "POST",
           "url": "CommunicationRequest",
-          "ifNoneExist": "identifier=" + this.state.communicationRequestIdentifier
+          "ifNoneExist": "identifier=" + communicationRequestIdentifier
+        }
+      })
+      bundle.entry.push({
+        "resource": {
+          "resourceType": "Endpoint",
+          "id":"Requester-Endpoint-Id",
+          "identifier":[
+            {
+              "system": "http://www.jurisdiction.com/insurer/123456",
+              "value": requester_endPoint_identifier
+            }
+          ],
+          "connectionType": {
+            "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+            "code": "hl7-fhir-rest"
+          },
+          " managingOrganization":{
+            "reference": "Organization/"+requesterOrganization.id
+          },
+          "address": this.state.requesterPayer.payer_end_point
+        },
+        "request": {
+          "method": "POST",
+          "url": "Endpoint",
+          "ifNoneExist":  "identifier=" + requester_endPoint_identifier
         }
       })
       bundle.entry.push({
@@ -498,25 +541,27 @@ class CommunicationRequest extends Component {
       bundle.entry.push({
         'resource': requesterOrganization,
         'request': {
-          "method": "POST",
-          "url": "Organization",
+          "method": "PUT",
+          "url": "Organization?identifier=" + requesterOrganization.identifier[0].value,
           "ifNoneExist": "identifier=" + requesterOrganization.identifier[0].value
         }
       })
       bundle.entry.push({
-        'resource': this.state.senderOrganizationResource,
+        'resource': senderOrganization,
         'request': {
           "method": "POST",
           "url": "Organization",
-          "ifNoneExist": "identifier=" + this.state.senderOrganizationResource.identifier[0].value
+          "ifNoneExist": "identifier=" + senderOrganization.identifier[0].value
         }
       })
 
-
-      let response = await this.createFhirResource(bundle, '', config.payerB.fhir_url, 'otherPayer', true)
-      console.log(response, 'comm request created')
+      let response = await this.createFhirResource(bundle, '', this.state.payer.endpoint, 'otherPayer', true).then(()=>{
+        this.setState({ loading: false });
+      })
+      console.log(response, 'communciation request created')
       // let res_json = {}
       // this.setState({ dataLoaded: false, reqId: '' })
+      // this.setState({ loading: false });
 
 
 
@@ -545,10 +590,9 @@ class CommunicationRequest extends Component {
     }
   }
   onChangeOrganizationIdentifier(event) {
-    this.setState({ requesterOrganizationIdentifier: event.target.value });
+    this.setState({ requesterPayer: event.target.value });
   }
   onChangeNote(event) {
-    console.log(event.target.value,'note')
     this.setState({ note: event.target.value });
   }
 
@@ -571,7 +615,7 @@ class CommunicationRequest extends Component {
 
               <nav id="nav-menu-container">
                 <ul className="nav-menu">
-                  <li><a href={window.location.protocol + "//" + window.location.host + "/home"}>List Of Communication</a></li>
+                  <li><a href={window.location.protocol + "//" + window.location.host + "/pdex_documents"}>List Of CT documents</a></li>
                   {/* <li><a href={window.location.protocol + "//" + window.location.host + "/pdex"}>PDEX</a></li> */}
                   {/* <li className="menu-active menu-has-children"><a href="">Services</a>
                     <ul>
@@ -608,43 +652,46 @@ class CommunicationRequest extends Component {
                     <div className="form-group col-8">
                       <SelectPatient elementName="patientResource" updateCB={this.updateStateElement} />
                     </div>
-                   
+
 
 
 
 
                   </div>
                   {this.state.patientResource !== '' &&
-                      <div >
-                        <div className="form-row">
-                          <div className="form-group col-md-3 offset-1">
-                            <h4 className="title">Patient Info*</h4>
-                          </div>
-                          
-                          <div className="form-group col-md-4">
-                            <input type="text" name="firstName" className="form-control" id="name" placeholder="First Name"
-                              value={this.state.patientResource.name[0].given} disabled=""
-                            />
-
-                          </div>
-                          <div className="form-group col-md-4">
-                            <input type="text" name="lastName" className="form-control" id="lastname" placeholder="Last Name"
-                              value={this.state.patientResource.name[0].family} disabled=""
-                            />
-                            
-                          </div>
-                        
+                    <div >
+                      <div className="form-row">
+                        <div className="form-group col-md-3 offset-1">
+                          <h4 className="title">Beneficiary Info</h4>
                         </div>
-                        <div className="form-row">
-                          <div className="form-group col-md-3 offset-1">
-                            {/* <h4 className="title">Gender</h4> */}
-                          </div>
-                          {this.state.patientResource.hasOwnProperty('gender') &&
-                            <div className="form-group col-md-4">
-                              <input type="text" name="gender" className="form-control" id="gender" placeholder="Gender"
-                                value={this.state.patientResource.gender} disabled=""
-                              />
-                              {/* <Dropdown
+
+                        <div className="form-group col-md-4">
+                          <span className="title-small">First Name</span>
+                          <input type="text" name="firstName" className="form-control" id="name" placeholder="First Name"
+                            value={this.state.patientResource.name[0].given} disabled
+                          />
+
+                        </div>
+                        <div className="form-group col-md-4">
+                          <span className="title-small">Last Name</span>
+                          <input type="text" name="lastName" className="form-control" id="lastname" placeholder="Last Name"
+                            value={this.state.patientResource.name[0].family} disabled
+                          />
+
+                        </div>
+
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group col-md-3 offset-1">
+                          {/* <h4 className="title">Gender</h4> */}
+                        </div>
+                        {this.state.patientResource.hasOwnProperty('gender') &&
+                          <div className="form-group col-md-4">
+                            <span className="title-small">Gender</span>
+                            <input type="text" name="gender" className="form-control" id="gender" placeholder="Gender"
+                              value={this.state.patientResource.gender} disabled
+                            />
+                            {/* <Dropdown
                                className={"blackBorder"}
                                options={this.state.genderOptions}
                                placeholder='Gender'
@@ -654,14 +701,15 @@ class CommunicationRequest extends Component {
                                value={this.state.gender}
                                onChange={this.handleGenderChange}
                              /> */}
-                            </div>
-                          }
-                          {this.state.patientResource.hasOwnProperty('birthDate') &&
-                            <div className="form-group col-md-4">
-                              <input type="text" name="birthDate" className="form-control" id="birthDate" placeholder="Birth Date"
-                                value={this.state.patientResource.birthDate} disabled=""
-                              />
-                              {/* <DateInput
+                          </div>
+                        }
+                        {this.state.patientResource.hasOwnProperty('birthDate') &&
+                          <div className="form-group col-md-4">
+                            <span className="title-small">Birth Date</span>
+                            <input type="text" name="birthDate" className="form-control" id="birthDate" placeholder="Birth Date"
+                              value={this.state.patientResource.birthDate} disabled
+                            />
+                            {/* <DateInput
                                 name="birthDate"
                                 placeholder="Birth Date"
                                 dateFormat="MM/DD/YYYY"
@@ -670,20 +718,21 @@ class CommunicationRequest extends Component {
                                 iconPosition="left"
                                 onChange={this.changebirthDate}
                               /> */}
-                            </div>
-                          }
-                        </div>
-                        {this.state.patientResource.hasOwnProperty('address') &&
-                          <div className="form-row">
-                            <div className="form-group col-md-3 offset-1">
-                              <h4 className="title"></h4>
-                            </div>
-                            {this.state.patientResource.address[0].hasOwnProperty('state') &&
-                              <div className="form-group col-md-4">
-                                <input type="text" name="state" className="form-control" id="state" placeholder="State"
-                                value={this.state.patientResource.address[0].state} disabled=""
+                          </div>
+                        }
+                      </div>
+                      {this.state.patientResource.hasOwnProperty('address') &&
+                        <div className="form-row">
+                          <div className="form-group col-md-3 offset-1">
+                            <h4 className="title"></h4>
+                          </div>
+                          {this.state.patientResource.address[0].hasOwnProperty('state') &&
+                            <div className="form-group col-md-4">
+                              <span className="title-small">State</span>
+                              <input type="text" name="state" className="form-control" id="state" placeholder="State"
+                                value={this.state.patientResource.address[0].state} disabled
                               />
-                                {/* <Dropdown
+                              {/* <Dropdown
                                   className={"blackBorder"}
                                   options={this.state.stateOptions}
                                   placeholder='State'
@@ -693,25 +742,39 @@ class CommunicationRequest extends Component {
                                   value={this.state.patientState}
                                   onChange={this.handlePatientStateChange}
                                 /> */}
-                              </div>
-                            }
-                            <div className="form-group col-md-4">
-                              <input type="text" name="patientPostalCoade" className="form-control" id="patientPostalCoade" placeholder="Postal Code"
-                                value={this.state.patientResource.address[0].postalCode} 
-                                />
-                              
                             </div>
-                          </div>
-                        }
-                      </div>
-                    }
-                  <SelectPayer elementName='payer' updateCB={this.updateStateElement} />
+                          }
+                          {this.state.patientResource.address[0].hasOwnProperty('postalCode') &&
+                            <div className="form-group col-md-4">
+                              <span className="title-small">Postal Code</span>
+                              <input type="text" name="patientPostalCoade" className="form-control" id="patientPostalCoade" placeholder="Postal Code"
+                                value={this.state.patientResource.address[0].postalCode} disabled
+                              />
+
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                  {/* <SelectPayer elementName='payer' updateCB={this.updateStateElement} /> */}
+                  <SelectPayerWithEndpoint elementName='payer' updateCB={this.updateStateElement} />
+                  {/* <div className="form-row">
+                    <div className="form-group col-3 offset-1">
+                      <h4 className="title">Payer Endpoint</h4>
+                    </div>
+                    <div className="form-group col-8">
+                    <input type="text" name="endpoint" className="form-control" id="endpoint" placeholder="endpoint"
+                                value={this.state.payer} disabled
+                              />
+                    </div>
+                    </div> */}
                   <div className="form-row">
                     <div className="form-group col-3 offset-1">
                       <h4 className="title">Purpose</h4>
                     </div>
                     <div className="form-group col-8">
-                    <DropdownPurpose elementName="purpose" updateCB={this.updateStateElement} />
+                      <DropdownPurpose elementName="purpose" updateCB={this.updateStateElement} />
                     </div>
                   </div>
                   <div className="form-row">
@@ -721,20 +784,20 @@ class CommunicationRequest extends Component {
                     <div className="form-group col-8">
                       <input type="text" name="note" className="form-control" id="note" placeholder="Note"
                         value={this.state.note} onChange={this.onChangeNote}
-                         />
+                      />
                     </div>
                   </div>
-                  <div className="form-row">
+                  {/* <div className="form-row">
                     <div className="form-group col-3 offset-1">
                       <h4 className="title">Identifier</h4>
                     </div>
                     <div className="form-group col-8">
                       <input type="text" name="practitioner" className="form-control" id="name" placeholder="Identifier"
-                        value={this.state.requesterOrganizationIdentifier} onChange={this.onChangeOrganizationIdentifier}
+                        value={this.state.requesterPayer} onChange={this.onChangeOrganizationIdentifier}
                         data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                       <div className="validation"></div>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="text-center">
                     <button type="button" onClick={this.startLoading}>Submit
                     <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
