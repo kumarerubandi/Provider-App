@@ -568,7 +568,7 @@ class PDEX extends Component {
     }
 
     async createFhirResource(json, resourceName, url, ) {
-        this.setState({ loading: true });
+        // this.setState({ loading: true });
         try {
             const fhirClient = new Client({ baseUrl: url });
             // let token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
@@ -946,7 +946,7 @@ class PDEX extends Component {
         let randomString = this.randomString()
         // let comp = await this.createFhirResource(this.state.compositionJson, 'Composition', this.state.fhir_url)
         // console.log(comp, 'composition Resource has been Created')
-
+        this.setState({ loading: true });
         let objJsonStr = JSON.stringify(this.state.bundle);
         let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
 
@@ -1057,7 +1057,7 @@ class PDEX extends Component {
             return response.json();
         }).then((response) => {
             console.log("----------response123", response);
-            this.setState({ loading: false });
+            // this.setState({ loading: false });
             this.UpdateCommunicationRequest();
             if (response.hasOwnProperty('entry')) {
                 let communicationId = response.entry[0].response.location.split('/')[1]
@@ -1074,7 +1074,9 @@ class PDEX extends Component {
             console.log("No response recieved from the server", reason)
         );
 
-        let senderCommunication = await this.createFhirResource(commJson, '', this.state.fhir_url)
+        let senderCommunication = await this.createFhirResource(commJson, '', this.state.fhir_url).then(()=>{
+            this.setState({ loading: false });
+        })
         console.log(senderCommunication, 'Sender Communication has been Created')
 
 
@@ -1406,7 +1408,7 @@ class PDEX extends Component {
                     <main id="main" style={{ marginTop: "92px", marginBottom: "100px" }}>
 
                         <div className="section-header">
-                            <h3>PDEX</h3>
+                            <h3>Transfer Coverage Decision Documents</h3>
                         </div>
                     </main>
                     <div className="content">
@@ -1487,8 +1489,6 @@ class PDEX extends Component {
                                         })}
                                     </div>
                                 }
-
-
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
                                         <small> - Enter a search keyword. (ex: height)</small>
