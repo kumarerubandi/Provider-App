@@ -101,6 +101,7 @@ class CommunicationRequest extends Component {
       payloadStartDate: payloadStartDate,
       payloadEndDate: payloadEndDate,
       isDocument: true,
+      payer_name: '',
       queries: [{ query: "", searchString: "", resource: "" }],
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
@@ -119,7 +120,7 @@ class CommunicationRequest extends Component {
       senderOrganizationResource: '',
       communicationRequestIdentifier: this.getGUID(),
       payer: '',
-      requesterPayer: JSON.parse(sessionStorage.getItem('requesterPayer')),
+      requesterPayer: '',
       requesterCommRequest: '',
       purpose: '',
       note: ''
@@ -245,9 +246,34 @@ class CommunicationRequest extends Component {
     })
     // }
   }
+  async getPayerList() {
+    //var url = this.props.config.cds_service.get_payers;
+    var url = "http://cdex.mettles.com/cds/getPayers";
+    // let token;
+    // token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
+    let headers = {
+      "Content-Type": "application/json",
+      // 'Authorization': 'Bearer ' + token
+    }
+    let payersList = await fetch(url, {
+      method: "GET",
+      headers: headers
+    }).then(response => {
+      return response.json();
+    }).then((response) => {
+      return response;
+    }).catch(reason =>
+      console.log("No response recieved from the server", reason)
+    );
+    return payersList;
+  }
 
   async componentDidMount() {
-
+    let payersList = await this.getPayerList()
+    let payer = payersList.find(payer => payer.id === config.current_payer_id);
+    // console.log(payer, "requesterPayer")
+    this.setState({ requesterPayer: payer })
+    this.setState({payer_name:payer.payer_name})
     // let token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
     // token = "Bearer " + token;
     var myHeaders = new Headers({
@@ -494,8 +520,8 @@ class CommunicationRequest extends Component {
         "type": "transaction",
         "entry": []
       }
-      requesterOrganization['endpoint']=[]
-      requesterOrganization['endpoint'][0] = {'reference':"Endpoint/Requester-Endpoint-Id"}
+      requesterOrganization['endpoint'] = []
+      requesterOrganization['endpoint'][0] = { 'reference': "Endpoint/Requester-Endpoint-Id" }
 
       bundle.entry.push({
         'resource': commRequest,
@@ -508,8 +534,8 @@ class CommunicationRequest extends Component {
       bundle.entry.push({
         "resource": {
           "resourceType": "Endpoint",
-          "id":"Requester-Endpoint-Id",
-          "identifier":[
+          "id": "Requester-Endpoint-Id",
+          "identifier": [
             {
               "system": "http://www.jurisdiction.com/insurer/123456",
               "value": requester_endPoint_identifier
@@ -519,15 +545,15 @@ class CommunicationRequest extends Component {
             "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
             "code": "hl7-fhir-rest"
           },
-          " managingOrganization":{
-            "reference": "Organization/"+requesterOrganization.id
+          " managingOrganization": {
+            "reference": "Organization/" + requesterOrganization.id
           },
           "address": this.state.requesterPayer.payer_end_point
         },
         "request": {
           "method": "POST",
           "url": "Endpoint",
-          "ifNoneExist":  "identifier=" + requester_endPoint_identifier
+          "ifNoneExist": "identifier=" + requester_endPoint_identifier
         }
       })
       bundle.entry.push({
@@ -555,7 +581,7 @@ class CommunicationRequest extends Component {
         }
       })
 
-      let response = await this.createFhirResource(bundle, '', this.state.payer.endpoint, 'otherPayer', true).then(()=>{
+      let response = await this.createFhirResource(bundle, '', this.state.payer.endpoint, 'otherPayer', true).then(() => {
         this.setState({ loading: false });
       })
       console.log(response, 'communciation request created')
@@ -609,8 +635,8 @@ class CommunicationRequest extends Component {
             <div className="container">
 
               <div id="logo" className="pull-left">
-                {this.state.requesterPayer!=='' &&
-                <h1><a href="#intro" className="scrollto">{this.state.requesterPayer.payer_name}</a></h1>
+                {this.state.payer_name!=='' &&
+                  <h1><a href="#intro" className="scrollto">{this.state.payer_name}</a></h1>
                 }
                 {/* <h1><a href="#intro" className="scrollto">{this.state.</a></h1> */}
                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}

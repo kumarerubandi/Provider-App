@@ -91,7 +91,8 @@ class CommunicationHandler extends Component {
       received: [],
       payer_org: '',
       provider_org: '',
-      requesterPayer: JSON.parse(sessionStorage.getItem('requesterPayer')),
+      requesterPayer: '',
+      payer_name: '',
       requirementSteps: [{ 'step_no': 1, 'step_str': 'Communicating with CRD system.', 'step_status': 'step_loading' },
       {
         'step_no': 2, 'step_str': 'Retrieving the required 4 FHIR resources on crd side.', 'step_status': 'step_not_started'
@@ -175,9 +176,36 @@ class CommunicationHandler extends Component {
       })
     }
   }
+  async getPayerList() {
+    //var url = this.props.config.cds_service.get_payers;
+    var url = "http://cdex.mettles.com/cds/getPayers";
+    // let token;
+    // token = await createToken(this.props.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
+    let headers = {
+      "Content-Type": "application/json",
+      // 'Authorization': 'Bearer ' + token
+    }
+    let payersList = await fetch(url, {
+      method: "GET",
+      headers: headers
+    }).then(response => {
+      return response.json();
+    }).then((response) => {
+      return response;
+    }).catch(reason =>
+      console.log("No response recieved from the server", reason)
+    );
+    return payersList;
+  }
 
   async componentDidMount() {
+
     try {
+      let payersList = await this.getPayerList()
+      let payer = payersList.find(payer => payer.id === config.current_payer_id);
+      // console.log(payer, "requesterPayer")
+      this.setState({ requesterPayer: payer })
+      this.setState({ payer_name: payer.payer_name })
       // console.log("this.props.config.::",this.props.config,this.state.requesterPayer.payer_end_point)
       const fhirClient = new Client({ baseUrl: this.state.requesterPayer.payer_end_point });
       // const token  = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
@@ -1042,8 +1070,8 @@ class CommunicationHandler extends Component {
             <div className="container">
 
               <div id="logo" className="pull-left">
-              {this.state.requesterPayer&&
-                <h1><a href="#intro" className="scrollto">{this.state.requesterPayer.payer_name}</a></h1>
+                {this.state.payer_name!=='' &&
+                  <h1><a href="#intro" className="scrollto">{this.state.payer_name}</a></h1>
                 }
                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
               </div>
@@ -1071,70 +1099,37 @@ class CommunicationHandler extends Component {
           <main id="main" style={{ marginTop: "92px" }}>
             <div className="form">
 
-                <div className="left-form">
-                  <div><h2>List of Coverage Transition documents Received</h2></div>
+              <div className="left-form">
+                <div><h2>List of Coverage Transition documents Received</h2></div>
 
-                  <div className="form-row">
-                    {/* <table className="table col-10 offset-1"> */}
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Request for Document ID</th>
-                          <th>Request for Document Identifier</th>
-                          <th>ID for information transmitted from a sender to a receiver</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {
-                          data.map((d, i) => (
-                            <tr key={i}>
-                              <td>
-                                <span>{d['communication_request']['id']}</span>
-                              </td>
-                              <td>
-                                {d['communication_request']['identifier'] != undefined &&
-                                  <span>{d['communication_request']['identifier'][0]['value']}</span>
-                                }
-                              </td>
-                              <td>
-                                <span>{d['communication']['id']}</span>
-                              </td>
-                              <td>
-                                <button className="btn list-btn" onClick={() => this.getPatientDetails(d['communication_request'], d['communication'])}>
-                                  Review
-                            </button>
-                              </td>
-                            </tr>
-                          ))
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                  <div></div>
-                  <div><h2>List of Coverage Transition documents Not Received</h2></div>
+                <div className="form-row">
+                  {/* <table className="table col-10 offset-1"> */}
                   <table className="table">
                     <thead>
                       <tr>
                         <th>Request for Document ID</th>
                         <th>Request for Document Identifier</th>
+                        <th>ID for information transmitted from a sender to a receiver</th>
                         <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       {
-                        requests.map((d, i) => (
+                        data.map((d, i) => (
                           <tr key={i}>
                             <td>
-                              <span>{d['id']}</span>
+                              <span>{d['communication_request']['id']}</span>
                             </td>
                             <td>
-                              {d['identifier'] != undefined &&
-                                <span>{d['identifier'][0]['value']}</span>
+                              {d['communication_request']['identifier'] != undefined &&
+                                <span>{d['communication_request']['identifier'][0]['value']}</span>
                               }
                             </td>
                             <td>
-                              <button className="btn list-btn" onClick={() => this.getPatientDetails(d, '')}>
+                              <span>{d['communication']['id']}</span>
+                            </td>
+                            <td>
+                              <button className="btn list-btn" onClick={() => this.getPatientDetails(d['communication_request'], d['communication'])}>
                                 Review
                             </button>
                             </td>
@@ -1144,39 +1139,72 @@ class CommunicationHandler extends Component {
                     </tbody>
                   </table>
                 </div>
-                {this.state.form_load &&
-                  <div className="right-form" style={{ paddingTop: "2%" }} >
-                    {this.state.patient_name &&
-                      <div className="data-label">
-                        Patient : <span className="data1"><strong>{this.state.patient_name}</strong></span>
-                      </div>}
-                    {this.state.gender &&
-                      <div className="data-label">
-                        Patient Gender : <span className="data1"><strong>{this.state.gender}</strong></span>
-                      </div>}
-                    {this.state.ident &&
-                      <div className="data-label">
-                        Patient Identifier : <span className="data1"><strong>{this.state.ident}</strong></span>
-                      </div>}
-                    {this.state.birthDate &&
-                      <div className="data-label">
-                        Patient Date of Birth : <span className="data1"><strong>{this.state.birthDate}</strong></span>
-                      </div>}
-                    {this.state.payer_org &&
-                      <div className="data-label">
-                        Requester Payer : <span className="data1"><strong>{this.state.payer_org}</strong></span>
-                      </div>}
-                    {this.state.provider_org &&
-                      <div className="data-label">
-                        Sender Payer : <span className="data1"><strong>{this.state.provider_org}</strong></span>
-                      </div>}
-                    {this.state.contentStrings.length > 0 &&
-                      <div className="data-label">
-                        Requests Sent : <span className="data1"><strong>{docs}</strong></span>
-                      </div>}
-
-                  </div>}
+                <div></div>
+                <div><h2>List of Coverage Transition documents Not Received</h2></div>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Request for Document ID</th>
+                      <th>Request for Document Identifier</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {
+                      requests.map((d, i) => (
+                        <tr key={i}>
+                          <td>
+                            <span>{d['id']}</span>
+                          </td>
+                          <td>
+                            {d['identifier'] != undefined &&
+                              <span>{d['identifier'][0]['value']}</span>
+                            }
+                          </td>
+                          <td>
+                            <button className="btn list-btn" onClick={() => this.getPatientDetails(d, '')}>
+                              Review
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
               </div>
+              {this.state.form_load &&
+                <div className="right-form" style={{ paddingTop: "2%" }} >
+                  {this.state.patient_name &&
+                    <div className="data-label">
+                      Patient : <span className="data1"><strong>{this.state.patient_name}</strong></span>
+                    </div>}
+                  {this.state.gender &&
+                    <div className="data-label">
+                      Patient Gender : <span className="data1"><strong>{this.state.gender}</strong></span>
+                    </div>}
+                  {this.state.ident &&
+                    <div className="data-label">
+                      Patient Identifier : <span className="data1"><strong>{this.state.ident}</strong></span>
+                    </div>}
+                  {this.state.birthDate &&
+                    <div className="data-label">
+                      Patient Date of Birth : <span className="data1"><strong>{this.state.birthDate}</strong></span>
+                    </div>}
+                  {this.state.payer_org &&
+                    <div className="data-label">
+                      Requester Payer : <span className="data1"><strong>{this.state.payer_org}</strong></span>
+                    </div>}
+                  {this.state.provider_org &&
+                    <div className="data-label">
+                      Sender Payer : <span className="data1"><strong>{this.state.provider_org}</strong></span>
+                    </div>}
+                  {this.state.contentStrings.length > 0 &&
+                    <div className="data-label">
+                      Requests Sent : <span className="data1"><strong>{docs}</strong></span>
+                    </div>}
+
+                </div>}
+            </div>
 
 
           </main>
