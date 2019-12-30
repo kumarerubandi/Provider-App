@@ -72,8 +72,8 @@ class PDEX extends Component {
             compositionJson: '',
             carePlanResources: '',
             selectedPlans: [],
-            checkCarePlan:false,
-            payerName:'',
+            checkCarePlan: false,
+            payerName: '',
             bundle: {
                 "resourceType": "Bundle",
                 "id": "pcde-example",
@@ -88,6 +88,7 @@ class PDEX extends Component {
             communicationIdentifier: this.randomString(),
             fhir_url: '',
             endpoint: '',
+            show:false
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -106,6 +107,7 @@ class PDEX extends Component {
         this.getResources = this.getResources.bind(this);
         this.getToken = this.getToken.bind(this);
         this.getCarePlans = this.getCarePlans.bind(this);
+        this.showBundlePreview = this.showBundlePreview.bind(this);
 
 
     }
@@ -208,7 +210,10 @@ class PDEX extends Component {
         this.setState({ comm_req: resources });
         // this.displayCommunicataionRequests();
     }
-
+    showBundlePreview(){
+        let show = this.state.show;
+        this.setState({show:!show});
+    }
     indexOfFile(file) {
         for (var i = 0; i < this.state.files.length; i++) {
             console.log(this.state.files[i].name, file.name, 'lets check')
@@ -849,7 +854,7 @@ class PDEX extends Component {
     }
 
     onPlanSelect(event) {
-        console.log("event --", event, event.target, );
+        console.log("event --", event, event.target);
         // let val = event.target.value;
         // let selectedPlans = [...this.state.selectedPlans]
         // let valueIndex = this.state.selectedPlans.indexOf(val)
@@ -1074,7 +1079,7 @@ class PDEX extends Component {
             console.log("No response recieved from the server", reason)
         );
 
-        let senderCommunication = await this.createFhirResource(commJson, '', this.state.fhir_url).then(()=>{
+        let senderCommunication = await this.createFhirResource(commJson, '', this.state.fhir_url).then(() => {
             this.setState({ loading: false });
         })
         console.log(senderCommunication, 'Sender Communication has been Created')
@@ -1377,8 +1382,8 @@ class PDEX extends Component {
                         <div className="container">
 
                             <div id="logo" className="pull-left">
-                                {this.state.payerName!==''&&
-                                <h1><a href="#intro" className="scrollto">{this.state.payerName}</a></h1>
+                                {this.state.payerName !== '' &&
+                                    <h1><a href="#intro" className="scrollto">{this.state.payerName}</a></h1>
 
                                 }
                                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
@@ -1480,7 +1485,6 @@ class PDEX extends Component {
 
                                 <div className="data-label" style={{ paddingTop: "0px" }}>
                                     Select Care Plans to submit :
-
                                 </div>
                                 {this.state.carePlanResources.length > 0 &&
                                     <div>
@@ -1488,6 +1492,11 @@ class PDEX extends Component {
                                             return this.renderCarePlans(item, key);
                                         })}
                                     </div>
+                                }
+                                <button className="btn list-btn" style={{float:"left"}} onClick={this.showBundlePreview}>
+                                    Preview</button>
+                                { this.state.show &&
+                                    <div><pre>{JSON.stringify(this.state.bundle, null, 2)}</pre></div>
                                 }
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR

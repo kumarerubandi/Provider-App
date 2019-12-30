@@ -17,17 +17,18 @@ class Review extends Component {
     }
     this.initialize = this.initialize.bind(this);   
        
-    if (sessionStorage.getItem('username') === 'john'){
-      this.initialize({
-          client_id: "app-login",
-          scope: "patient/* openid profile"
-        });
-    } else {
+    // if (sessionStorage.getItem('username') === 'john'){
+    //   this.initialize({
+    //       client_id: "app-login",
+    //       scope: "patient/* openid profile"
+    //     });
+    // } else {
+       
         this.initialize({
-          client_id: "385b8e12-722f-4c43-9ab1-7c2aed14004e",
+          client_id: "b7cb53e9-5e8e-4748-a790-1f45a0101255",//cerner
           scope: "patient/* openid profile"
         });
-    }
+    // }
   }
   setSettings(data) {
     sessionStorage.setItem("app-settings", JSON.stringify(data));
@@ -58,10 +59,10 @@ class Review extends Component {
       if (this.props.config.provider.authorized_fhir === true){
          var { authorizeUrl, tokenUrl } = await fhirClient.smartAuthMetadata();
       
-         if(settings.api_server_uri.search('54.227.218.17') > 0){
+         if(settings.api_server_uri.search('cdex.mettles.com') > 0){
            authorizeUrl
-            = {protocol:"https://",host:"auth.mettles.com:8443/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
-           tokenUrl = {protocol:"https:",host:"auth.mettles.com:8443",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
+            = {protocol:"https://",host:"auth.mettles.com/",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/auth"}
+           tokenUrl = {protocol:"https:",host:"auth.mettles.com",pathname:"auth/realms/ProviderCredentials/protocol/openid-connect/token"}
          }
 
          // //////////////
@@ -83,11 +84,11 @@ class Review extends Component {
           authorizePath: authorizeUrl.pathname,
           },
          });
-
+         
          console.log("Current URL--",`${window.location.protocol}//${window.location.host}/index`);
          // Authorization uri definition
          const authorizationUri = oauth2.authorizationCode.authorizeURL({
-             redirect_uri: `${window.location.protocol}//${window.location.host}/index`,
+             redirect_uri: `${window.location.protocol}//${window.location.host}/mips`,
              aud: settings.api_server_uri,
              scope: settings.scope,
              state: '3(#0/!~',
@@ -96,7 +97,7 @@ class Review extends Component {
          window.location = authorizationUri;
 	}
         if (!this.props.config.provider.authorized_fhir){
-        	window.location = `${window.location.protocol}//${window.location.host}/index`;
+        	window.location = `${window.location.protocol}//${window.location.host}/mips`;
       	}
   }
 

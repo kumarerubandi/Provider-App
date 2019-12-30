@@ -643,7 +643,7 @@ class ProviderRequest extends Component {
   async submit_info() {
     // this.setState({ loadingSteps: false, stepsErrorString: undefined });
     // this.resetSteps();
-    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
+    let token = await createToken("password", 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
     token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
