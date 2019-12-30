@@ -1042,7 +1042,9 @@ class CommunicationHandler extends Component {
             <div className="container">
 
               <div id="logo" className="pull-left">
-                <h1><a href="#intro" className="scrollto">Payer A</a></h1>
+              {this.state.requesterPayer&&
+                <h1><a href="#intro" className="scrollto">{this.state.requesterPayer.payerName}</a></h1>
+                }
                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
               </div>
 

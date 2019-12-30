@@ -17,6 +17,7 @@ import Dropzone from 'react-dropzone';
 import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import config from '../globalConfiguration.json';
+import { ThemeProvider } from 'styled-components';
 
 
 var date = new Date()
@@ -71,6 +72,8 @@ class PDEX extends Component {
             compositionJson: '',
             carePlanResources: '',
             selectedPlans: [],
+            checkCarePlan:false,
+            payerName:'',
             bundle: {
                 "resourceType": "Bundle",
                 "id": "pcde-example",
@@ -177,6 +180,7 @@ class PDEX extends Component {
         let payer = payersList.find(payer => payer.id === config.current_payer_id);
         console.log(payer, "requesterPayer")
         this.setState({ fhir_url: payer.payer_end_point })
+        this.setState({ payerName: payer.payer_name })
         // sessionStorage.setItem('requesterPayer', JSON.stringify(requesterPayer))
         let resp = await this.getCommunicationRequests();
         // console.log("resp------", resp);
@@ -845,17 +849,17 @@ class PDEX extends Component {
     }
 
     onPlanSelect(event) {
-        console.log("event --", event, event.target, this.state.selectedPlans);
-        let val = event.target.name;
-        let selectedPlans = [...this.state.selectedPlans]
-        let valueIndex = this.state.selectedPlans.indexOf(val)
-        if (valueIndex == -1) {
-            selectedPlans.push(val);
-        }
-        else {
-            selectedPlans.splice(valueIndex, 1)
-        }
-        this.setState({ selectedPlans: selectedPlans })
+        console.log("event --", event, event.target, );
+        // let val = event.target.value;
+        // let selectedPlans = [...this.state.selectedPlans]
+        // let valueIndex = this.state.selectedPlans.indexOf(val)
+        // if (valueIndex == -1) {
+        //     selectedPlans.push(val);
+        // }
+        // else {
+        //     selectedPlans.splice(valueIndex, 1)
+        // }
+        // this.setState({ checkCarePlan: selectedPlans })
     }
 
     renderCarePlans(item, key) {
@@ -1371,7 +1375,10 @@ class PDEX extends Component {
                         <div className="container">
 
                             <div id="logo" className="pull-left">
-                                <h1><a href="#intro" className="scrollto">Payer B</a></h1>
+                                {this.state.payerName!==''&&
+                                <h1><a href="#intro" className="scrollto">{this.state.payerName}</a></h1>
+
+                                }
                                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
                             </div>
 

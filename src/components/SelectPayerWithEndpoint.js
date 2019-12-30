@@ -59,6 +59,7 @@ export class SelectPayerWithEndpoint extends Component {
                 /**Update payer options */
                 let val = {'name':item.payer_name.replace(/ /g, "_").toLowerCase(),
                 'payer_identifier': item.payer_identifier,
+                "payerName":item.payer_name,
                 'endpoint':item.payer_end_point
             }
                 let obj = { key: item.id, value: val, text: item.payer_name };
@@ -102,6 +103,7 @@ export class SelectPayerWithEndpoint extends Component {
             if (item.payer_type.replace(/ /g, "_").toLowerCase() === value) {
                 let val = {'name':item.payer_name.replace(/ /g, "_").toLowerCase(),
                 'payer_identifier': item.payer_identifier,
+                "payerName":item.payer_name,
                 'endpoint':item.payer_end_point
             }
                 let obj = { key: item.id, value: val, text: item.payer_name };
