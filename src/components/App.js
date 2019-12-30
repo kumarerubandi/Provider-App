@@ -18,6 +18,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faIgloo,faNotesMedical } from '@fortawesome/free-solid-svg-icons';
 import CDEX from '../containers/CDEX';
 import Home from '../containers/Home';
+import PayerCommunicationRequest from '../containers/PayerCommunicationRequest';
+import PDEX from '../containers/PDEX';
 
 library.add(faIgloo,faNotesMedical)
 export default class App extends Component {
@@ -30,10 +32,12 @@ export default class App extends Component {
                     <Route path={"/x12converter"} component={X12Converter} />
                     <Route path={"/reportingScenario"} component={ReportingScenario} />
                     <Route path={"/cdex"} component={CDEX} />
+                    <Route path={"/payerB"} component={PDEX} />
                     <Route path={"/cd"} component={CoverageDetermination} />
                     {/* <Route path={"/prior_auth"} component={PriorAuthorization} /> */}
                     <Route path={"/provider_request"} component={ProviderRequest} />                    
                     <Route path={"/mips"} component={Mips} />                    
+                    <Route path={"/payerA"} component={PayerCommunicationRequest} />                    
                     {/* <Route path={"/review"} component={Review} /> */}
                     <Route exact path="/index" component={Main} />
                     <Route exact path="/home" component={Home} />

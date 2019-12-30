@@ -16,12 +16,21 @@ import moment from "moment";
 import Dropzone from 'react-dropzone';
 import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import config from '../globalConfiguration.json';
 
 
+var date = new Date()
+var currentDateTime = date.toISOString()
 
+var requesterPayerFhir = "http://localhost:8080/hapi-fhir-jpaserver/fhir"
 
-
-class CDEX extends Component {
+const types = {
+    error: "errorClass",
+    info: "infoClass",
+    debug: "debugClass",
+    warning: "warningClass"
+}
+class PDEX extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -45,8 +54,8 @@ class CDEX extends Component {
             check: false,
             documentCheck: false,
             content: [],
-            providerOrganization: {},
-            payerOrganization: {},
+            senderOrganization: {},
+            requesterOrganization: {},
             valueString: '',
             communicationPayload: [],
             documentContent: [],
@@ -58,7 +67,20 @@ class CDEX extends Component {
             success: false,
             successMsg: '',
             documentList: [],
-            selectedDocs: []
+            selectedDocs: [],
+            compositionJson: '',
+            bundle: {
+                "resourceType": "Bundle",
+                "id": "pcde-example",
+                "identifier": {
+                    "system": "http://example.org/documentIDs",
+                    "value": this.randomString()
+                },
+                "type": "document",
+                "timestamp": currentDateTime,
+                "entry": []
+            },
+            communicationIdentifier: this.randomString()
         };
         this.goTo = this.goTo.bind(this);
         this.getCommunicationRequests = this.getCommunicationRequests.bind(this);
@@ -74,16 +96,83 @@ class CDEX extends Component {
         this.showError = this.showError.bind(this);
         this.onDocSelect = this.onDocSelect.bind(this);
         this.renderDocs = this.renderDocs.bind(this);
+        this.getResources = this.getResources.bind(this);
+        this.getToken = this.getToken.bind(this);
 
 
+    }
+    async getToken(grant_type, client_id, client_secret) {
+        let params = {}
+        const tokenUrl = config.token_url;
+        params['grant_type'] = grant_type
+        params['client_id'] = client_id
+        params['client_secret'] = client_secret
+        const searchParams = Object.keys(params).map((key) => {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+        }).join('&');
+        const tokenResponse = await fetch(tokenUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: searchParams
+        })
+            .then((response) => {
+                return response.json();
+            })
+            .then((response) => {
+                const token = response ? response.access_token : null;
+                if (token) {
+                    console.log("Successfully retrieved token", types.info);
+                } else {
+                    console.log("Failed to get token", types.warning);
+                    if (response.error_description) {
+                        console.log(response.error_description, types.error);
+                    }
+                }
+                return token;
+
+            })
+            .catch(reason => {
+                console.log("Failed to get token", types.error, reason);
+                console.log("Bad request");
+            });
+        //    let t = await tokenResponse
+        // console.log("tokenResponse:",t)
+        return tokenResponse;
     }
 
     goTo(title) {
         window.location = window.location.protocol + "//" + window.location.host + "/" + title;
     }
 
-    componentDidMount() {
-        this.displayCommunicataionRequests();
+    async componentDidMount() {
+        let resources = [];
+        let resp = await this.getCommunicationRequests();
+        // console.log("resp------", resp);
+        if (resp != undefined) {
+            if (resp.entry != undefined) {
+                Object.keys(resp.entry).forEach((key) => {
+                    if (resp.entry[key].resource != undefined) {
+                        if (resp.entry[key].resource.hasOwnProperty('payload')) {
+                            if (resp.entry[key].resource.payload[0].extension[0].hasOwnProperty('valueCodeableConcept')) {
+                                console.log(resp.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code, '----------')
+                                if (resp.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code === 'pcde') {
+                                    resources.push(resp.entry[key].resource);
+                                }
+                            }
+                        }
+
+                    }
+                });
+            }
+        }
+        else {
+            console.log('no communications')
+        }
+        // console.log("-------", resources);
+        this.setState({ comm_req: resources });
+        // this.displayCommunicataionRequests();
     }
 
     indexOfFile(file) {
@@ -144,17 +233,46 @@ class CDEX extends Component {
             this.showError()
         })
     }
-    async getCommunicationRequests() {
-        var tempUrl = this.state.config.provider.fhir_url;
+
+    async getResources(searchParams) {
+        var tempUrl = config.payerB.fhir_url;
         let headers = {
             "Content-Type": "application/json",
         }
-        const token = await createToken(this.state.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        console.log(token, 'token')
-        if (this.state.config.provider.authorized_fhir) {
-            console.log('The token is : ', token, tempUrl);
-            headers['Authorization'] = 'Bearer ' + token
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
+
+        // const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // if (config.payerB.authorized_fhir) {
+        //     // console.log('The token is : ', token, tempUrl);
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
+        const fhirResponse = await fetch(tempUrl + "/" + searchParams, {
+            method: "GET",
+            headers: headers
+        }).then(response => {
+            // console.log("Recieved response", response);
+            return response.json();
+        }).then((response) => {
+            // console.log("----------response", response);
+            return response;
+        }).catch(reason =>
+            console.log("No response recieved from the server", reason)
+        );
+        return fhirResponse;
+    }
+
+    async getCommunicationRequests() {
+        var tempUrl = config.payerB.fhir_url;
+        let headers = {
+            "Content-Type": "application/json",
         }
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
+
+        // const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // if (config.payerB.authorized_fhir) {
+        //     // console.log('The token is : ', token, tempUrl);
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         const fhirResponse = await fetch(tempUrl + "/CommunicationRequest?_count=100000", {
             method: "GET",
             headers: headers
@@ -180,11 +298,13 @@ class CDEX extends Component {
                     if (resp.entry[key].resource != undefined) {
                         if (resp.entry[key].resource.hasOwnProperty('payload')) {
                             if (resp.entry[key].resource.payload[0].extension[0].hasOwnProperty('valueCodeableConcept')) {
-                                if (resp.entry[key].payload[0].extension[0].valueCodeableConcept.coding[0].code !== 'pcde') {
+                                console.log(resp.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code, '----------')
+                                if (resp.entry[key].resource.payload[0].extension[0].valueCodeableConcept.coding[0].code === 'pcde') {
                                     resources.push(resp.entry[key].resource);
                                 }
                             }
                         }
+
                     }
                 });
             }
@@ -192,7 +312,6 @@ class CDEX extends Component {
         else {
             console.log('no communications')
         }
-
         // console.log("-------", resources);
         this.setState({ comm_req: resources });
     }
@@ -218,14 +337,17 @@ class CDEX extends Component {
         // f = null;
         // this.setState({ files: f });
         // console.log(this.state.files)
-        var tempUrl = this.state.config.provider.fhir_url + "/" + patient_id;
-        const token = await createToken(this.state.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        var tempUrl = config.payerB.fhir_url + "/" + patient_id;
+        let token;
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
+
+        // const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.state.config.provider.authorized_fhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (config.payerB.authorized_fhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         let patient = await fetch(tempUrl, {
             method: "GET",
             headers: headers
@@ -249,7 +371,7 @@ class CDEX extends Component {
                         this.setState({ patient_name: name })
                     }
                 }
-                console.log("patient name----------", this.state.patient_name, this.state.patient.resourceType + "?identifier=" + this.state.patient.identifier[0].value);
+                // console.log("patient name----------", this.state.patient_name, this.state.patient.resourceType + "?identifier=" + this.state.patient.identifier[0].value);
             }
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
@@ -298,6 +420,9 @@ class CDEX extends Component {
         //     }
         // })
 
+        // await this.getObservationDetails().then(() => {
+        //     // this.showError()
+        // })
         await this.getObservationDetails().then(() => {
             // this.showError()
         })
@@ -320,15 +445,6 @@ class CDEX extends Component {
     async getDocuments(payload) {
         let strings = [];
         payload.map((c) => {
-            // console.log("ccccccc", c);
-            // if (c.hasOwnProperty('contentReference')) {
-            //     if (c['contentReference']['reference'].replace('#', '')) {
-
-            //     }
-            // }
-            // if (c.hasOwnProperty('extension')) {
-            //     strings.push(c.extension[0]['valueCodeableConcept']['coding'][0]['display']);
-            // }
             if (c.hasOwnProperty('contentString')) {
                 strings.push(c.contentString)
             }
@@ -344,140 +460,297 @@ class CDEX extends Component {
         }
         else {
             this.setState({ error: false });
+        }
+    }
+
+    async getReferences(object, resource) {
+        let referenceArray = []
+        console.log(object, 'objjj')
+        if (resource === 'Claim') {
+            if (object.hasOwnProperty('enterer')) {
+                let enterer = await this.getResources(object.enterer.reference)
+                referenceArray.push({ resource: enterer })
+            }
+            if (object.hasOwnProperty('provider')) {
+                let provider = await this.getResources(object.provider.reference)
+                referenceArray.push({ resource: provider })
+            }
+            if (object.hasOwnProperty('insurer')) {
+                let insurer = await this.getResources(object.insurer.reference)
+                referenceArray.push({ resource: insurer })
+            }
+            if (object.hasOwnProperty('procedure')) {
+                let procedure = await this.getResources(object.procedure[0].procedureReference.reference)
+                // if(procedure.hasOwnProperty('encounter')){
+                //     let encounter = await this.getResources(procedure.encounter.reference)
+                //     referenceArray.push({resource:encounter})
+
+                // }
+                referenceArray.push({ resource: procedure })
+            }
+            if (object.hasOwnProperty('encounter')) {
+                let encounter = await this.getResources(object.encounter.reference)
+                referenceArray.push({ resource: encounter })
+            }
+            if (object.hasOwnProperty('insurance')) {
+                if (object.insurance[0].hasOwnProperty('coverage')) {
+                    if (object.insurance[0].coverage.hasOwnProperty('reference')) {
+                        let coverage = await this.getResources(object.insurance[0].coverage)
+                        referenceArray.push({ resource: coverage })
+                    }
+
+                }
+
+            }
 
         }
+        else if (resource === "CarePlan") {
+            if (object.hasOwnProperty('encounter')) {
+                let encounter = await this.getResources(object.encounter.reference)
+                referenceArray.push({ resource: encounter })
+            }
+            if (object.hasOwnProperty('careTeam')) {
+                let careTeam = await this.getResources(object.careTeam[0].reference)
+                referenceArray.push({ resource: careTeam })
+            }
+        }
 
+        return referenceArray
     }
+
+    async createFhirResource(json, resourceName, url, ) {
+        this.setState({ loading: true });
+        try {
+            const fhirClient = new Client({ baseUrl: url });
+            // let token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
+            // fhirClient.bearerToken = token;
+
+            //   console.log('The json is : ', json);
+            let data = fhirClient.create({
+                resourceType: resourceName,
+                body: json,
+                headers: { "Content-Type": "application/fhir+json" }
+            }).then((data) => {
+                console.log("Data::", data);
+                this.setState({ compositionJson: data })
+                this.setState({ loading: false });
+                return data;
+            }).catch((err) => {
+                console.log(err);
+                this.setState({ loading: false });
+            })
+            return data
+        } catch (error) {
+            console.error('Unable to create resource', error.message);
+            this.setState({ loading: false });
+            this.setState({ dataLoaded: false })
+        }
+    }
+
+
     async getObservationDetails() {
         // let searchParameter = this.state.searchParameter;
         // console.log(searchParameter,'search')
         let communicationRequest = this.state.communicationRequest
+        let practitionerResource = ''
+        if (this.state.patient.hasOwnProperty('generalPractitioner')) {
+            practitionerResource = await this.getResources(this.state.patient.generalPractitioner[0].reference)
+        }
         let payload = communicationRequest.payload
         let code;
+        var date = new Date()
+        var currentDateTime = date.toISOString()
         let patientId = communicationRequest.subject.reference
         let dateParameter;
         let valueString;
-        payload.map(async (p) => {
-            if (p.hasOwnProperty('extension')) {
-                let communicationPayload = this.state.communicationPayload
-                if (p['extension'][0].hasOwnProperty('valueString')) {
-                    valueString = p['extension'][0]['valueString'];
-                    console.log(valueString, 'vallll')
-                    var Url;
-                    if ((valueString === 'Practitioner') || (valueString === 'Organization') || (valueString === 'SupplyRequest')) {
-                        Url = this.state.config.provider.fhir_url + "/" + valueString;
+        let Bundle = this.state.bundle
+        let compositionJson = {
+            "resourceType": "Composition",
+            "status": "final",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDEDocumentCode",
+                        "code": "pcde"
                     }
-                    else {
-                        Url = this.state.config.provider.fhir_url + "/" + valueString + "&patient=" + this.state.patient.id;
-                    }
-                    // Url  = this.state.config.provider.fhir_url + "/"+valueString;
-                    // if(valueString)
-                    console.log(Url, 'url')
-
-                    var extensionUrl = p['extension'][0].url
-                    console.log(p['extension'][0].url, 'teeee')
-                    const token = await createToken(this.state.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-                    let headers = {
-                        "Content-Type": "application/json",
-                    }
-                    if (this.state.config.provider.authorized_fhir) {
-                        headers['Authorization'] = 'Bearer ' + token
-                    }
-                    let dataResult = await fetch(Url, {
-                        method: "GET",
-                        headers: headers
-                    }).then(response => {
-                        console.log(response, 'the reposnse')
-                        return response.json();
-                    }).then((response) => {
-                        // console.log("----------response", response);
-                        if (response.hasOwnProperty('entry')) {
-                            return response
-                        }
-                        // console.log(response,'res')
-                    }).catch(reason =>
-                        console.log("No response recieved from the server", reason)
-                    );
-                    console.log(dataResult, 'dataResult')
-                    var encoded = btoa(JSON.stringify(dataResult))
-                    console.log(encoded, 'base64')
-                    // let communicationPayload = this.state.communicationPayload
-
-                    communicationPayload.push({
-                        "extension": p['extension'],
-                        "contentAttachment": {
-                            "contentType": "application/json",
-                            "data": encoded
+                ]
+            },
+            "subject": {
+                "reference": "Patient/" + this.state.patient.id
+            },
+            "date": currentDateTime,
+            // "author": [
+            //     {
+            //         "reference": "Practitioner/1"
+            //     }
+            // ],
+            "title": "Example PCDE Document for Diabetes patient",
+            "event": [],
+            "section": []
+        }
+        var arr = []
+        var conditionsArray = []
+        let conditionResource = ''
+        var claims = ''
+        let claim = ''
+        let claimResponse = ''
+        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id)
+        console.log(carePlanResources, 'resources')
+        if (carePlanResources.hasOwnProperty('entry')) {
+            carePlanResources.entry.map(async (c, key) => {
+                if (c.resource.hasOwnProperty('activity')) {
+                    c.resource.activity.map((act) => {
+                        if (act.hasOwnProperty('detial')) {
+                            if (act.detail.hasOwnProperty('reasonReference')) {
+                                if (act.detail.reasonReference.reference.indexOf('Condition') > -1) {
+                                    arr.push(act.detail.reasonReference.reference)
+                                }
+                            }
                         }
                     })
-
-
                 }
-                else if (p['extension'][0].hasOwnProperty('valueCodeableConcept')) {
-                    var extensionUrl = p['extension'][0]['url']
-                    var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
-                    var searchString = "?type=" + code + "&patient=" + this.state.patient.id
-                    var Url = this.state.config.provider.fhir_url + "/DocumentReference" + searchString;
-                    // var Url=''
-                    const token = await createToken(this.state.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-                    let headers = {
-                        "Content-Type": "application/json",
-                    }
-                    if (this.props.config.provider.authorized_fhir) {
-                        headers['Authorization'] = 'Bearer ' + token
-                    }
-                    let documents = await fetch(Url, {
-                        method: "GET",
-                        headers: headers
-                    }).then(response => {
-                        console.log(response)
-                        return response.json();
-                    }).then((response) => {
-                        if (response.hasOwnProperty('entry')) {
-                            return response
-                        }
-                    }).catch(reason =>
-                        console.log("No response recieved from the server", reason)
-                    );
-
-                    if (documents !== undefined) {
-                        if ("entry" in documents) {
-                            documents.entry.map((documentObj) => {
-                                // let documentList = this.state.documentList
-                                // documentList.push(document)
-                                documentObj.payload_value = {
-                                    "extension": p['extension'],
-                                    "contentAttachment": {
-                                        'contentType': documentObj.resource.content[0].attachment.contentType,
-                                        'data': documentObj.resource.content[0].attachment.data
-                                    }
-                                }
-                                this.setState(prevState => ({
-                                    documentList: [...prevState.documentList, documentObj]
-                                }))
-                                // communicationPayload.push({
-                                //     "extension":p['extension'],
-                                //     "contentAttachment":{
-                                //         'contentType':document.resource.content[0].attachment.contentType,
-                                //         'data':document.resource.content[0].attachment.data
-                                //     }
-                                // })
-                            })
-                        }
-                    }
-
-
+                if (c.resource.hasOwnProperty('addresses')) {
+                    c.resource.addresses.map((address => {
+                        arr.push(address.reference)
+                    }))
                 }
-                console.log('doclist', this.state.documentList)
-                console.log(communicationPayload, 'police station')
-
-                this.setState({ communicationPayload: communicationPayload }, () => {
-                    this.showError();
+                let ref = await this.getReferences(c.resource, 'CarePlan')
+                ref.map((r) => {
+                    Bundle.entry.push(r)
                 })
+                conditionResource = await this.getResources(arr[0])
+                // if (arr.length > 0) {
+                //     conditionsArray.push(await this.getResources(arr[0]))
+                // }
+                claims = await this.getResources('Claim?patient=' + this.state.patient.id)
+                if (claims.hasOwnProperty('entry')) {
+                    claims.entry.map((c) => {
+                        if (c.resource.hasOwnProperty('diagnosis')) {
+                            if (c.resource.diagnosis[0].hasOwnProperty("diagnosisReference")) {
+                                if (c.resource.diagnosis[0].diagnosisReference.reference === arr[0]) {
+                                    claim = c.resource
+                                }
+                            }
+                        }
+                    })
+                }
+                if (claim !== '') {
+                    let cr = await this.getResources('ClaimResponse?request=' + claim.id)
+                    if (cr.hasOwnProperty('entry')) {
+                        claimResponse = cr.entry[0].resource
+                    }
+                    let ref = await this.getReferences(claim, 'Claim')
+                    ref.map((r) => {
+                        Bundle.entry.push(r)
+                    })
+                }
+                Bundle.entry.push({ resource: this.state.patient })
+                console.log('1234', conditionResource, claim, claimResponse, 'conditionsArray')
 
 
-            }
-        })
+                compositionJson.section.push(
+                    {
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDESectionCode",
+                                    "code": "activeTreatment"
+                                }
+                            ]
+                        },
+                        "section": [
+                            {
+                                "code": {
+                                    "coding": [
+                                        {
+                                            "system": "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDESectionCode",
+                                            "code": "treatment"
+                                        }
+                                    ]
+                                },
+                                "entry": [
+                                    {
+                                        "reference": "CarePlan/" + c.resource.id
+                                    }
+                                ]
+                            },
+
+                        ]
+                    }
+                )
+                if (claim !== '' && claimResponse !== '') {
+
+
+                    compositionJson.section[key].section.push(
+                        {
+                            "code": {
+                                "coding": [
+                                    {
+                                        "system": "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDESectionCode",
+                                        "code": "priorCoverage"
+                                    }
+                                ]
+                            },
+                            "entry": [
+                                {
+                                    "reference": "Claim/" + claim.id
+                                },
+                                {
+                                    "reference": "ClaimResponse/" + claimResponse.id
+                                }
+                            ]
+                        }
+                    )
+                }
+                Bundle.entry.push({ resource: c.resource })
+                Bundle.entry.push({ resource: conditionResource })
+                Bundle.entry.push({ resource: claim })
+                Bundle.entry.push({ resource: claimResponse })
+
+            })
+            this.setState({ compositionJson: compositionJson })
+            Bundle.entry.push({ resource: compositionJson })
+            console.log(compositionJson, 'compositionJSON', Bundle)
+            this.setState({ bundle: Bundle })
+
+            // Bundle.entry.push({resource:compositionJson})
+        }
+
+
+
+
+        // var searchString = "?type=" + code + "&patient=" + this.state.patient.id
+        // var Url = this.state.config.provider.fhir_url + "/DocumentReference" + searchString;
+        // var Url=''
+
+
+
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
+
+        // let headers = {
+        //     "Content-Type": "application/json",
+        // }
+        // if (config.payerB.authorized_fhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
+        // let documents = await fetch(Url, {
+        //     method: "GET",
+        //     headers: headers
+        // }).then(response => {
+        //     console.log(response)
+        //     return response.json();
+        // }).then((response) => {
+        //     if (response.hasOwnProperty('entry')) {
+        //         return response
+        //     }
+        // }).catch(reason =>
+        //     console.log("No response recieved from the server", reason)
+        // );
+
+
+
+
+
         // await this.showError()
     }
 
@@ -515,80 +788,7 @@ class CDEX extends Component {
         </div>
         )
     }
-    // async getClinicalNoteDetails() {
-    //     // let searchParameter = this.state.searchParameter;
-    //     // console.log(searchParameter,'search')
-    //     let communicationRequest = this.state.communicationRequest
-    //     let payload=communicationRequest.payload
-    //     let patientId = communicationRequest.subject.reference
-    //     let dateParameter;
-    //     payload.map(async (p)=>{
-    //         if(p.hasOwnProperty('extension')){
-    //             if(p['extension'][0].hasOwnProperty('valueCodeableConcept')){
-    //                 console.log(p['extension'][0]['url'],'urlle')
-    //                 var code = p['extension'][0]['valueCodeableConcept'].coding[0].code;
-    //                 console.log(code,'vallll')
-    //                 console.log(p['contentString'],'yo whts goin on ')
-    //                 var string = p['contentString'].split('during ')
-    //                 console.log(string,'string')
-    //                 var dates = string[1].split(" - ")
-    //                 console.log(dates,'dates')
-    //                 var searchString = "?type="+code+"&patient.identifier="+this.state.patient.identifier[0].value+"&period=gt"+dates[0]+"&period=lt"+dates[1]
-    //                 console.log(searchString,'searchstring')
-    //                 var Url  = this.state.config.provider.fhir_url + "/DocumentReference"+searchString;
-    //                 // var Url=''
-    //                 const token = await createToken(this.state.config.provider.grant_type,'provider',sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-    //                 let headers = {
-    //                     "Content-Type": "application/json",
-    //                 }
-    //                 if(this.props.config.provider.authorized_fhir){
-    //                     headers['Authorization'] = 'Bearer ' + token
-    //                 }
-    //                 let documents = await fetch(Url, {
-    //                     method: "GET",
-    //                     headers: headers
-    //                 }).then(response => {
-    //                     console.log(response)
-    //                     return response.json();
-    //                 }).then((response) => {
-    //                     // console.log("----------response", response);
-    //                     if (response.hasOwnProperty('entry')) {
-    //                         return response
-    //                     }
-    //                     // console.log(response,'res')
-    //                 }).catch(reason =>
-    //                     console.log("No response recieved from the server", reason)
-    //                 );
-    //                 console.log(documents, 'documents')
 
-    //                 let documentList = this.state.documentList
-    //                 if(documents !== undefined ){
-    //                     if ("entry" in documents) {
-    //                         documents.entry.map((document) => {
-    //                                 // observation['valueString']=valueString
-    //                             // if (observationList.indexOf(observation.resource) == -1) {
-    //                             //     observationList.push(observation.resource)
-    //                             // }
-    //                             documentList.push({
-    //                                 "extension":p['extension'],
-    //                                 "document":document.resource
-    //                             })
-    //                         })
-    //                     }
-    //                 }
-    //                 console.log(documentList,'documentList')
-    //                 // // observationList.push(observations)
-    //                 this.setState({documentList:documentList})
-    //                 // this.setState({valueString:valueString})
-    //                 // this.setState()
-    //             }
-    //             else{
-    //                 console.log('no Documents found')
-    //             }   
-    //         }
-    //         // console.log(observationList,'ooo')
-    //     })
-    // }
 
 
     startLoading() {
@@ -607,17 +807,31 @@ class CDEX extends Component {
         comm_req.status = 'completed'
         console.log(this.state.communicationRequest, 'what value')
         this.setState({ communicationRequest: comm_req })
-        const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        if (this.props.config.payer.authorized_fhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
-        // var communicationUrl = '';
-        var url = this.state.config.payer.fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
+        // const token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
 
+        // const token = await createToken(config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // if (config.payerA.authorized_fhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
+        // var communicationUrl = '';
+        // var url = config.payerA.fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
+        var url = config.payerA.fhir_url ;
+        var bundle = {
+            "resourceType": "Bundle",
+            "type": "transaction",
+            "entry": [{
+                "resource":this.state.communicationRequest,
+                "request": {
+                    "method": "PUT",
+                    "url": "CommunicationRequest?identifier="+this.state.communicationRequest.identifier[0].value
+                }
+            }]
+
+        }
         let Communication = await fetch(url, {
             method: "PUT",
             headers: headers,
-            body: JSON.stringify(this.state.communicationRequest)
+            body: JSON.stringify(bundle)
         }).then(response => {
             return response.json();
         }).then((response) => {
@@ -629,80 +843,49 @@ class CDEX extends Component {
 
     async submit_info() {
         let randomString = this.randomString()
+        // let comp = await this.createFhirResource(this.state.compositionJson, 'Composition', config.payerB.fhir_url)
+        // console.log(comp, 'composition Resource has been Created')
+
+        let objJsonStr = JSON.stringify(this.state.bundle);
+        let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
+
         let fullUrl = this.randomString()
         let communicationRequest = this.state.communicationRequest;
-        console.log(this.state.communicationRequest, 'submitted', communicationRequest.sender.reference)
+        // console.log(this.state.communicationRequest, 'submitted', communicationRequest.sender.reference)
         // let communicationRequestJson = {};
         let doc_ref = {};
-        console.log(this.state.payerOrganization, this.state.providerOrganization)
+        // console.log(this.state.requesterOrganization, this.state.senderOrganization)
         var date = new Date()
         var authoredOn = date.toISOString()
         // console.log(authoredOn,communicationRequest.occurrencePeriod,'timeeee')
         let communicationPayload = this.state.communicationPayload
-        this.state.documentList.forEach((doc) => {
-            let docIndex = this.state.selectedDocs.indexOf(doc.resource.id)
-            if (docIndex > -1) {
-                communicationPayload.push(doc.payload_value)
+        let payload = [{
+            'extension': this.state.communicationRequest.payload[0].extension,
+            "contentAttachment": {
+                "contentType": "application/fhir+xml",
+                "data": objJsonB64
             }
-        })
-        // console.log("Commm PAYYYLOADDd !!!",communicationPayload);
-        if (this.state.files != null) {
-            for (var i = 0; i < this.state.files.length; i++) {
-                (function (file) {
-                    let content_type = file.type;
-                    let file_name = file.name;
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        // get file content  
-                        communicationPayload.push({
-                            "extension": [
-                                {
-                                    "url": "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-payload-clinical-note-type",
-                                    "valueCodeableConcept": {
-                                        "coding": [
-                                            {
-                                                "system": "http://loinc.org",
-                                                "code": "11503-0"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "contentAttachment": {
-                                'contentType': content_type,
-                                'data': reader.result
-                            }
-                        })
-                    }
-                    reader.readAsBinaryString(file);
-                })(this.state.files[i])
-            }
-        }
-        // this.setState({documentList:communicationPayload},() =>{
-        //     this.showError()
-        // })
+        }]
         this.setState({ communicationPayload: communicationPayload })
         var commJson = {
             "resourceType": "Bundle",
             "type": "transaction",
             "entry": [{
-                "fullUrl": "urn:uuid:" + fullUrl,
                 "resource": {
                     "resourceType": "Communication",
                     "status": "completed",
                     "subject": {
-                        // "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
-                        'reference': "Patient?given=" + this.state.patient.name[0].given[0] + "&family=" + this.state.patient.name[0].family + "&address-postalcode=" + this.state.patient.address[0].postalCode + "&birthdate=" + this.state.patient.birthDate
+                        'reference': "Patient/" + this.state.patient.id
                     },
-                    // "recipient": [
-                    //     {
-                    //         "reference": this.state.payerOrganization.resourceType+"?identifier="+this.state.payerOrganization.identifier[0].value
-                    //     }
-                    // ],
-                    // "sender": {
-                    //     "reference": this.state.providerOrganization.resourceType+"?identifier="+this.state.providerOrganization.identifier[0].value                
-                    // },
-                    "occurrencePeriod": communicationRequest.occurrencePeriod,
+                    "recipient": [
+                        {
+                            "reference": "Organization/"+this.state.requesterOrganization.id
+                        }
+                    ],
+                    "sender": {
+                        "reference": "Organization/"+this.state.senderOrganization.id
+                    },
+                    // "occurrencePeriod": communicationRequest.occurrencePeriod,
                     "authoredOn": authoredOn,
                     "category": communicationRequest.category,
                     // "contained": communicationRequest.contained,
@@ -714,91 +897,58 @@ class CDEX extends Component {
                     "identifier": [
                         {
                             "system": "http://www.providerco.com/communication",
-                            "value": randomString
+                            "value": this.state.communicationIdentifier
                         }
                     ],
-                    "payload": this.state.communicationPayload
+                    "payload": payload
                 },
                 "request": {
                     'method': "POST",
-                    "url": "Communication"
+                    "url": "Communication",
+                    "ifNoneExist": "identifier=" + this.state.communicationIdentifier
                 }
             }
 
             ]
         }
+        commJson.entry.push({
+            'resource': this.state.patient,
+            'request': {
+                "method": "POST",
+                "url": "Patient",
+                "ifNoneExist": "identifier=" + this.state.patient.identifier[0].value
+            }
+        })
+        commJson.entry.push({
+            'resource': this.state.requesterOrganization,
+            'request': {
+              "method": "POST",
+              "url": "Organization",
+              "ifNoneExist": "identifier=" + this.state.requesterOrganization.identifier[0].value
+            }
+        })
+        commJson.entry.push({
+            'resource': this.state.senderOrganization,
+            'request': {
+                "method": "POST",
+                "url": "Organization",
+                "ifNoneExist": "identifier=" + this.state.senderOrganization.identifier[0].value
+            }
+        })
 
-        console.log(this.state.patient.id, 'iddd', communicationRequest)
-        // let content = this.state.content;
-        // let objJsonStr = JSON.stringify(this.state.observationList);
-        // let objJsonB64 = Buffer.from(objJsonStr).toString("base64");
-        // console.log(objJsonB64)
-        // fileInputData.payload.push({
-        //                 'extension': {'url':this.state.extensionUrl,'valueString':content.extension[0].valueString},
-        //                 'cdex-payload-query-string': {'url':this.state.extensionUrl,'extension':content.extension,'valueString':content.extension[0].valueString},
-        //                 "contentAttachment":{
-        //                     "contentType":"application/json",
-        //                     "data":objJsonB64
-        //                 }})
-        // commJson.entry[0].
-        // for (var j = 0; j < this.state.content.length; j++) {
-        //     (function (content) {
-        //         // let url = observationList[j];
-        //         console.log(content,'content',content.extension)
-        //         fileInputData.payload.push({
-        //             'extension': content.extension,
-        //             'cdex-payload-query-string': {'url':content.extension[0].url,'extension':content.extension,'valueString':content.extension[0].valueString},
-        //             "contentString":content.contentString})
-        //     })(this.state.content[j])
-        // }
+        console.log(this.state.patient.id, 'iddd', commJson)
 
-
-        // for (var j = 0; j < this.state.documentContent.length; j++) {
-        //     (function (content) {
-        //         // let url = observationList[j];
-        //         console.log(content,'content',content)
-        //         fileInputData.payload.push({
-        //             'extension': content.extension,
-        //             'cdex-payload-clinical-string': {'url':content.extension[0].url,'extension':content.extension,'valueCodeableConcept':content.extension[0].valueCodeableConcept},
-        //             "contentAttachment":content.contentAttachment})
-        //     })(this.state.documentContent[j])
-        // }
-
-
-        // if (this.state.files != null) {
-        //     for (var i = 0; i < this.state.files.length; i++) {
-        //         (function (file) {
-        //             let content_type = file.type;
-        //             let file_name = file.name;
-        //             var reader = new FileReader();
-        //             reader.onload = function (e) {
-        //                 // get file content  
-        //                 fileInputData.payload.push({
-        //                     // "cdex-payload-query-string":"",
-        //                     //  "cdex-payload-clinical-note-type":[],
-        //                     "content": {
-        //                         "data": reader.result,
-        //                         "contentType": content_type,
-        //                         "title": file_name
-        //                     }
-        //                 })
-        //             }
-        //             reader.readAsBinaryString(file);
-        //         })(this.state.files[i])
-        //     }
-        // }
-        // console.log("Resource Json before communication--", fileInputData);
         let headers = {
             "Content-Type": "application/json",
         }
-        const token = await createToken(this.state.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        if (this.props.config.payer.authorizedPayerFhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
-        // var communicationUrl = '';
-        var communicationUrl = this.state.config.payer.fhir_url;
+        // const token = await this.getToken(config.payerA.grant_type, config.payerA.client_id, config.payerA.client_secret);
 
-        let Communication = await fetch(communicationUrl, {
+        // if (config.payerA.authorizedPayerFhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
+        var communicationUrl = config.payerA.fhir_url;
+
+        let requesterCommunication = await fetch(communicationUrl, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(commJson)
@@ -809,10 +959,10 @@ class CDEX extends Component {
             this.setState({ loading: false });
             this.UpdateCommunicationRequest();
             if (response.hasOwnProperty('entry')) {
-                let communicaationId = response.entry[0].response.location.split('/')[1]
+                let communicationId = response.entry[0].response.location.split('/')[1]
 
                 this.setState({ success: true })
-                this.setState({ successMsg: 'Communication has been posted to payer successfully with id - ' + communicaationId })
+                this.setState({ successMsg: 'Communication has been posted to payer successfully with id - ' + communicationId })
                 // NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
                 return response
             }
@@ -822,6 +972,11 @@ class CDEX extends Component {
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
+
+        let senderCommunication = await this.createFhirResource(commJson, '', config.payerB.fhir_url)
+        console.log(senderCommunication,'Sender Communication has been Created')
+
+        
 
 
 
@@ -941,14 +1096,15 @@ class CDEX extends Component {
         //         sender_obj = c;
         //     }
         // });
-        var tempUrl = this.state.config.provider.fhir_url;
+        var tempUrl = config.payerB.fhir_url;
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
         // const token = await createToken(sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.props.config.provider.authorized_fhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (config.payerB.authorized_fhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         const fhirResponse = await fetch(tempUrl + "/" + senderreference, {
             method: "GET",
             headers: headers
@@ -964,7 +1120,7 @@ class CDEX extends Component {
         // return fhirResponse;
         console.log(fhirResponse, 'respo')
         if (fhirResponse) {
-            this.setState({ payerOrganization: fhirResponse })
+            this.setState({ requesterOrganization: fhirResponse })
             this.setState({ sender_name: fhirResponse.name });
             // this.setState({ sender_resource: fhirResponse['resourceType'] });
             // const sender_res = await this.getSenderResource(sender_obj);
@@ -992,7 +1148,7 @@ class CDEX extends Component {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
+                // 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
             console.log("Recieved response", response);
@@ -1005,23 +1161,23 @@ class CDEX extends Component {
         );
         // return fhirResponse;
         console.log(recipientResponse, 'rest')
-        if (fhirResponse) {
-            this.setState({ providerOrganization: recipientResponse })
+        if (recipientResponse) {
+            this.setState({ senderOrganization: recipientResponse })
         }
 
 
     }
 
     async getSenderResource(c) {
-        var sender_url = this.state.config.provider.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
+        var sender_url = config.payerB.fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
         console.log("url---------", sender_url);
-        const token = await createToken(this.state.config.provider.grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // const token = await this.getToken(config.payerB.grant_type, config.payerB.client_id, config.payerB.client_secret);
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.props.config.provider.authorized_fhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (this.props.config.provider.authorized_fhir) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         let sender = await fetch(sender_url, {
             method: "GET",
             headers: headers
@@ -1052,42 +1208,27 @@ class CDEX extends Component {
         let content = data.map((d, i) => {
             // console.log(d, i);
             if (d['status'] === 'active') {
-                let startDate
-                let endDate;
-                // console.log(d['occurrencePeriod'])
-                if (d['occurrencePeriod'] != undefined) {
-                    if (d['occurrencePeriod'].hasOwnProperty("start")) {
-                        startDate = d["occurrencePeriod"]['start']
-                    }
-                    if (d['occurrencePeriod'].hasOwnProperty("end")) {
-                        endDate = d["occurrencePeriod"]['end']
-                    }
-                    else {
-                        endDate = "No End Date"
-                    }
+                let recievedDate = ''
+                if (d.hasOwnProperty('authoredOn')) {
+                    recievedDate = d['authoredOn']
                 }
-                else {
-                    startDate = false
-                    endDate = false
-                }
-
-
-                let recievedDate = d["authoredOn"]
                 // console.log(startDate.substring(0,10),'stdate')
                 if (d.hasOwnProperty("subject")) {
                     let patientId = d['subject']['reference'];
-                    // let patient_obj = d['contained'].map((c) => {
-                    //     if (c.hasOwnProperty('id')) {
-                    //         if (c['id'] == d['subject']['reference'].replace('#', '')) {
-                    //             patientId = c['identifier'][0]['value'];
-                    //         }
-                    //     }
-                    // })
-                    if (startDate && endDate) {
+                    if (recievedDate !== '') {
                         return (
                             <div key={i} className="main-list">
-                                {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId} Start Date ({startDate.substring(0, 10)}),End Date({endDate.substring(0, 10)}), Recieved On ({recievedDate.substring(0, 10)})
+                                {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId} , Recieved On ({recievedDate.substring(0, 10)})
                             <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
+                                    Review</button>
+                            </div>
+                        )
+                    }
+                    else {
+                        return (
+                            <div key={i} className="main-list">
+                                {i + 1}.  {d['resourceType']} (#{d['id']}) for {patientId}
+                                <button className="btn list-btn" onClick={() => this.getPatientDetails(patientId, d, patientId)}>
                                     Review</button>
                             </div>
                         )
@@ -1106,54 +1247,6 @@ class CDEX extends Component {
 
             }
         });
-        // let observations = this.state.observationList.map((observation, key) => {
-        //     if (observation) {
-        //         return (
-        //             <div key={key}>
-        //                 <div className='data-label1'>
-        //                 {observation.observation.code.coding[0].display+" : "}<span className="data2">{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</span>
-        //                     <span>
-        //                         <input 
-        //                             className='ui checkbox'
-        //                             name = {key}
-        //                             type="checkbox"
-        //                             defaultChecked={this.state.check}
-        //                             value={this.state.check}
-        //                             onChange={(e)=>this.handleChange(observation,e)}
-        //                         />
-        //                     </span>
-        //                 </div>
-        //                 {/* <label for="ui checkbox">  {observation.observation.code.coding[0].display+":"}{observation.observation.valueQuantity.value+" "+observation.observation.valueQuantity.unit}</label> */}
-
-        //             </div>
-        //         )
-
-        //     }
-        // });
-        // let documents = this.state.documentList.map((document, key) => {
-        //     if (document) {
-        //         console.log('document,doc',document.document)
-        //         var label =  document.document.type.coding[0].display+" : "
-        //         var value = document.document.description+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)
-        //         return (
-        //             <div key={key}>
-        //                 <div className="data-label1">
-        //                     {document.document.type.coding[0].display+" : "}<span className="data2">{document.document.description+","+"  Status - "+document.document.status+","+"  Time Period - "+document.document.context.period.start.substring(0,10)+" - "+document.document.context.period.end.substring(0,10)}</span>
-        //                     <span><input 
-        //                     className='ui checkbox'
-        //                     name = {key}
-        //                     type="checkbox"
-        //                     defaultChecked={this.state.documentCheck}
-        //                     value={this.state.documentCheck}
-        //                     onChange={(e)=>this.handleDocumentChange(document,e)}
-
-        //                 /></span></div>
-
-        //             </div>
-        //         )
-
-        //     }
-        // });
         return (
 
             <React.Fragment>
@@ -1162,45 +1255,35 @@ class CDEX extends Component {
                         <div className="container">
 
                             <div id="logo" className="pull-left">
-                                <h1><a href="#intro" className="scrollto">Beryllium</a></h1>
+                                <h1><a href="#intro" className="scrollto">Payer B</a></h1>
                                 {/* <a href="#intro"><img src={process.env.PUBLIC_URL + "/assets/img/logo.png"} alt="" title="" /></a> */}
                             </div>
 
                             <nav id="nav-menu-container">
                                 <ul className="nav-menu">
-                                    <li><a href={window.location.protocol + "//" + window.location.host + "/home"}>Home</a></li>
-                                    <li className="menu-active menu-has-children"><a href="">Services</a>
-                                        <ul>
-                                            <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
-                                            <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
-                                    <li className="menu-has-children"><a href="">{sessionStorage.getItem('username')}</a>
-                                        <ul>
-                                            <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
-                                        </ul>
-                                    </li>
+                                    {/* <li><a href={window.location.protocol + "//" + window.location.host + "/home"}>Communication List</a></li>
+                                    <li><a href={window.location.protocol + "//" + window.location.host + "/request_CTD"}>Communication Request</a></li> */}
+                                    {/* <li className="menu-active menu-has-children"><a href="">Services</a>
+                    <ul>
+                      <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
+                      <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
+                    </ul>
+                  </li> */}
+                                    {/* <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li> */}
+                                    {/* <li className="menu-has-children"><a href="">{sessionStorage.getItem('username')}</a>
+                    <ul>
+                      <li><a href="" onClick={this.onClickLogout}>Logout</a></li>
+                    </ul>
+                  </li> */}
                                 </ul>
                             </nav>
                         </div>
                     </header>
-                    {/* <div>
-                        <div className="main_heading">
-                            <span style={{ lineHeight: "35px" }}>PILOT INCUBATOR - CDEX</span>
-                            <div className="menu_conf" onClick={() => this.goTo('provider_request')}>
-                                <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-home"></i>
-                                Home</div>
-                            <div className="menu_conf" onClick={() => this.goTo('configuration')}>
-                                <i style={{ paddingLeft: "5px", paddingRight: "7px" }} className="fa fa-cog"></i>
-                                Configuration</div>
 
-                        </div>
-                    </div> */}
                     <main id="main" style={{ marginTop: "92px", marginBottom: "100px" }}>
 
                         <div className="section-header">
-                            <h3>CDEX</h3>
+                            <h3>PDEX</h3>
                         </div>
                     </main>
                     <div className="content">
@@ -1214,17 +1297,20 @@ class CDEX extends Component {
                                     Patient : <span className="data1">{this.state.patient_name}</span>
                                 </div>
                                 <div className="data-label">
-                                    Sender {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
+                                    Requester Organization {this.state.sender_resource} : <span className="data1">{this.state.sender_name}</span>
                                 </div>
-                                <div className="data-label">
+                                {/* <div className="data-label">
                                     Start Date : <span className="data1">{moment(this.state.startDate).format(" YYYY-MM-DD, hh:mm a")}</span>
                                 </div>
                                 <div className="data-label">
                                     End Date : <span className="data1">{moment(this.state.endDate).format(" YYYY-MM-DD, hh:mm a")}</span>
-                                </div>
-                                <div className="data-label">
-                                    Recieved Date : <span className="data1">{moment(this.state.recievedDate).format(" YYYY-MM-DD, hh:mm a")}</span>
-                                </div>
+                                </div> */}
+                                {this.state.recievedDate !== '' &&
+                                    <div className="data-label">
+                                        Recieved Date : <span className="data1">{moment(this.state.recievedDate).format(" YYYY-MM-DD, hh:mm a")}</span>
+                                    </div>
+                                }
+
 
                                 <div className="data-label">
                                     Requested for : <span className="data1">{requests}</span>
@@ -1240,7 +1326,7 @@ class CDEX extends Component {
                                     </div>  
                                 } */}
 
-                                <div className="data-label" style={{ paddingTop: "0px" }}>
+                                {/* <div className="data-label" style={{ paddingTop: "0px" }}>
                                     Select documents :
 
                                 </div>
@@ -1248,35 +1334,13 @@ class CDEX extends Component {
                                     {this.state.documentList.map((item, key) => {
                                         return this.renderDocs(item, key);
                                     })}
-                                </div>
-                                {this.state.documentList.length === 0 &&
+                                </div> */}
+                                {/* {this.state.documentList.length === 0 &&
                                     <div >
                                         {"No Documents found.Please Upload the required documents"}
                                     </div>
-                                }
-                                <div className="header">
-                                    Upload Required/Additional Documentation
-                                </div>
-                                <div className="drop-box">
-                                    <section>
-                                        <Dropzone
-                                            onDrop={this.onDrop.bind(this)}
-                                            onFileDialogCancel={this.onCancel.bind(this)
-                                            }
-                                        >
-                                            {({ getRootProps, getInputProps }) => (
-                                                <div    >
-                                                    <div className='drag-drop-box' {...getRootProps()}>
-                                                        <input {...getInputProps()} />
-                                                        <div className="file-upload-icon"><FontAwesomeIcon icon={faCloudUploadAlt} /></div>
-                                                        <div>Drop files here, or click to select files </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Dropzone>
-                                    </section>
-                                    <div  >{files}</div>
-                                </div>
+                                } */}
+
 
 
                                 {/* <div className='data-label'>
@@ -1343,4 +1407,4 @@ function mapStateToProps(state) {
     };
 };
 
-export default withRouter(connect(mapStateToProps)(CDEX));
+export default withRouter(connect(mapStateToProps)(PDEX));
