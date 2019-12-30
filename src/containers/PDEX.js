@@ -69,6 +69,8 @@ class PDEX extends Component {
             documentList: [],
             selectedDocs: [],
             compositionJson: '',
+            carePlanResources: [],
+            selectedPlans: [],
             bundle: {
                 "resourceType": "Bundle",
                 "id": "pcde-example",
@@ -98,6 +100,7 @@ class PDEX extends Component {
         this.renderDocs = this.renderDocs.bind(this);
         this.getResources = this.getResources.bind(this);
         this.getToken = this.getToken.bind(this);
+        this.getCarePlans = this.getCarePlans.bind(this);
 
 
     }
@@ -315,7 +318,10 @@ class PDEX extends Component {
         // console.log("-------", resources);
         this.setState({ comm_req: resources });
     }
-
+    async getCarePlans() {
+        let carePlanResources = await this.getResources('CarePlan?status=active&subject=' + this.state.patient.id)
+        console.log(carePlanResources, 'resources')
+    }
     async getPatientDetails(patient_id, communication_request, identifier) {
         this.setState({ patient_name: "" });
         this.setState({ sender_resource: "" });
@@ -423,9 +429,12 @@ class PDEX extends Component {
         // await this.getObservationDetails().then(() => {
         //     // this.showError()
         // })
-        await this.getObservationDetails().then(() => {
-            // this.showError()
+        await this.getCarePlans().then(() => {
+
         })
+        // await this.getObservationDetails().then(() => {
+        //     // this.showError()
+        // })
 
         // await this.getClinicalNoteDetails()
 
@@ -789,6 +798,36 @@ class PDEX extends Component {
         )
     }
 
+    onPlanSelect(event) {
+        console.log("event --", event, event.target, this.state.selectedPlans);
+        let val = event.target.name;
+        let selectedPlans = [...this.state.selectedPlans]
+        let valueIndex = this.state.selectedPlans.indexOf(val)
+        if (valueIndex == -1) {
+            selectedPlans.push(val);
+        }
+        else {
+            selectedPlans.splice(valueIndex, 1)
+        }
+        this.setState({ selectedPlans: selectedPlans })
+    }
+
+    renderCarePlans(item, key) {
+        let resource = item.resource
+        return (<div key={key}>
+            <div key={key} style={{ padding: "15px", paddingTop: "0px", paddingBottom: "0px" }}>
+                <label>
+                    <input type="checkbox" name={resource.id}
+                        onChange={this.onPlanSelect} />
+                </label>
+
+                <span>{resource.resourceType}</span>
+
+            </div>
+        </div>
+        )
+    }
+
 
 
     startLoading() {
@@ -815,15 +854,15 @@ class PDEX extends Component {
         // }
         // var communicationUrl = '';
         // var url = config.payerA.fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
-        var url = config.payerA.fhir_url ;
+        var url = config.payerA.fhir_url;
         var bundle = {
             "resourceType": "Bundle",
             "type": "transaction",
             "entry": [{
-                "resource":this.state.communicationRequest,
+                "resource": this.state.communicationRequest,
                 "request": {
                     "method": "PUT",
-                    "url": "CommunicationRequest?identifier="+this.state.communicationRequest.identifier[0].value
+                    "url": "CommunicationRequest?identifier=" + this.state.communicationRequest.identifier[0].value
                 }
             }]
 
@@ -879,11 +918,11 @@ class PDEX extends Component {
                     },
                     "recipient": [
                         {
-                            "reference": "Organization/"+this.state.requesterOrganization.id
+                            "reference": "Organization/" + this.state.requesterOrganization.id
                         }
                     ],
                     "sender": {
-                        "reference": "Organization/"+this.state.senderOrganization.id
+                        "reference": "Organization/" + this.state.senderOrganization.id
                     },
                     // "occurrencePeriod": communicationRequest.occurrencePeriod,
                     "authoredOn": authoredOn,
@@ -922,9 +961,9 @@ class PDEX extends Component {
         commJson.entry.push({
             'resource': this.state.requesterOrganization,
             'request': {
-              "method": "POST",
-              "url": "Organization",
-              "ifNoneExist": "identifier=" + this.state.requesterOrganization.identifier[0].value
+                "method": "POST",
+                "url": "Organization",
+                "ifNoneExist": "identifier=" + this.state.requesterOrganization.identifier[0].value
             }
         })
         commJson.entry.push({
@@ -974,9 +1013,9 @@ class PDEX extends Component {
         );
 
         let senderCommunication = await this.createFhirResource(commJson, '', config.payerB.fhir_url)
-        console.log(senderCommunication,'Sender Communication has been Created')
+        console.log(senderCommunication, 'Sender Communication has been Created')
 
-        
+
 
 
 
@@ -1341,7 +1380,15 @@ class PDEX extends Component {
                                     </div>
                                 } */}
 
+                                <div className="data-label" style={{ paddingTop: "0px" }}>
+                                    Select Care Plans to submit :
 
+                                </div>
+                                <div>
+                                    {this.state.carePlanResources.map((item, key) => {
+                                        return this.renderCarePlans(item, key);
+                                    })}
+                                </div>
 
                                 {/* <div className='data-label'>
                                     <div>Search Observations form FHIR
@@ -1369,7 +1416,6 @@ class PDEX extends Component {
                                         updateCallback={this.updateDocuments}
                                     />
                                     </div>
-                                
                                 } */}
                                 {this.state.error &&
                                     <div className="decision-card alert-error">
