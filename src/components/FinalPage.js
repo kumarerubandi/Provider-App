@@ -13,11 +13,7 @@ import { throwStatement } from '@babel/types';
 import Config from '../globalConfiguration.json';
 import Switch from "react-switch";
 import Loader from 'react-loader-spinner';
-
-
-
-
-
+import DropdownMipsPurpose from '../components/DropdownMipsPurpose'
 
 export default class FinalPage extends Component {
   constructor(props) {
@@ -36,6 +32,7 @@ export default class FinalPage extends Component {
       showScore: false,
       score: 0,
       mask: false,
+      purpose:""
     };
     this.calculateMeasure = this.calculateMeasure.bind(this);
     this.showMeasureData = this.showMeasureData.bind(this);
@@ -69,6 +66,9 @@ export default class FinalPage extends Component {
   componentWillUnmount() { }
   handleMask(mask) {
     this.setState({ mask })
+  }
+  updateStateElement = (elementName, text) => {
+    this.setState({ [elementName]: text });
   }
   calculateMeasure = async () => {
     let qualityImprovement = this.props.getStore().qualityImprovement
@@ -230,7 +230,7 @@ export default class FinalPage extends Component {
             </section>
           </div>
         }
-        <div className="form-row">
+        {/* <div className="form-row">
           <div className="form-group col-md-2">
             <span className="title-small">Type of Reporting</span>
           </div>
@@ -243,7 +243,20 @@ export default class FinalPage extends Component {
           <div className="form-group col-md-4">
             <span>{this.state.qualityImprovement.submissionType}</span>
           </div>
+        </div> */}
+        {/* Data submission only, Score calculation only, BOTH */}
+        <div className="form-row">
+          <div className="form-group col-md-2">
+            <span className="title-small">Purpose</span>
+          </div>
+          <div className="form-group col-md-4">
+            <span><DropdownMipsPurpose
+            elementName="purpose"
+            updateCB={this.updateStateElement}
+          /></span>
+          </div>
         </div>
+        
         <div className="form-row">
           {this.state.qualityImprovement.measureList.length > 0 &&
             <div style={{ width: "100%", margin: "10px" }}>

@@ -180,7 +180,7 @@ class DisplayBox extends Component {
       link.url += `iss=` + this.state.config.provider_fhir_url;
       if (link.appContext) {
         // link.url += `&launch=` + link.appContext;
-        link.url += `&launchContextId=` + link.appContext;
+        link.url += `&app_context=` + link.appContext;
       }
       link.url += `&client_id=` + this.state.config.provider_client_id;
       //link.url += `client_id=` + this.state.config.provider_client_id;

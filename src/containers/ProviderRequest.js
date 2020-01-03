@@ -71,7 +71,7 @@ class ProviderRequest extends Component {
       medication: null,
       medicationStartDate: '',
       medicationEndDate: '',
-      hook: null,
+      hook: "order-select",
       hookName: 'order-review',
       healthcareCode: null,
       resource_records: {},
@@ -93,7 +93,7 @@ class ProviderRequest extends Component {
       category_name: "",
       // device_code: "",
       // device_text: "",
-      quantity:1,
+      quantity: 1,
       unit: null,
       birthDate: '',
       patientState: '',
@@ -209,38 +209,30 @@ class ProviderRequest extends Component {
     console.log(this.state.prefetch, 'here kya')
     this.setState({ prefetch: true });
     // if (this.state.prefetch === false) {
-      this.setState({ prefetchloading: true });
-      let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-      token = "Bearer " + token;
-      var myHeaders = new Headers({
-        "Content-Type": "application/json",
-        "authorization": token,
-      });
-      var url = this.state.config.provider_fhir_url + '/' + 'Patient' + "/" + this.state.patientId;
-      let sender = await fetch(url, {
-        method: "GET",
-        headers: myHeaders
-      }).then(response => {
-        // console.log("response----------",response);
-        return response.json();
-      }).then((response) => {
-        // console.log("----------response", response);
-        this.setState({ prefetchloading: false });
-        return response;
-      }).catch(reason =>
-        console.log("No response recieved from the server", reason)
-      );
-      console.log(sender, 'sender')
-      if (sender.resourceType === 'Patient') {
-        // this.setState((prevState) => ({ prefetch: !prevState.prefetch }))
-        this.setState({ patientResource: sender })
-        this.setState({ firstName: sender.name[0].given })
-        this.setState({ lastName: sender.name[0].family })
-        this.setState({ gender: sender.gender })
-        this.setState({ birthDate: sender.birthDate })
-        this.setState({ patientState: sender.address[0].state })
-        this.setState({ patientPostalCode: sender.address[0].postalCode })
-        console.log(sender.address[0].state, 'patientState')
+    this.setState({ prefetchloading: true });
+    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+    token = "Bearer " + token;
+    var myHeaders = new Headers({
+      "Content-Type": "application/json",
+      "authorization": token,
+    });
+    var url = this.state.config.provider_fhir_url + '/' + 'Patient' + "/" + this.state.patientId;
+    await fetch(url, {
+      method: "GET",
+      headers: myHeaders
+    }).then(response => {
+      return response.json();
+    }).then((patient_data) => {
+      this.setState({ prefetchloading: false });
+      if (patient_data.resourceType === 'Patient') {
+        this.setState({ patientResource: patient_data })
+        this.setState({ firstName: patient_data.name[0].given })
+        this.setState({ lastName: patient_data.name[0].family })
+        this.setState({ gender: patient_data.gender })
+        this.setState({ birthDate: patient_data.birthDate })
+        this.setState({ patientState: patient_data.address[0].state })
+        this.setState({ patientPostalCode: patient_data.address[0].postalCode })
+        console.log(patient_data.address[0].state, 'patientState')
       }
       else {
         this.setState({ gender: '' })
@@ -250,6 +242,10 @@ class ProviderRequest extends Component {
         this.setState({ firstName: '' })
         this.setState({ lastName: '' })
       }
+    }).catch(reason =>
+      console.log("No response recieved from the server", reason)
+    );
+
     // }
 
 
@@ -297,7 +293,7 @@ class ProviderRequest extends Component {
 
   validateForm() {
     let formValidate = true;
-    if(this.state.firstName === '' || this.state.lastName === ''){
+    if (this.state.firstName === '' || this.state.lastName === '') {
       formValidate = false;
     }
     // if (this.state.patientId === '') {
@@ -384,6 +380,8 @@ class ProviderRequest extends Component {
       headers: headers,
       body: JSON.stringify(prefectInput),
     }).then((response) => {
+      console.log("Response.headers---", response.headers)
+      response.headers.set("Access-Control-Allow-Origin", "*")
       return response.json();
     }).then((response) => {
       this.setState({ prefetchData: response });
@@ -643,7 +641,7 @@ class ProviderRequest extends Component {
   async submit_info() {
     // this.setState({ loadingSteps: false, stepsErrorString: undefined });
     // this.resetSteps();
-    let token = await createToken("password", 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
+    let token = await createToken("password", 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'), true);
     token = "Bearer " + token;
     var myHeaders = new Headers({
       "Content-Type": "application/json",
@@ -921,7 +919,7 @@ class ProviderRequest extends Component {
                       <div className='errorMsg dropdown'>{this.props.config.errorMsg}</div>
                     }
                   </div>}
-                    <DropdownServiceCode elementName="selected_codes"  updateCB={this.updateStateElement} />
+                <DropdownServiceCode elementName="selected_codes" updateCB={this.updateStateElement} />
                 {this.state.hookName === 'order-select' &&
                   <div>
                     <div className="header">
@@ -1202,52 +1200,235 @@ class ProviderRequest extends Component {
     }
     return randomstring
   }
+
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
-    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'),true);
-    let coverage = {
-      resource: {
-        resourceType: "Coverage",
-        id: this.state.coverageId,
-        class: [
-          {
-            type: {
-              system: "http://hl7.org/fhir/coverage-class",
-              code: "plan"
-            },
-            value: "Medicare Part D"
-          }
-        ],
-        payor: [
-          {
-            reference: "Organization/6"
-          }
-        ]
+    let PractitionerRole = {
+      "resourceType": "PractitionerRole",
+      "id": "practitioner1",
+      "practitioner": {
+        "reference": "Practitioner/" + this.state.practitionerId
       }
+    }
+    let organization = {
+      "resourceType": "Organization",
+      "id": this.state.payer,
+      "name": this.state.payer
+    }
+    let coverage = {
+      resourceType: "Coverage",
+      id: "coverage1",
+      class: [
+        {
+          type: {
+            system: "http://hl7.org/fhir/coverage-class",
+            code: "plan"
+          },
+          value: "Medicare Part D"
+        }
+      ],
+      payor: [
+        {
+          reference: "Organization/"+this.state.payer
+        }
+      ]
     };
     let serviceRequest = {
       "resourceType": "ServiceRequest",
       "identifier": [
         {
-          "value": await this.getRequestID(token)
+          "value": this.randomString()
         }
       ],
-      "status": "completed",
+      "status": "draft",
       "intent": "order",
+
       "category": [],
       "subject": {
-        "display": this.state.firstName + " " + this.state.lastName
+        "reference": "Patient/" + this.state.patientId
       },
-      "quantity":{"value":this.state.quantity},
-      // "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
-      // "authoredOn": "2013-05-08T09:33:27+07:00",
-      "requester": {
-        "display": this.state.practitionerId
+      "quantity": { "value": this.state.quantity },
+      "authoredOn": "2013-05-08T09:33:27+07:00",
+      "insurance": [
+        {
+          "reference": "Coverage/coverage1"
+        }
+      ],
+      "performer": {
+        "reference": "PractitionerRole/practitioner1"
       }
     }
     let selected_codes = this.state.selected_codes;
-    console.log("selected codes---",selected_codes)
+    for (var i = 0; i < selected_codes.length; i++) {
+      let obj = {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": selected_codes[i]
+            }
+          ],
+        }
+      }
+      if (i == 0) {
+        serviceRequest["code"] = obj.code;
+      }
+      serviceRequest.category.push(obj)
+    }
+    let patientResource;
+    if (this.state.prefetch === true) {
+      patientResource = this.state.patientResource;
+    }
+    else {
+      patientResource = {
+        resourceType: "Patient",
+        id: patientId,
+        gender: this.state.gender,
+        "birthDate": this.state.birthDate,
+        "address": [
+          {
+            "use": "home",
+            "city": "Thornton",
+            "state": this.state.patientState,
+            "postalCode": this.state.patientPostalCode,
+            "country": "USA"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": this.state.lastName,
+            "given": [
+              this.state.firstName
+            ]
+          }
+        ],
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/v2/0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://hospital.davinci.org",
+            "value": this.randomString()
+          }
+        ],
+      }
+      this.setState({ patientResource: patientResource });
+      console.log(patientResource, JSON.stringify(patientResource))
+    }
+    let request = {
+      hook: this.state.hook,
+      hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
+      fhirServer: this.state.config.provider_fhir_url,
+      fhirAuthorization: {
+        "access_token": this.state.accessToken,
+        "token_type": "Bearer",
+        "expires_in": 300,
+        "scope": "patient/Patient.read patient/Observation.read",
+        "subject": "cds-service"
+      },
+      user: "Practitioner/"+this.state.practitionerId,
+      context: {
+        patientId: patientId,
+        orders : {
+          resourceType: "Bundle",
+          entry: [
+            {
+              resource: serviceRequest
+            }
+          ]
+        }
+      },
+      "prefetch": {
+        "serviceRequestBundle": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": [
+            {
+              "resource":serviceRequest
+            },
+            {
+              "resource":patientResource
+            },
+            {
+              "resource":PractitionerRole
+            },
+            {
+              "resource":coverage
+            },
+            {
+              "resource":organization
+            }
+          ]
+        }
+      }
+    };
+    return request;
+  }
+  async getOldJson() {
+    var patientId = null;
+    patientId = this.state.patientId;
+    let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'), true);
+    let PractitionerRole = {
+      "resourceType": "PractitionerRole",
+      "id": "practitioner1",
+      "practitioner": {
+        "reference": "Practitioner/" + this.state.practitionerId
+      }
+    }
+    let coverage = {
+      resourceType: "Coverage",
+      id: this.state.coverageId,
+      class: [
+        {
+          type: {
+            system: "http://hl7.org/fhir/coverage-class",
+            code: "plan"
+          },
+          value: "Medicare Part D"
+        }
+      ],
+      payor: [
+        {
+          reference: "Organization/"+this.state.payer
+        }
+      ]
+    };
+    let serviceRequest = {
+      "resourceType": "ServiceRequest",
+      "identifier": [
+        {
+          "value": this.randomString()
+        }
+      ],
+      "status": "draft",
+      "intent": "order",
+      "category": [],
+      "subject": {
+        "reference": "Patient/" + this.state.patientId
+      },
+      "quantity": { "value": this.state.quantity },
+      "authoredOn": "2013-05-08T09:33:27+07:00",
+      "insurance": [
+        {
+          "reference": "Coverage/coverage1"
+        }
+      ],
+      "performer": {
+        "reference": "PractitionerRole/practitioner1"
+      }
+    }
+    let selected_codes = this.state.selected_codes;
+    console.log("selected codes---", selected_codes)
     for (var i = 0; i < selected_codes.length; i++) {
       // let IcdDescription = this.getIcdDescription(selected_codes[i]);
       let obj = {
@@ -1262,7 +1443,7 @@ class ProviderRequest extends Component {
           "text": ""
         }
       }
-      if (i == 0){
+      if (i == 0) {
         serviceRequest["code"] = obj.code;
       }
       serviceRequest.category.push(obj)
@@ -1398,7 +1579,6 @@ class ProviderRequest extends Component {
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
       fhirServer: this.state.config.provider_fhir_url,
       payerName: this.state.payer,
-      // service_code: this.state.service_code,
       fhirAuthorization: {
         "access_token": this.state.accessToken,
         // "token_type": this.props.config.authorization_service.token_type, // json

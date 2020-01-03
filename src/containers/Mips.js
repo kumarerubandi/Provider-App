@@ -172,7 +172,7 @@ class Mips extends Component {
         console.log('oooo')
         const { token } = oauth2.accessToken.create(result);
         sessionStorage.setItem("tokenResponse", token.access_token);
-        console.log('The token is : ', token);
+        console.log('The token is : ', token);  
         fhirClient.bearerToken = token.access_token;
       }
     } catch (error) {
@@ -185,7 +185,7 @@ class Mips extends Component {
   render() {
     const steps =
       [
-        // {name: 'Step 1', component: <InitialPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
+        {name: 'Initial', component: <InitialPage getStore={() => (this.getStore())} updateStore={(u) => {this.updateStore(u)}} />},
         { name: 'Step 1', component: <ImprovementActivities getStore={() => (this.getStore())} updateStore={(u) => { this.updateStore(u) }} /> },
         { name: 'Step 2', component: <Cost getStore={() => (this.getStore())} updateStore={(u) => { this.updateStore(u) }} /> },
         { name: 'Step 3', component: <PromotingInteroperability getStore={() => (this.getStore())} updateStore={(u) => { this.updateStore(u) }} /> },
