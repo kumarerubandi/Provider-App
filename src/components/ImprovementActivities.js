@@ -238,6 +238,12 @@ export default class ImprovementActivities extends Component {
     });
 
   }
+  previousStep() {
+    this.props.jumpToStep(0);
+  }
+  nextStep() {
+    this.props.jumpToStep(2);
+  }
   addMeasure() {
     if (this.state.measure !== '') {
       if (!this.state.measureObj.hasOwnProperty(this.state.measure)) {
@@ -408,6 +414,10 @@ export default class ImprovementActivities extends Component {
             </div>
           </div>
         }
+        <div class="footer-buttons">
+        <button type="button" class="btn btn-prev btn-primary btn-lg pull-left" id="next-button" onClick={() => this.previousStep()}>Previous</button>
+          <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.nextStep()}>Next</button>
+        </div>
       </div>
     )
   }

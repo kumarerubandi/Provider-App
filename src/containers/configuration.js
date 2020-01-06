@@ -19,6 +19,7 @@ class Configuration extends Component {
         }
         this.onChangeTokenExpiry = this.onChangeTokenExpiry.bind(this);
         this.onChangeCrdUrl = this.onChangeCrdUrl.bind(this);
+        this.onChangeCrdOrderReviewUrl = this.onChangeCrdOrderReviewUrl.bind(this);
         this.onChangeCoverageDecisionPath = this.onChangeCoverageDecisionPath.bind(this);
         this.onChangeCoverageRequirementPath = this.onChangeCoverageRequirementPath.bind(this);
         this.onChangePayerFhirUrl = this.onChangePayerFhirUrl.bind(this);
@@ -48,12 +49,17 @@ class Configuration extends Component {
 
     onChangeTokenExpiry(event) {
         let config = this.state.config;
-        config.tokenExpiresIn = event.target.value
+        config.tokenExpiresIn = event.target.value;
         this.setState({ config })
     }
     onChangeCrdUrl(event) {
         let config = this.state.config;
         config.crd_url = event.target.value
+        this.setState({ config })
+    }
+    onChangeCrdOrderReviewUrl(event) {
+        let config = this.state.config;
+        config.crd_order_review_url = event.target.value;
         this.setState({ config })
     }
     onChangeCoverageDecisionPath(event) {
@@ -344,7 +350,7 @@ class Configuration extends Component {
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group col-md-2 offset-2">
-                                        <h4 className="title">CRD</h4>
+                                        <h4 className="title">CRD (order-select)</h4>
                                     </div>
                                     <div className="form-group col-md-6">
                                         <input type="text" name="crd_url" className="form-control"
@@ -354,14 +360,19 @@ class Configuration extends Component {
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
                                     </div>
-                                    {/* <div className="form-group col-md-3">
-                                        <input type="text" name="coverage_requirements_path" className="form-control"
-                                            id="name" placeholder="Requirements Path"
-                                            onChange={this.onChangeCoverageRequirementPath}
-                                            value={this.state.config.crd.coverage_requirement_path}
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-2 offset-2">
+                                        <h4 className="title">CRD (order-review)</h4>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <input type="text" name="crd_url" className="form-control"
+                                            id="name" placeholder="URL"
+                                            onChange={this.onChangeCrdOrderReviewUrl}
+                                            value={this.state.config.crd_order_review_url}
                                             data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                                         <div className="validation"></div>
-                                    </div> */}
+                                    </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group col-md-2 offset-2">

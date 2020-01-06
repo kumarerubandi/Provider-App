@@ -48,7 +48,9 @@ class Mips extends Component {
     this.store = {
       initialPage: {
         reporting: '',
-        practice: ''
+        practice: '',
+        submissionType: "",
+        purpose:"score"
       },
       qualityImprovement: {
         collectionType: 'all',
@@ -57,9 +59,8 @@ class Mips extends Component {
         measure: '',
         measureList: [],
         measureOptions: [],
-        reporting: "",
-        practice: "",
-        submissionType: "",
+
+
         weightage: "45",
         loading: true,
         group: false,
@@ -180,7 +181,6 @@ class Mips extends Component {
       console.log('Authentication failed');
       // this.setState({ token_error: true });
     }
-
   }
   render() {
     const steps =
@@ -246,8 +246,8 @@ class Mips extends Component {
               <div className="form">
                 <div className="container">
                   <div className="section-header">
-                    <h3>MIPS Score Calculator
-                  <div className="sub-heading">Calculates MIPS Score on a 100 points scale based on the Quality, Promoting Interoperability and Improvement Activities.</div>
+                    <h3>Merit-based Incentive Payment System
+                  <div className="sub-heading">Submit and/or calculates MIPS Score on a 100 points scale based on the Quality, Promoting Interoperability and Improvement Activities.</div>
                     </h3>
                   </div>
                   <div className='step-progress'>
@@ -262,6 +262,7 @@ class Mips extends Component {
                       onStepChange={step =>
                         window.sessionStorage.setItem("step", step)
                       }
+                      showNavigation={false}
                     />
                   </div>
 

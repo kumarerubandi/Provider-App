@@ -47,7 +47,7 @@ class DropdownServiceCode extends Component {
             exists = true;
           }
         }
-        console.log("Category-",item.id,item.code,"---",service_category,exists,);
+        // console.log("Category-",item.id,item.code,"---",service_category,exists,);
         if (!exists) {
           service_category.push(service_category_obj);
         }
