@@ -276,6 +276,7 @@ class CommunicationHandler extends Component {
     let request = comm_req.map((req, key) => {
       let added = false;
       let communication = comm.map((c, k) => {
+        console.log('iii,comm')
         if (req.hasOwnProperty("id") && c.hasOwnProperty('basedOn')) {
           // if (c.hasOwnProperty('contained') && c['basedOn'][0]['reference'])
           //   let contained = c['contained'].map((cont, l) => {
