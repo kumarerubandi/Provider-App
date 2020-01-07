@@ -512,7 +512,6 @@ class CommunicationRequest extends Component {
 
 
       let requesterCommRequest = await this.createFhirResource(commRequest, 'CommunicationRequest', this.state.requesterPayer.payer_end_point, 'payer', true)
-      console.log()
       let requester_endPoint_identifier = this.getGUID()
       let bundle = {
         "resourceType": "Bundle",
