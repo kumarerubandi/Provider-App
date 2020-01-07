@@ -114,8 +114,7 @@ export default class QualityImprovement extends Component {
       promotingInteroperability: props.getStore().promotingInteroperability,
       improvementActivity: props.getStore().improvementActivity,
       group: props.getStore().improvementActivity.group,
-
-
+      purpose: this.props.getStore().initialPage.purpose
     };
     this.handleCollectionTypeChange = this.handleCollectionTypeChange.bind(this);
     this.handleMeasureChange = this.handleMeasureChange.bind(this);
@@ -159,10 +158,7 @@ export default class QualityImprovement extends Component {
   componentWillUnmount() {
     smart.search({ resourceType: 'Patient', searchParams: { _count: '100' } })
       .then((response) => {
-        // console.log(response);
         this.patientsList = response.entry;
-
-        // return response;
       })
   }
 
@@ -473,11 +469,11 @@ export default class QualityImprovement extends Component {
         measureObj[this.state.measure] = Obj.text
         this.setState({ measureObj: measureObj })
         this.setState(prevState => ({
-          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false,loading:true }]
+          measureList: [...prevState.measureList, { measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false, loading: true }]
         }))
         const { measureList } = this.state;
         let tempArr = [...measureList];
-        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false,loading:true });
+        tempArr.push({ measureId: this.state.measure, measureName: Obj.text, highpriority: Obj.highpriority, measuretype: Obj.measuretype, showData: false, loading: true });
         console.log(tempArr, 'tempArrs')
         let qualityImprovement = this.state.qualityImprovement
         qualityImprovement.measureList = tempArr
@@ -546,7 +542,7 @@ export default class QualityImprovement extends Component {
           // payload.resource.id = this.getGUID()
           // summaryBundle.entry.push(payload)
           // console.log('summaryBundle', summaryBundle)
-          
+
           return payload
         }
 
@@ -555,8 +551,8 @@ export default class QualityImprovement extends Component {
     })
     // console.log(promises, 'promises')
     return await Promise.all(promises).then(data => {
-      data.map((e,k)=>{
-        if(e!==undefined){
+      data.map((e, k) => {
+        if (e !== undefined) {
           summaryBundle.entry.push(e)
           // console.log('summaryBundle', summaryBundle)
         }
@@ -1154,13 +1150,13 @@ export default class QualityImprovement extends Component {
     let promotingInteroperability = this.state.promotingInteroperability
     let improvementActivity = this.state.improvementActivity
 
-    await this.getDataByCategory(qualityImprovement.measureList, 'qi').then((result) => {
-      qualityImprovement.measureList = result
-      qualityImprovement.loading = false
-      this.setState({ qualityImprovement: qualityImprovement })
-      this.props.updateStore({ qualityImprovement: qualityImprovement })
-      console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
-    })
+    // await this.getDataByCategory(qualityImprovement.measureList, 'qi').then((result) => {
+    //   qualityImprovement.measureList = result
+    //   qualityImprovement.loading = false
+    //   this.setState({ qualityImprovement: qualityImprovement })
+    //   this.props.updateStore({ qualityImprovement: qualityImprovement })
+    //   console.log(this.state.qualityImprovement, 'qualityimprovement123', result)
+    // })
 
     // await this.getDataByCategory(promotingInteroperability.measureList, 'pi').then((result) => {
     //   promotingInteroperability.measureList = result;
@@ -1191,9 +1187,14 @@ export default class QualityImprovement extends Component {
   }
 
   previousStep() {
-    console.log(this.props);
-    this.props.jumpToStep(3);
-
+    if (this.state.purpose === "data") {
+      this.props.jumpToStep(0);
+    } else {
+      this.props.jumpToStep(3);
+    }
+  }
+  nextStep() {
+    this.props.jumpToStep(5);
   }
 
   render() {
@@ -1203,53 +1204,6 @@ export default class QualityImprovement extends Component {
   . Quality category carries the maximum weight towards final MIPS score and requires data to be reported for the full calendar year (Jan 1, 2019 – Dec 31, 2019). Quality category weight has been set to 45%  for 2019 unless you apply for PI hardship exception . In that case, the PI category weight of 25% is assigned to Quality category making the Quality category weight 70%.
 Submit collected data for at least 6 measures, or a complete specialty measure set. One of these 6 measures should be an outcome measure (if you have no applicable outcome measure, you can submit another high priority measure instead).</p>
         <div className="form-row">
-          <div className="form-group col-3 offset-1">
-            <span className="title-small">Type of Reporting</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.reportingOptions}
-              placeholder='Type of Reporting'
-              search
-              selection
-              fluid
-              disabled
-              value={this.state.reporting}
-              onChange={this.handleReportingChange}
-            />
-          </div>
-          {this.state.reporting === "group" &&
-            <div className="form-group col-3">
-              <span className="title-small">Type of Practice</span>
-              <Dropdown
-                className={"blackBorder"}
-                options={this.state.practiceOptions}
-                placeholder='Type of Practice'
-                search
-                selection
-                fluid
-                value={this.state.practice}
-                onChange={this.handlePracticeChange}
-              />
-            </div>
-          }
-          <div className="form-group col-4">
-            <span className="title-small">Submission Type</span>
-            <Dropdown
-              className={"blackBorder"}
-              options={this.state.submissionTypeOptions}
-              placeholder='Submission Type'
-              search
-              selection
-              fluid
-              value={this.state.submissionType}
-              onChange={this.handleSubTypeChange}
-            />
-          </div>
-        </div>
-        <div className="form-row">
-          {/* <div className="form-group col-2 offset-1">
-            <h4 className="title">Filter Measures</h4>
-          </div> */}
           <div className="form-group col-3 offset-1">
             <span className="title-small">Collection Type</span>
             <Dropdown
@@ -1353,9 +1307,14 @@ Submit collected data for at least 6 measures, or a complete specialty measure s
             }
           </table>
         </div>
-        {/* <div class="footer-buttons">
-          <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.submitAndSave()}>Save</button>
-        </div> */}
+        <div class="footer-buttons">
+          <button type="button" class="btn btn-prev btn-primary btn-lg pull-left" id="next-button" onClick={() => this.previousStep()}>Previous</button>
+          {this.state.purpose === "data" &&
+            <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.nextStep()}>Submit Data</button>
+          } {this.state.purpose !== "data" &&
+            <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.nextStep()}>Next</button>
+          }
+        </div>
       </div>
     )
   }

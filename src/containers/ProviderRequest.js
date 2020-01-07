@@ -207,7 +207,7 @@ class ProviderRequest extends Component {
   }
   handlePrefetch = async () => {
     console.log(this.state.prefetch, 'here kya')
-    this.setState({ prefetch: true });
+    
     // if (this.state.prefetch === false) {
     this.setState({ prefetchloading: true });
     let token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
@@ -223,6 +223,7 @@ class ProviderRequest extends Component {
     }).then(response => {
       return response.json();
     }).then((patient_data) => {
+      this.setState({ prefetch: true });
       this.setState({ prefetchloading: false });
       if (patient_data.resourceType === 'Patient') {
         this.setState({ patientResource: patient_data })
@@ -245,13 +246,14 @@ class ProviderRequest extends Component {
     }).catch(reason =>
       console.log("No response recieved from the server", reason)
     );
-
-    // }
-
-
   }
 
   updateStateElement = (elementName, text) => {
+    if (elementName === "selected_codes" && ["E1390","E1391","E0424","E0439","E1405","E1406","E0431","E0434","E1392","E0433","K0738","E0441","E0442","E0443","E0444"].indexOf(text[0])) {
+      this.setState({ hook: "order-review" });
+    } else {
+      this.setState({ hook: "order-select" });
+    }
     this.setState({ [elementName]: text });
   }
   async getHookFromCategory() {
@@ -654,10 +656,10 @@ class ProviderRequest extends Component {
     let json_request = await this.getJson();
 
     let url = '';
-    if (this.state.request === 'coverage-requirement' && this.state.hook !== 'patient-view') {
-      url = this.state.config.crd_url;
+    if (this.state.hook === 'order-review') {
+      url = this.state.config.crd_order_review_url;
     }
-    if (this.state.hook === 'patient-view') {
+    if (this.state.hook === 'order-select') {
       url = this.state.config.crd_url;
     }
     console.log("json_request", json_request, this.state.config.crd_url)
@@ -883,7 +885,7 @@ class ProviderRequest extends Component {
                         <DateInput
                           name="birthDate"
                           placeholder="Birth Date"
-                          dateFormat="MM/DD/YYYY"
+                          dateFormat="YYYY-MM-DD"
                           fluid
                           value={this.state.birthDate}
                           iconPosition="left"
@@ -1192,7 +1194,7 @@ class ProviderRequest extends Component {
 
   randomString() {
     var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-    var string_length = 8;
+    var string_length = 16;
     var randomstring = '';
     for (var i = 0; i < string_length; i++) {
       var rnum = Math.floor(Math.random() * chars.length);
@@ -1204,6 +1206,9 @@ class ProviderRequest extends Component {
   async getJson() {
     var patientId = null;
     patientId = this.state.patientId;
+    if (!this.state.prefetch) {
+      patientId = this.randomString();
+    }
     let PractitionerRole = {
       "resourceType": "PractitionerRole",
       "id": "practitioner1",
@@ -1230,10 +1235,11 @@ class ProviderRequest extends Component {
       ],
       payor: [
         {
-          reference: "Organization/"+this.state.payer
+          reference: "Organization/" + this.state.payer
         }
       ]
     };
+    let selected_codes = this.state.selected_codes;
     let serviceRequest = {
       "resourceType": "ServiceRequest",
       "identifier": [
@@ -1243,10 +1249,9 @@ class ProviderRequest extends Component {
       ],
       "status": "draft",
       "intent": "order",
-
       "category": [],
       "subject": {
-        "reference": "Patient/" + this.state.patientId
+        "reference": "Patient/" + patientId
       },
       "quantity": { "value": this.state.quantity },
       "authoredOn": "2013-05-08T09:33:27+07:00",
@@ -1259,7 +1264,7 @@ class ProviderRequest extends Component {
         "reference": "PractitionerRole/practitioner1"
       }
     }
-    let selected_codes = this.state.selected_codes;
+    
     for (var i = 0; i < selected_codes.length; i++) {
       let obj = {
         "code": {
@@ -1275,6 +1280,48 @@ class ProviderRequest extends Component {
         serviceRequest["code"] = obj.code;
       }
       serviceRequest.category.push(obj)
+    }
+    let deviceRequest = {
+      "resourceType": "DeviceRequest",
+      "identifier": [
+        {
+          "value": this.randomString()
+        }
+      ],
+      "status": "draft",
+      "intent": "order",
+      "parameter": [],
+      "subject": {
+        "reference": "Patient/" + patientId
+      },
+      "authoredOn": "2013-05-08T09:33:27+07:00",
+      "insurance": [
+        {
+          "reference": "Coverage/coverage1"
+        }
+      ],
+      "performer": {
+        "reference": "PractitionerRole/practitioner1"
+      }
+    }
+    for (var i = 0; i < selected_codes.length; i++) {
+      let obj = {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": selected_codes[i]
+            }
+          ],
+        },
+        "valueQuantity": {
+          "value": this.state.quantity,
+        }
+      }
+      if (i == 0) {
+        deviceRequest["codeCodeableConcept"] = obj.code;
+      }
+      deviceRequest.parameter.push(obj)
     }
     let patientResource;
     if (this.state.prefetch === true) {
@@ -1325,6 +1372,63 @@ class ProviderRequest extends Component {
       this.setState({ patientResource: patientResource });
       console.log(patientResource, JSON.stringify(patientResource))
     }
+    let requestEntryObj = {}
+    let prefetchObj = {}
+    if (this.state.hook === "order-review") {
+      prefetchObj = {
+        "deviceRequestBundle": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": [
+            {
+              "resource": deviceRequest
+            },
+            {
+              "resource": patientResource
+            },
+            {
+              "resource": PractitionerRole
+            },
+            {
+              "resource": coverage
+            },
+            {
+              "resource": organization
+            }
+          ]
+        }
+      }
+      requestEntryObj = {
+        resource: deviceRequest
+      }
+    } else {
+      prefetchObj = {
+        "serviceRequestBundle": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": [
+            {
+              "resource": serviceRequest
+            },
+            {
+              "resource": patientResource
+            },
+            {
+              "resource": PractitionerRole
+            },
+            {
+              "resource": coverage
+            },
+            {
+              "resource": organization
+            }
+          ]
+        }
+      }
+      requestEntryObj = {
+        resource: serviceRequest
+      }
+    }
     let request = {
       hook: this.state.hook,
       hookInstance: "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
@@ -1336,41 +1440,17 @@ class ProviderRequest extends Component {
         "scope": "patient/Patient.read patient/Observation.read",
         "subject": "cds-service"
       },
-      user: "Practitioner/"+this.state.practitionerId,
+      user: "Practitioner/" + this.state.practitionerId,
       context: {
         patientId: patientId,
-        orders : {
+        orders: {
           resourceType: "Bundle",
           entry: [
-            {
-              resource: serviceRequest
-            }
+            requestEntryObj
           ]
         }
       },
-      "prefetch": {
-        "serviceRequestBundle": {
-          "resourceType": "Bundle",
-          "type": "collection",
-          "entry": [
-            {
-              "resource":serviceRequest
-            },
-            {
-              "resource":patientResource
-            },
-            {
-              "resource":PractitionerRole
-            },
-            {
-              "resource":coverage
-            },
-            {
-              "resource":organization
-            }
-          ]
-        }
-      }
+      "prefetch": prefetchObj
     };
     return request;
   }
@@ -1399,7 +1479,7 @@ class ProviderRequest extends Component {
       ],
       payor: [
         {
-          reference: "Organization/"+this.state.payer
+          reference: "Organization/" + this.state.payer
         }
       ]
     };

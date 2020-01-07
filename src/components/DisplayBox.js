@@ -329,28 +329,30 @@ class DisplayBox extends Component {
               console.log("Smart launch url -----", card.links);
               linksSection = card.links.map((link, ind) => (
                 <div key={ind}>
-                  <div className="div-prior-auth">
-                    <p>Prior Authorization is  necessary </p>
-                    {link.hasOwnProperty('appContext') && link.appContext.hasOwnProperty("prior_auth") &&
-                      <ul className="prior_auth_ul">
-                        {
-                          Object.keys(link.appContext.prior_auth).map(function (code, index) {
-                            console.log("in prior auth loop--", code);
-                            return <li>
-                              {link.appContext.prior_auth[code].value == true &&
-                                <p>Prior Authorization necessary for {code}</p>
-                              }
-                              {link.appContext.prior_auth[code].value == false &&
-                                <p>No Prior Authorization is Needed for {code} </p>
-                              }
-                            </li>
-                          })
-                        }
-                      </ul>
+                  {link !== undefined &&
+                    <div className="div-prior-auth">
+                      <p>Prior Authorization is  necessary </p>
+                      {link.hasOwnProperty('appContext') && link.appContext.hasOwnProperty("prior_auth") &&
+                        <ul className="prior_auth_ul">
+                          {
+                            Object.keys(link.appContext.prior_auth).map(function (code, index) {
+                              console.log("in prior auth loop--", code);
+                              return <li>
+                                {link.appContext.prior_auth[code].value == true &&
+                                  <p>Prior Authorization necessary for {code}</p>
+                                }
+                                {link.appContext.prior_auth[code].value == false &&
+                                  <p>No Prior Authorization is Needed for {code} </p>
+                                }
+                              </li>
+                            })
+                          }
+                        </ul>
 
-                    }
+                      }
 
-                  </div>
+                    </div>
+                  }
                   {/* <a className="cta-btn" target="_blank" href={link.url}>{link.label}</a> */}
                   <button className="smart-btn"
                     onClick={e => this.launchLink(e, link)}

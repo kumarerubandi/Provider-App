@@ -383,6 +383,12 @@ export default class PromotingInteroperability extends Component {
     );
     return questionnarie;
   }
+  previousStep() {
+    this.props.jumpToStep(2);
+  }
+  nextStep() {
+    this.props.jumpToStep(4);
+  }
   async addMeasure() {
     if (this.state.measure !== '') {
       if (!this.state.measureObj.hasOwnProperty(this.state.measure)) {
@@ -678,6 +684,10 @@ export default class PromotingInteroperability extends Component {
             </div>
           </div>
         }
+        <div class="footer-buttons">
+          <button type="button" class="btn btn-prev btn-primary btn-lg pull-left" id="next-button" onClick={() => this.previousStep()}>Previous</button>
+          <button type="button" class="btn btn-prev btn-primary btn-lg pull-right" id="next-button" onClick={() => this.nextStep()}>Next</button>
+        </div>
       </div>
     )
   }
