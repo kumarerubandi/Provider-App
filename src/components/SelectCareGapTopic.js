@@ -11,6 +11,7 @@ export class SelectCareGapTopic extends Component {
         this.state = {
             topicOptions: [
                 { key: 'effective+clinical+care', text: "Effective Clinical Care", value: 'effective+clinical+care' },
+                { key: 'preventive+care', text: "Preventive Care", value: 'preventive+care' },
             ]
         };
         this.handleChange = this.handleChange.bind(this);

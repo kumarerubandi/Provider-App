@@ -818,7 +818,7 @@ class CDEX extends Component {
                 let communicaationId = response.entry[0].response.location.split('/')[1]
 
                 this.setState({ success: true })
-                this.setState({ successMsg: 'Communication has been posted to payer successfully with id - ' + communicaationId })
+                this.setState({ successMsg: 'CLinical Document has been posted  successfully with id - ' + communicaationId })
                 // NotificationManager.success('Communication has been posted to payer successfully.', 'Success');
                 return response
             }
@@ -1179,6 +1179,8 @@ class CDEX extends Component {
                                         <ul>
                                             <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
                                             <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
+                                            <li><a href={window.location.protocol + "//" + window.location.host + "/care_gaps"}>Gaps in care</a></li>
+                                            <li><a href={window.location.protocol + "//" + window.location.host + "/cdex"}>Submit Clinical Documents</a></li>
                                         </ul>
                                     </li>
                                     <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>
@@ -1211,11 +1213,11 @@ class CDEX extends Component {
                     </main>
                     <div className="content">
                         <div className="left-form" style={{ paddingLeft: "2%", paddingTop: "1%" }}>
-                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> Communication Requests </strong></div>
+                            <div style={{ paddingTop: "10px", color: "#8a6d3b", marginBottom: "10px" }}><strong> Requests for Clinical Document </strong></div>
                             <div>{content}</div>
                         </div>
                         {this.state.form_load &&
-                            <div className="right-form" style={{ paddingTop: "1%" }} >
+                            <div className="right-form" style={{ paddingTop: "1%",paddingBottom: "100px" }} >
                                 <div className="data-label">
                                     Patient : <span className="data1">{this.state.patient_name}</span>
                                 </div>
@@ -1323,7 +1325,8 @@ class CDEX extends Component {
                                         {this.state.successMsg}
                                     </div>
                                 }
-                                <button className="submit-btn btn btn-class button-ready" onClick={this.startLoading}>Submit
+                                <div className='text-center'>
+                                <button type="button" onClick={this.startLoading}>Submit
                                         <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
                                         <Loader
                                             type="Oval"
@@ -1334,6 +1337,7 @@ class CDEX extends Component {
                                     </div>
                                 </button>
                                 <NotificationContainer />
+                                </div>
                             </div>}
                     </div>
                 </div>

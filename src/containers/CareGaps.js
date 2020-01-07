@@ -16,7 +16,8 @@ export default class CareGaps extends Component {
             startDate: "",
             endDate: "",
             successMsg: "",
-            errorMsg: ""
+            errorMsg: "",
+            careGapsRes: '',
         }
         this.onClickLogout = this.onClickLogout.bind(this);
         this.onChange = this.onChange.bind(this);
@@ -59,10 +60,11 @@ export default class CareGaps extends Component {
         }).then(response => {
             return response.json();
         }).then((careGapsRes) => {
-            console.log("Care Gaps Response",careGapsRes);
-            this.setState({"successMsg":"Check patient's care gap report below."})
-        }).catch((error)=>{
-            this.setState({"errorMsg":"Unable to fetch Care Gaps report !!"})
+            this.setState({ careGapsRes: careGapsRes })
+            console.log("Care Gaps Response", careGapsRes);
+            this.setState({ "successMsg": "Check patient's care gap report below." })
+        }).catch((error) => {
+            this.setState({ "errorMsg": "Unable to fetch Care Gaps report !!" })
         })
     }
     render() {
@@ -148,14 +150,28 @@ export default class CareGaps extends Component {
                                 </div>
                             </button>
                         </div>
-                        <div>
+                        {/* {this.state.careGapsRes!==''&&
+                        <div className="text-center">
                             {this.state.successMsg.length > 0 &&
-                                <h4>{this.state.successMsg}</h4>
+                                <div>
+                                    <h4>{this.state.successMsg}</h4>
+                                    <section id="call-to-action" className="call-to-action wow fadeIn" style="visibility: visible; animation-name: fadeIn;">
+                                        <div class="container text-center">
+                                            <div></div><div><div><div className="div-prior-auth">
+                                                <p>{this.state.careGapsRes.entry[0].resource.title} </p>
+                                            </div>{this.state.careGapsRes.entry[0].resource.section.map((s,key) => {
+                                                return (<div key={key} >{s.title}</div>)
+                                            })}</div></div></div></section>
+                                </div>
+
                             }
+                            </div>
+                        } */}
+
                             {this.state.errorMsg.length > 0 &&
                                 <h4>{this.state.errorMsg}</h4>
                             }
-                        </div>
+                        
                     </div>
                 </main>
 
