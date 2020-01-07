@@ -151,16 +151,19 @@ class CDEX extends Component {
         })
     }
     async getCommunicationRequests() {
+        if(this.state.config!==null){
+
+        
         var tempUrl = this.state.config.provider_fhir_url;
         let headers = {
             "Content-Type": "application/json",
         }
-        const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        console.log(token, 'token')
-        if (this.state.config.provider_authorised) {
-            console.log('The token is : ', token, tempUrl);
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // console.log(token, 'token')
+        // if (this.state.config.provider_authorised) {
+        //     console.log('The token is : ', token, tempUrl);
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         const fhirResponse = await fetch(tempUrl + "/CommunicationRequest?_count=100000", {
             method: "GET",
             headers: headers
@@ -174,6 +177,7 @@ class CDEX extends Component {
             console.log("No response recieved from the server", reason)
         );
         return fhirResponse;
+        }
     }
 
     async displayCommunicataionRequests() {
@@ -225,13 +229,14 @@ class CDEX extends Component {
         // this.setState({ files: f });
         // console.log(this.state.files)
         var tempUrl = this.state.config.provider_fhir_url + "/" + patient_id;
-        const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        let token 
+        // token= await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.state.config.provider_authorised) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (this.state.config.provider_authorised) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         let patient = await fetch(tempUrl, {
             method: "GET",
             headers: headers
@@ -382,13 +387,13 @@ class CDEX extends Component {
 
                     var extensionUrl = p['extension'][0].url
                     console.log(p['extension'][0].url, 'teeee')
-                    const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    // const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
                     let headers = {
                         "Content-Type": "application/json",
                     }
-                    if (this.state.config.provider_authorised) {
-                        headers['Authorization'] = 'Bearer ' + token
-                    }
+                    // if (this.state.config.provider_authorised) {
+                    //     headers['Authorization'] = 'Bearer ' + token
+                    // }
                     let dataResult = await fetch(Url, {
                         method: "GET",
                         headers: headers
@@ -425,13 +430,13 @@ class CDEX extends Component {
                     var searchString = "?type=" + code + "&patient=" + this.state.patient.id
                     var Url = this.state.config.provider_fhir_url + "/DocumentReference" + searchString;
                     // var Url=''
-                    const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+                    // const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
                     let headers = {
                         "Content-Type": "application/json",
                     }
-                    if (this.state.config.provider_authorised) {
-                        headers['Authorization'] = 'Bearer ' + token
-                    }
+                    // if (this.state.config.provider_authorised) {
+                    //     headers['Authorization'] = 'Bearer ' + token
+                    // }
                     let documents = await fetch(Url, {
                         method: "GET",
                         headers: headers
@@ -591,6 +596,7 @@ class CDEX extends Component {
     //             else{
     //                 console.log('no Documents found')
     //             }   
+    
     //         }
     //         // console.log(observationList,'ooo')
     //     })
@@ -613,12 +619,12 @@ class CDEX extends Component {
         comm_req.status = 'completed'
         console.log(this.state.communicationRequest, 'what value')
         this.setState({ communicationRequest: comm_req })
-        const token = await createToken(this.state.config.payer_grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        if (this.state.configpayer.authorised) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // const token = await createToken(this.state.config.payer_grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // if (this.state.config.payer_authorised) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         // var communicationUrl = '';
-        var url = this.state.config.payer_fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
+        var url = this.state.config.provider_fhir_url + "/CommunicationRequest/" + this.state.communicationRequest.id;
 
         let Communication = await fetch(url, {
             method: "PUT",
@@ -697,8 +703,8 @@ class CDEX extends Component {
                     "resourceType": "Communication",
                     "status": "completed",
                     "subject": {
-                        // "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
-                        'reference': "Patient?given=" + this.state.patient.name[0].given[0] + "&family=" + this.state.patient.name[0].family + "&address-postalcode=" + this.state.patient.address[0].postalCode + "&birthdate=" + this.state.patient.birthDate
+                        "reference": this.state.patient.resourceType+"?identifier="+this.state.patient.identifier[0].value
+                        // 'reference': "Patient?given=" + this.state.patient.name[0].given[0] + "&family=" + this.state.patient.name[0].family + "&address-postalcode=" + this.state.patient.address[0].postalCode + "&birthdate=" + this.state.patient.birthDate
                     },
                     // "recipient": [
                     //     {
@@ -797,10 +803,10 @@ class CDEX extends Component {
         let headers = {
             "Content-Type": "application/json",
         }
-        const token = await createToken(this.state.config.payer_grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
-        if (this.state.configpayer.authorizedPayerFhir) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // const token = await createToken(this.state.config.payer_grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // if (this.state.config.payer_authorised) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         // var communicationUrl = '';
         var communicationUrl = this.state.config.payer_fhir_url;
 
@@ -952,9 +958,9 @@ class CDEX extends Component {
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.state.config.provider_authorised) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (this.state.config.provider_authorised) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         const fhirResponse = await fetch(tempUrl + "/" + senderreference, {
             method: "GET",
             headers: headers
@@ -998,7 +1004,7 @@ class CDEX extends Component {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                'Authorization': 'Bearer ' + token
+                // 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
             console.log("Recieved response", response);
@@ -1021,13 +1027,13 @@ class CDEX extends Component {
     async getSenderResource(c) {
         var sender_url = this.state.config.provider_fhir_url + "/" + c['resourceType'] + "?identifier=" + c['identifier'][0]['value'];
         console.log("url---------", sender_url);
-        const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
+        // const token = await createToken(this.state.config.provider_grant_type, 'provider', sessionStorage.getItem('username'), sessionStorage.getItem('password'));
         let headers = {
             "Content-Type": "application/json",
         }
-        if (this.state.config.provider_authorised) {
-            headers['Authorization'] = 'Bearer ' + token
-        }
+        // if (this.state.config.provider_authorised) {
+        //     headers['Authorization'] = 'Bearer ' + token
+        // }
         let sender = await fetch(sender_url, {
             method: "GET",
             headers: headers

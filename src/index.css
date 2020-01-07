@@ -814,7 +814,13 @@ ol.progtrckr {
   list-style-type: none;
   padding: 0;
 }
-
+.care_report {
+  border: 1px solid white;
+  border-radius: 3px;
+  color: white;
+  width: 60%;
+  margin-left: 20%;
+}
 ol.progtrckr li {
   display: inline-block;
   text-align: center;

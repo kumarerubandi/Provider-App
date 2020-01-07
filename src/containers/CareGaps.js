@@ -60,9 +60,14 @@ export default class CareGaps extends Component {
         }).then(response => {
             return response.json();
         }).then((careGapsRes) => {
-            this.setState({ careGapsRes: careGapsRes })
-            console.log("Care Gaps Response", careGapsRes);
-            this.setState({ "successMsg": "Check patient's care gap report below." })
+            if (careGapsRes.resourceType === "OperationOutcome") {
+                this.setState({ "errorMsg": "Unable to fetch Care Gaps report !!" })
+            } else {
+                this.setState({ careGapsRes: careGapsRes })
+                console.log("Care Gaps Response", careGapsRes);
+                this.setState({ "successMsg": "Check patient's care gap report below." })
+            }
+            window.scrollTo(0, document.body.scrollHeight)
         }).catch((error) => {
             this.setState({ "errorMsg": "Unable to fetch Care Gaps report !!" })
         })
@@ -150,28 +155,34 @@ export default class CareGaps extends Component {
                                 </div>
                             </button>
                         </div>
-                        {/* {this.state.careGapsRes!==''&&
-                        <div className="text-center">
-                            {this.state.successMsg.length > 0 &&
-                                <div>
-                                    <h4>{this.state.successMsg}</h4>
-                                    <section id="call-to-action" className="call-to-action wow fadeIn" style="visibility: visible; animation-name: fadeIn;">
-                                        <div class="container text-center">
-                                            <div></div><div><div><div className="div-prior-auth">
-                                                <p>{this.state.careGapsRes.entry[0].resource.title} </p>
-                                            </div>{this.state.careGapsRes.entry[0].resource.section.map((s,key) => {
-                                                return (<div key={key} >{s.title}</div>)
-                                            })}</div></div></div></section>
-                                </div>
+                        {this.state.careGapsRes !== '' &&
+                            <div className="text-center" style={{margin: "50px 0px"}}>
+                                {this.state.successMsg.length > 0 &&
+                                    <div className="col-8 offset-2">
+                                        <section className="call-to-action wow fadeIn">
+                                            <div className="container text-center">
+                                                <div className="div-prior-auth">
+                                                    <h3 style={{ textTransform: "uppercase" }}>{this.state.careGapsRes.entry[0].resource.title} </h3>
+                                                </div>
+                                                {this.state.careGapsRes.entry[0].resource.section.map((s, key) => {
+                                                    return (<div key={key} className="care_report" >
+                                                        <div>{s.title}</div>
+                                                        <div>Status : {s.text.status}</div>
+                                                        <div>Care Gap : <span dangerouslySetInnerHTML={{ __html: s.text.div }}></span></div>
+                                                    </div>)
+                                                })}
+                                            </div>
+                                        </section>
+                                    </div>
 
-                            }
+                                }
                             </div>
-                        } */}
+                        }
 
-                            {this.state.errorMsg.length > 0 &&
-                                <h4>{this.state.errorMsg}</h4>
-                            }
-                        
+                        {this.state.errorMsg.length > 0 &&
+                            <h4>{this.state.errorMsg}</h4>
+                        }
+
                     </div>
                 </main>
 
