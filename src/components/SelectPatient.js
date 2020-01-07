@@ -10,6 +10,7 @@ export class SelectPatient extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            config: sessionStorage.getItem('config') !== undefined ? JSON.parse(sessionStorage.getItem('config')) : {},
             currentValue: "",
             patients: []
         };
@@ -18,7 +19,6 @@ export class SelectPatient extends Component {
     };
 
     async componentDidMount() {
-
         try {
             let patients = await this.getResources();
             let list = [];
@@ -28,44 +28,38 @@ export class SelectPatient extends Component {
                 let res = item.resource;
                 let patient_state = { key: '', value: '', text: '' };
                 Object.keys(res).map((k, v) => {
-                    // if (k == 'id') {
-                    //     patient_state.text = res[k];
-                    // }
-                    if(k == "name"){
-                        if(res[k][0].given.length>1){
-                            patient_state.text=   res[k][0].given[0] +" "+res[k][0].given[1]+" "+ res[k][0].family
-                        }
-                        else{
-                            patient_state.text=   res[k][0].given[0]+" "+res[k][0].family
-                        }
-                        
+                    if (k == 'id') {
+                        patient_state.key = res[k];
+                        patient_state.value = res[k];
                     }
-                    if (k == 'identifier') {
-                        patient_state.value = res;
+                    if (k == "name") {
+                        if (res[k][0].given.length > 1) {
+                            patient_state.text = res[k][0].given[0] + " " + res[k][0].given[1] + " " + res[k][0].family
+                        }
+                        else {
+                            patient_state.text = res[k][0].given[0] + " " + res[k][0].family
+                        }
+
                     }
-                    patient_state.key = 'patient' + i;
                 });
                 list.push(patient_state);
             });
-            this.setState({patients:list});
+            console.log("List---", list);
+            this.setState({ patients: list });
         } catch (error) {
-            console.log('Communication Creation failed', error);
+            console.log('Patients List Request failed', error);
         }
 
     }
 
     async getResources() {
-        // var url = this.props.config.payer.fhir_url+'/Patient';
-        let req = JSON.parse(sessionStorage.getItem('requesterPayer'))
-        console.log(req.payer_end_point,'request sessions')
-        var url = req.payer_end_point+'/Patient'
+        var url = this.state.config.payer_fhir_url + '/Patient'
         let token;
         // token = await createToken(this.props.config.payer.grant_type, 'payer', sessionStorage.getItem('username'), sessionStorage.getItem('password'))
         let headers = {
             "Content-Type": "application/json",
             // 'Authorization': 'Bearer ' + token
         }
-
         let patients = await fetch(url, {
             method: "GET",
             headers: headers
@@ -77,12 +71,10 @@ export class SelectPatient extends Component {
         }).catch(reason =>
             console.log("No response recieved from the server", reason)
         );
-        // console.log(sender, 'sender')
         return patients;
     }
 
     handleChange = (e, { value }) => {
-        // console.log(this.props, value);
         this.props.updateCB(this.props.elementName, value)
         this.setState({ currentValue: value })
     }
@@ -96,15 +88,22 @@ export class SelectPatient extends Component {
             blackBorder = "";
         }
         return (
-            <Dropdown
-                className={blackBorder}
-                options={this.state.patients}
-                placeholder='Select Patient'
-                search
-                selection
-                fluid
-                onChange={this.handleChange}
-            />
+            <div className="form-row">
+                <div className="form-group col-md-2 offset-2">
+                    <h4 className="title">Select Patient*</h4>
+                </div>
+                <div className="form-group col-md-6">
+                    <Dropdown
+                        className={blackBorder}
+                        options={this.state.patients}
+                        placeholder='Select Patient'
+                        search
+                        selection
+                        fluid
+                        onChange={this.handleChange}
+                    />
+                </div>
+            </div>
         )
     }
 }
@@ -113,7 +112,7 @@ export class SelectPatient extends Component {
 function mapStateToProps(state) {
     console.log(state);
     return {
-      config: state.config,
+        config: state.config,
     };
-  };
-  export default withRouter(connect(mapStateToProps)(SelectPatient));
+};
+export default withRouter(connect(mapStateToProps)(SelectPatient));

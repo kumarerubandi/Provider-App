@@ -772,6 +772,7 @@ class ProviderRequest extends Component {
                     <ul>
                       <li className="menu-active"><a href={window.location.protocol + "//" + window.location.host + "/provider_request"}>Prior Auth Submit</a></li>
                       <li><a href={window.location.protocol + "//" + window.location.host + "/mips"}>MIPS Score</a></li>
+                      <li><a href={window.location.protocol + "//" + window.location.host + "/care_gaps"}>Gaps in care</a></li>
                     </ul>
                   </li>
                   <li><a href={window.location.protocol + "//" + window.location.host + "/configuration"}>Configuration</a></li>

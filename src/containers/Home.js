@@ -26,7 +26,7 @@ class Home extends Component {
                                     <ul>
                                         <li><a href="#prior-auth">Prior Auth Submit</a></li>
                                         <li><a href="#mips">MIPS Score</a></li>
-
+                                        <li><a href="/care_gaps">Gaps in Care</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#team">Doctors</a></li>
